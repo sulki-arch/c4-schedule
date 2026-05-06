@@ -347,7 +347,7 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 
   <div class="tabs">
     <div class="tab active" onclick="switchTab('overview',this)">📊 전체 일정</div>
-    <div class="tab" onclick="switchTab('calendar',this)">📅 월간 스케줄</div>
+    <div class="tab" onclick="switchTab('calendar',this)">📅 상세 일정</div>
     <div class="tab admin-only" onclick="switchTab('settings',this)">⚙️ 설정</div>
   </div>
 
@@ -470,7 +470,11 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
     <div class="fg"><label>카테고리</label><select id="evCat"></select></div>
     <div class="fg"><label>날짜</label><input type="date" id="evDate"></div>
     <div class="fg"><label>설명 (선택)</label><input type="text" id="evDesc" placeholder="내용, 장소 등"></div>
-    <div class="ma"><button class="btn-s" onclick="closeModal('evModal')">취소</button><button class="btn-p" onclick="saveEvent()">저장</button></div>
+    <div class="ma">
+      <button id="evDeleteBtn" class="btn-s" style="color:#DC2626;border-color:#DC2626;margin-right:auto;display:none;" onclick="deleteCurrentEvent()">삭제</button>
+      <button class="btn-s" onclick="closeModal('evModal')">취소</button>
+      <button class="btn-p" onclick="saveEvent()">저장</button>
+    </div>
   </div>
 </div>
 <div class="mo mh" id="excelModal">
@@ -938,7 +942,6 @@ function renderCalendar(){
       ev+=`<div class="ce" style="background:${col}18;border-left:2px solid ${col};color:${col};"
         onclick="openEditEventModal('${e.id}','${isMs?'ms':'ev'}','${ds}')" title="${e.name}">
         <span style="overflow:hidden;text-overflow:ellipsis;">${e.name}</span>
-        ${!isMs?`<span class="ce-del" onclick="delEvent(event,'${e.id}')">✕</span>`:''}
       </div>`;
     });
     if(filt.length>3)ev+=`<div class="c-more">+${filt.length-3}개 더</div>`;
@@ -958,12 +961,10 @@ function openAddEventOnDate(ds){
   document.getElementById('evName').value='';
   document.getElementById('evDate').value=ds;
   document.getElementById('evDesc').value='';
+  document.getElementById('evDeleteBtn').style.display='none';
   openModal('evModal');
-  // 게스트는 자신의 카테고리를 기본 선택
   const evCatEl=document.getElementById('evCat');
-  if(evCatEl&&S.user?.role==='guest'&&S.user?.cat!=='all'){
-    evCatEl.value=S.user.cat;
-  }
+  if(evCatEl&&S.user?.role==='guest'&&S.user?.cat!=='all'){evCatEl.value=S.user.cat;}
 }
 function openEditEventModal(id,type,ds){
   if(type==='ms')return;
@@ -971,6 +972,7 @@ function openEditEventModal(id,type,ds){
   if(!ev)return;
   document.getElementById('evModalTitle').textContent='일정 편집';
   document.getElementById('evEditId').value=ev.id;
+  document.getElementById('evDeleteBtn').style.display='inline-flex';
   document.getElementById('evName').value=ev.name;
   document.getElementById('evDate').value=ev.date;
   document.getElementById('evDesc').value=ev.desc||'';
@@ -980,6 +982,13 @@ function delEvent(e,id){
   e.stopPropagation();
   S.events=S.events.filter(ev=>String(ev.id)!==String(id));
   autoSave();renderCalendar();
+}
+function deleteCurrentEvent(){
+  const id=document.getElementById('evEditId').value;
+  if(!id)return;
+  if(!confirm('이 일정을 삭제하시겠습니까?'))return;
+  S.events=S.events.filter(ev=>String(ev.id)!==String(id));
+  closeModal('evModal');autoSave();renderCalendar();
 }
 function saveEvent(){
   const editId=document.getElementById('evEditId').value;
@@ -1007,6 +1016,8 @@ function renderSettings(){
       <span class="cat-nm">${c.name}</span>
       <input type="color" value="${c.color}" onchange="updCatColor(${i},this.value)" style="width:26px;height:22px;border:1px solid var(--border);border-radius:4px;cursor:pointer;padding:1px;">
       <button class="ab" onclick="editCatName(${i})">이름</button>
+      <button class="cat-move-btn" onclick="moveCat(${i},-1)" title="위로" ${i===0?'style="opacity:0.2;pointer-events:none;"':''}>▲</button>
+      <button class="cat-move-btn" onclick="moveCat(${i},1)" title="아래로" ${i===S.cats.length-1?'style="opacity:0.2;pointer-events:none;"':''}>▼</button>
       <button class="ab d" onclick="delCat(${i})">삭제</button>
     </div>`).join('');
   document.getElementById('phaseList').innerHTML=S.phases.map(p=>`
@@ -1052,19 +1063,12 @@ function hideTT(){document.getElementById('tooltip').classList.add('mh');}
 function switchTab(id,el){document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById(id+'Tab').classList.add('active');el.classList.add('active');if(id==='settings')renderSettings();}
 
 function renderCatFilter(){
-  const isAdmin=S.user?.role==='admin';
   let h=`<span class="cf-label">카테고리</span>`;
   h+=`<button class="cat-btn all ${S.activeCat==='all'?'active':''}" onclick="filterCat('all')">전체</button>`;
   S.cats.forEach((cat,i)=>{
     const active=S.activeCat==='all'||S.activeCat===cat.name;
     h+=`<div class="cat-chip-wrap">`;
     h+=`<button class="cat-btn ${active?'active':''}" data-cat="${cat.name}" onclick="filterCat('${cat.name}')">${cat.name}</button>`;
-    if(isAdmin){
-      h+=`<div style="display:flex;flex-direction:column;gap:1px;">`;
-      h+=`<button class="cat-move-btn" onclick="moveCat(${i},-1)" title="위로" ${i===0?'style="opacity:0.2;pointer-events:none;"':''}>▲</button>`;
-      h+=`<button class="cat-move-btn" onclick="moveCat(${i},1)" title="아래로" ${i===S.cats.length-1?'style="opacity:0.2;pointer-events:none;"':''}>▼</button>`;
-      h+=`</div>`;
-    }
     h+=`</div>`;
   });
   document.getElementById('catFilter').innerHTML=h;
