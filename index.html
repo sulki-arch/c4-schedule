@@ -1152,6 +1152,7 @@ function switchTab(id,el){
   document.getElementById(id+'Tab').classList.add('active');
   el.classList.add('active');
   document.getElementById('catFilter').style.display=id==='calendar'?'flex':'none';
+  if(id==='calendar')renderCalendar();
   if(id==='settings')renderSettings();
 }
 
