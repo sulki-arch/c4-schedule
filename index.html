@@ -143,38 +143,42 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .gms:hover{transform:rotate(45deg) scale(1.4);}
 
 /* CALENDAR */
-.cal-nav{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
-.cal-nav h3{font-size:20px;font-weight:800;}
-.cn-btn{width:32px;height:32px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text2);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
-.cn-btn:hover{border-color:var(--accent);color:var(--accent);}
-.ct-btn{padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text4);font-size:12px;cursor:pointer;font-weight:600;}
-.ct-btn:hover{border-color:var(--accent);color:var(--accent);}
+.cal-nav{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.cal-nav h3{font-size:22px;font-weight:800;letter-spacing:-0.5px;}
+.cn-btn{width:28px;height:28px;background:transparent;border:1px solid var(--border);border-radius:50%;color:var(--text4);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:all 0.18s;}
+.cn-btn:hover{border-color:var(--text2);color:var(--text2);}
+.ct-btn{padding:5px 14px;background:transparent;border:1px solid var(--border);border-radius:20px;color:var(--text4);font-size:11px;cursor:pointer;font-weight:700;letter-spacing:0.3px;transition:all 0.18s;}
+.ct-btn:hover{border-color:var(--text2);color:var(--text2);}
 .save-status{font-size:11px;color:var(--text3);margin-left:auto;display:flex;align-items:center;gap:5px;}
-.save-dot{width:6px;height:6px;border-radius:50%;background:var(--success);}
-.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px;}
-.cal-wd{text-align:center;padding:8px;font-size:11px;color:var(--text3);font-weight:700;}
-.cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
-.cal-day{background:#fff;border:1px solid var(--border);border-radius:10px;min-height:108px;padding:10px;transition:all 0.15s;box-shadow:var(--shadow);}
-.cal-day:hover{border-color:var(--border2);box-shadow:var(--shadow-md);}
-.cal-day.today{border-color:var(--accent);background:#FFF8F6;box-shadow:0 0 0 2px rgba(232,64,28,0.1);}
-.cal-day.other{opacity:0.28;background:var(--bg3);box-shadow:none;}
-.cal-day.wknd{background:#FAFBFC;}
-.cdn{font-size:13px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;}
-.cal-day.today .cdn{color:var(--accent);}
-.today-now{font-size:9px;color:#fff;font-weight:800;background:var(--accent);padding:2px 7px;border-radius:10px;}
-.ce{font-size:10px;padding:3px 7px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.5;cursor:pointer;font-weight:600;transition:all 0.15s;display:flex;align-items:center;gap:4px;}
-.ce:hover{filter:brightness(0.95);}
-.ce .ce-del{opacity:0;font-size:9px;margin-left:auto;flex-shrink:0;color:rgba(0,0,0,0.4);}
-.ce:hover .ce-del{opacity:1;}
-.cpb{height:1px;border-radius:0;margin-bottom:4px;opacity:0.18;background:#000;}
+.save-dot{width:5px;height:5px;border-radius:50%;background:var(--success);}
+.cal-grid{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--border);box-shadow:var(--shadow);}
+.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;}
+.cal-wd{text-align:center;padding:9px 4px;font-size:10px;color:var(--text4);font-weight:700;letter-spacing:0.5px;background:var(--bg3);}
+.cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;}
+.cal-day{background:#fff;min-height:112px;padding:10px;transition:background 0.12s;position:relative;}
+.cal-day:hover{background:#FAFCFC;}
+.cal-day.today{background:#FFF8F6;}
+.cal-day.other{background:var(--bg);}
+.cal-day.cal-wknd:not(.today):not(.other){background:#FAFBFC;}
+.cdn{margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;}
+.cdn-num{width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border-radius:50%;color:var(--text2);flex-shrink:0;}
+.cal-day.today .cdn-num{background:var(--accent);color:#fff;}
+.cal-day.other .cdn-num{color:var(--text3);font-weight:400;font-size:11px;}
+.cal-sun .cdn-num{color:#DC2626;}
+.cal-sat .cdn-num{color:#2563EB;}
+.cal-day.today.cal-sun .cdn-num,.cal-day.today.cal-sat .cdn-num{background:var(--accent);color:#fff;}
+.today-badge{font-size:8px;color:var(--accent);font-weight:800;letter-spacing:0.8px;text-transform:uppercase;}
+.ce{font-size:10px;padding:2px 6px;border-radius:3px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.7;cursor:pointer;font-weight:600;transition:filter 0.12s;display:flex;align-items:center;gap:3px;}
+.ce:hover{filter:brightness(0.91);}
 /* PROJECT SWITCHER */
 .proj-switcher{display:flex;align-items:center;gap:8px;margin-bottom:20px;}
 .proj-btn{padding:7px 22px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;border:2px solid var(--border);color:var(--text3);background:#fff;transition:all 0.2s;font-family:inherit;}
 .proj-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 3px 10px rgba(232,64,28,0.3);}
 .proj-btn:disabled{opacity:0.28;cursor:not-allowed;background:var(--bg3);}
-.c-more{font-size:10px;color:var(--text3);margin-top:2px;font-weight:600;}
-.add-event-btn{width:100%;text-align:left;padding:3px 4px;font-size:10px;color:var(--text3);background:transparent;border:none;cursor:pointer;border-radius:4px;transition:all 0.15s;}
-.add-event-btn:hover{background:var(--accent-dim);color:var(--accent);}
+.c-more{font-size:9px;color:var(--text3);margin-top:3px;font-weight:700;padding-left:3px;}
+.add-event-btn{width:100%;text-align:left;padding:2px 4px;font-size:10px;color:transparent;background:transparent;border:none;cursor:pointer;border-radius:3px;transition:all 0.15s;margin-top:2px;}
+.cal-day:hover .add-event-btn{color:var(--text3);}
+.add-event-btn:hover{background:var(--accent-dim);color:var(--accent) !important;}
 
 /* SETTINGS */
 .sg{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
@@ -404,13 +408,15 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
         <button class="ct-btn" onclick="goToday()">오늘</button>
         <div class="save-status"><div class="save-dot"></div><span id="saveStatus">자동 저장됨</span></div>
       </div>
-      <div class="cal-weekdays">
-        <div class="cal-wd" style="color:#DC2626">일</div>
-        <div class="cal-wd">월</div><div class="cal-wd">화</div><div class="cal-wd">수</div>
-        <div class="cal-wd">목</div><div class="cal-wd">금</div>
-        <div class="cal-wd" style="color:#2563EB">토</div>
+      <div class="cal-grid">
+        <div class="cal-weekdays">
+          <div class="cal-wd" style="color:#DC2626;">일</div>
+          <div class="cal-wd">월</div><div class="cal-wd">화</div><div class="cal-wd">수</div>
+          <div class="cal-wd">목</div><div class="cal-wd">금</div>
+          <div class="cal-wd" style="color:#2563EB;">토</div>
+        </div>
+        <div class="cal-days" id="calDays"></div>
       </div>
-      <div class="cal-days" id="calDays"></div>
     </div>
   </div>
 
@@ -960,19 +966,15 @@ function renderCalendar(){
   document.getElementById('calDays').innerHTML=cells.map((c,idx)=>{
     const isT=!c.o&&c.d===TODAY.getDate()&&c.m===TODAY.getMonth()&&c.y===TODAY.getFullYear();
     const ds=`${c.y}-${p2(c.m+1)}-${p2(c.d)}`;
-    // 단일 날짜 이벤트 & 마일스톤
+    const isSun=idx%7===0,isSat=idx%7===6;
+    // 수동 입력 단일 이벤트 & 마일스톤 (엑셀 phases 제외)
     const singleEvts=[...S.milestones.filter(m=>m.date===ds&&visibleCatNames.includes(m.cat)),...S.events.filter(e=>e.date===ds&&!e.endDate&&visibleCatNames.includes(e.cat))];
-    // 기간 이벤트 (시작일~종료일 범위 내)
+    // 기간 이벤트
     const spanEvts=S.events.filter(e=>e.endDate&&e.date<=ds&&e.endDate>=ds&&visibleCatNames.includes(e.cat));
-    const ap=S.phases.filter(p=>p.start<=ds&&p.end>=ds&&visibleCatNames.includes(p.cat));
     const filt=S.activeCat==='all'?singleEvts:singleEvts.filter(e=>e.cat===S.activeCat);
     const filtSpan=S.activeCat==='all'?spanEvts:spanEvts.filter(e=>e.cat===S.activeCat);
-    const filtP=S.activeCat==='all'?ap:ap.filter(p=>p.cat===S.activeCat);
-    const isSun=idx%7===0,isSat=idx%7===6;
     let ev='';
-    // 얇은 검정 단계 바
-    if(filtP.length>0)ev+=`<div class="cpb"></div>`;
-    // 기간 이벤트 바
+    // 기간 이벤트 바 렌더링
     filtSpan.forEach(e=>{
       const col=cc(e.cat);
       const isFirst=e.date===ds,isLast=e.endDate===ds;
@@ -983,16 +985,17 @@ function renderCalendar(){
       else st+='border-radius:0;margin-left:-10px;padding-left:14px;margin-right:-10px;';
       ev+=`<div class="ce" style="${st}" onclick="openEditEventModal('${e.id}','ev','${ds}')" title="${e.name}">${isFirst?`<span style="overflow:hidden;text-overflow:ellipsis;">${e.name}</span>`:''}</div>`;
     });
-    // 단일 이벤트
+    // 단일 이벤트 렌더링
     filt.slice(0,3).forEach(e=>{
       const col=cc(e.cat);
       const isMs=S.milestones.find(m=>m.id===e.id&&m.date===e.date);
-      ev+=`<div class="ce" style="background:${col}18;border-left:2px solid ${col};color:${col};" onclick="openEditEventModal('${e.id}','${isMs?'ms':'ev'}','${ds}')" title="${e.name}"><span style="overflow:hidden;text-overflow:ellipsis;">${e.name}</span></div>`;
+      ev+=`<div class="ce" style="background:${col}22;border-left:2px solid ${col};color:${col};" onclick="openEditEventModal('${e.id}','${isMs?'ms':'ev'}','${ds}')" title="${e.name}"><span style="overflow:hidden;text-overflow:ellipsis;">${e.name}</span></div>`;
     });
     if(filt.length>3)ev+=`<div class="c-more">+${filt.length-3}개 더</div>`;
-    ev+=`<button class="add-event-btn" onclick="openAddEventOnDate('${ds}')">+ 일정 추가</button>`;
-    return`<div class="cal-day${c.o?' other':''}${isT?' today':''}${isSun||isSat?' wknd':''}">
-      <div class="cdn"><span>${c.d}</span>${isT?'<span class="today-now">NOW</span>':''}</div>
+    ev+=`<button class="add-event-btn" onclick="openAddEventOnDate('${ds}')">+ 추가</button>`;
+    const cls=['cal-day',c.o?'other':'',isT?'today':'',isSun?'cal-sun':'',isSat?'cal-sat':'',(isSun||isSat)&&!c.o?'cal-wknd':''].filter(Boolean).join(' ');
+    return`<div class="${cls}">
+      <div class="cdn"><span class="cdn-num">${c.d}</span>${isT?'<span class="today-badge">TODAY</span>':''}</div>
       ${ev}
     </div>`;
   }).join('');
