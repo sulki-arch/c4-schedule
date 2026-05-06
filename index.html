@@ -225,6 +225,61 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .cat-move-btn:hover{border-color:var(--accent);color:var(--accent);}
 .cat-chip-wrap{display:inline-flex;align-items:center;gap:3px;}
 
+/* ── DETAIL SCHEDULE LAYOUT ── */
+.detail-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.detail-layout{display:flex;gap:20px;align-items:flex-start;}
+.detail-left{width:292px;flex-shrink:0;}
+.detail-right{flex:1;min-width:0;}
+
+/* Mini Monthly Cal */
+.mini-cal{background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px 12px;box-shadow:var(--shadow);}
+.mini-cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.mini-days-hd{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;margin-bottom:3px;}
+.mini-wd{text-align:center;font-size:10px;color:var(--text3);font-weight:700;padding:3px 0;}
+.mini-days{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;}
+.mini-day{border-radius:7px;padding:3px 1px;text-align:center;cursor:pointer;transition:background 0.12s;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:38px;}
+.mini-day:hover:not(.other){background:var(--bg3);}
+.mini-day.other{opacity:0.22;pointer-events:none;}
+.mdn{font-size:11px;font-weight:700;width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:50%;}
+.mini-day.is-today .mdn{background:var(--accent);color:#fff;}
+.mini-day.is-selected:not(.is-today) .mdn{background:var(--text);color:#fff;}
+.mini-dots{display:flex;gap:2px;flex-wrap:wrap;justify-content:center;max-width:26px;}
+.mini-dot{width:4px;height:4px;border-radius:50%;flex-shrink:0;}
+
+/* Week / Day View */
+.week-view{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);}
+.wv-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--bg3);}
+.wv-title{font-size:13px;font-weight:800;}
+.wv-subtitle{font-size:10px;color:var(--text3);font-weight:500;margin-bottom:2px;}
+.wk-nav{display:flex;gap:6px;}
+.wk-btn{height:28px;padding:0 10px;background:#fff;border:1px solid var(--border);border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text4);transition:all 0.15s;font-weight:600;white-space:nowrap;}
+.wk-btn:hover{border-color:var(--accent);color:var(--accent);}
+.week-cols{display:flex;border-top:none;overflow:hidden;touch-action:pan-y;user-select:none;}
+.week-col{flex:1;border-right:1px solid var(--border);min-width:0;display:flex;flex-direction:column;}
+.week-col:last-child{border-right:none;}
+.wc-head{padding:8px 6px;text-align:center;border-bottom:1px solid var(--border);background:var(--bg3);cursor:pointer;transition:background 0.12s;}
+.wc-head:hover{background:var(--bg4);}
+.wc-day-name{font-size:10px;font-weight:700;color:var(--text3);margin-bottom:3px;}
+.wc-date-num{font-size:16px;font-weight:900;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:50%;margin:0 auto;}
+.wc-date-num.is-today{background:var(--accent);color:#fff;}
+.wc-date-num.is-selected{background:var(--text);color:#fff;}
+.wc-body{padding:5px;flex:1;min-height:180px;}
+.wc-event{font-size:10px;padding:4px 7px;border-radius:5px;margin-bottom:3px;cursor:pointer;font-weight:600;transition:filter 0.12s;display:flex;align-items:center;gap:4px;line-height:1.4;}
+.wc-event:hover{filter:brightness(0.93);}
+.wce-del{opacity:0;font-size:9px;margin-left:auto;flex-shrink:0;color:rgba(0,0,0,0.45);}
+.wc-event:hover .wce-del{opacity:1;}
+.wc-ms{font-size:10px;padding:3px 7px;border-radius:5px;margin-bottom:3px;font-weight:700;display:flex;align-items:center;gap:4px;}
+.wc-add{width:100%;text-align:left;padding:4px 6px;font-size:10px;color:var(--text3);background:transparent;border:none;cursor:pointer;border-radius:4px;transition:all 0.15s;margin-top:3px;}
+.wc-add:hover{background:var(--accent-dim);color:var(--accent);}
+.wc-center{background:rgba(232,64,28,0.015);}
+
+/* Mobile */
+@media (max-width:768px){
+  .detail-layout{flex-direction:column;gap:14px;}
+  .detail-left{width:100%;}
+  .week-col{min-width:0;}
+}
+
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
@@ -292,7 +347,7 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 
   <div class="tabs">
     <div class="tab active" onclick="switchTab('overview',this)">📊 전체 일정</div>
-    <div class="tab" onclick="switchTab('calendar',this)">📅 월간 스케줄</div>
+    <div class="tab" onclick="switchTab('calendar',this)">📅 상세 일정</div>
     <div class="tab admin-only" onclick="switchTab('settings',this)">⚙️ 설정</div>
   </div>
 
@@ -326,23 +381,25 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
     </div>
   </div>
 
-  <!-- CALENDAR -->
+  <!-- DETAIL SCHEDULE -->
   <div id="calendarTab" class="tab-content">
     <div class="cw">
-      <div class="cal-nav">
-        <button class="cn-btn" onclick="changeMonth(-1)">‹</button>
-        <h3 id="calTitle"></h3>
-        <button class="cn-btn" onclick="changeMonth(1)">›</button>
-        <button class="ct-btn" onclick="goToday()">오늘</button>
+      <div class="detail-topbar">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:13px;font-weight:800;color:var(--text);">상세 일정</span>
+        </div>
         <div class="save-status"><div class="save-dot"></div><span id="saveStatus">자동 저장됨</span></div>
       </div>
-      <div class="cal-weekdays">
-        <div class="cal-wd" style="color:#DC2626">일</div>
-        <div class="cal-wd">월</div><div class="cal-wd">화</div><div class="cal-wd">수</div>
-        <div class="cal-wd">목</div><div class="cal-wd">금</div>
-        <div class="cal-wd" style="color:#2563EB">토</div>
+      <div class="detail-layout">
+        <!-- LEFT: 미니 월간 캘린더 -->
+        <div class="detail-left">
+          <div class="mini-cal" id="miniCal"></div>
+        </div>
+        <!-- RIGHT: 주간/일간 뷰 -->
+        <div class="detail-right">
+          <div class="week-view" id="weekView"></div>
+        </div>
       </div>
-      <div class="cal-days" id="calDays"></div>
     </div>
   </div>
 
@@ -857,45 +914,190 @@ function renderProgress(){
   }).join('');
 }
 
-// ═══ CALENDAR ═══
-function renderCalendar(){
+// ═══ DETAIL CALENDAR HELPERS ═══
+function dsStr(d){return`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;}
+function dsDate(s){return new Date(s+'T00:00:00');}
+function addDays(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
+function getMondayOf(d){const r=new Date(d);const day=r.getDay();const diff=day===0?-6:1-day;r.setDate(r.getDate()+diff);return r;}
+let _detTouchX=0;
+
+function renderCalendar(){renderDetailCalendar();}
+
+function renderDetailCalendar(){
+  renderMiniCal();
+  if(window.innerWidth<=768) renderDayView();
+  else renderWeekView();
+}
+
+function renderMiniCal(){
+  const el=document.getElementById('miniCal');if(!el)return;
   const yr=S.calY,mo=S.calM;
   const mN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-  document.getElementById('calTitle').textContent=`${yr}년 ${mN[mo]}`;
   const fd=new Date(yr,mo,1).getDay(),ld=new Date(yr,mo+1,0).getDate(),pl=new Date(yr,mo,0).getDate();
+  const todayStr=dsStr(TODAY);
+  const selStr=S.selectedDate||todayStr;
+  let h=`<div class="mini-cal-nav">
+    <button class="cn-btn" onclick="changeMonth(-1)">‹</button>
+    <span style="font-size:13px;font-weight:800;">${yr}년 ${mN[mo]}</span>
+    <button class="cn-btn" onclick="changeMonth(1)">›</button>
+  </div>`;
+  h+=`<div class="mini-days-hd">`;
+  ['일','월','화','수','목','금','토'].forEach((d,i)=>{
+    h+=`<div class="mini-wd" style="${i===0?'color:#DC2626':i===6?'color:#2563EB':''}">${d}</div>`;
+  });
+  h+=`</div><div class="mini-days">`;
   const cells=[];
   for(let i=fd-1;i>=0;i--)cells.push({d:pl-i,m:mo-1,y:yr+(mo===0?-1:0),o:true});
   for(let d=1;d<=ld;d++)cells.push({d,m:mo,y:yr,o:false});
   while(cells.length<42)cells.push({d:cells.length-fd-ld+1,m:mo+1,y:yr+(mo===11?1:0),o:true});
-  document.getElementById('calDays').innerHTML=cells.map((c,idx)=>{
-    const isT=!c.o&&c.d===TODAY.getDate()&&c.m===TODAY.getMonth()&&c.y===TODAY.getFullYear();
+  cells.forEach((c,idx)=>{
     const ds=`${c.y}-${p2(c.m+1)}-${p2(c.d)}`;
-    const evts=[...S.milestones.filter(m=>m.date===ds),...S.events.filter(e=>e.date===ds)];
-    const ap=S.phases.filter(p=>p.start<=ds&&p.end>=ds);
-    const filt=S.activeCat==='all'?evts:evts.filter(e=>e.cat===S.activeCat);
-    const filtP=S.activeCat==='all'?ap:ap.filter(p=>p.cat===S.activeCat);
+    const isToday=ds===todayStr,isSel=ds===selStr;
     const isSun=idx%7===0,isSat=idx%7===6;
-    let ev='';
-    filtP.slice(0,1).forEach(p=>{ev+=`<div class="cpb" style="background:${cc(p.cat)};"></div>`;});
-    filt.slice(0,3).forEach(e=>{
-      const col=cc(e.cat);
-      const isMs=S.milestones.find(m=>m.id===e.id&&m.date===e.date);
-      ev+=`<div class="ce" style="background:${col}18;border-left:2px solid ${col};color:${col};"
-        onclick="openEditEventModal('${e.id}','${isMs?'ms':'ev'}','${ds}')" title="${e.name}">
-        <span style="overflow:hidden;text-overflow:ellipsis;">${e.name}</span>
-        ${!isMs?`<span class="ce-del" onclick="delEvent(event,'${e.id}')">✕</span>`:''}
-      </div>`;
-    });
-    if(filt.length>3)ev+=`<div class="c-more">+${filt.length-3}개 더</div>`;
-    if(!c.o)ev+=`<button class="add-event-btn" onclick="openAddEventOnDate('${ds}')">+ 일정 추가</button>`;
-    return`<div class="cal-day${c.o?' other':''}${isT?' today':''}${isSun||isSat?' wknd':''}">
-      <div class="cdn"><span>${c.d}</span>${isT?'<span class="today-now">NOW</span>':''}</div>
-      ${ev}
+    const evts=[...S.milestones.filter(m=>m.date===ds),...S.events.filter(e=>e.date===ds)];
+    const filt=S.activeCat==='all'?evts:evts.filter(e=>e.cat===S.activeCat);
+    const dotCols=[...new Set(filt.slice(0,4).map(e=>cc(e.cat)))];
+    h+=`<div class="mini-day${c.o?' other':''}${isToday?' is-today':''}${isSel&&!isToday?' is-selected':''}" onclick="selectDate('${ds}')">
+      <div class="mdn" style="${!isToday&&!isSel?(isSun?'color:#DC2626':isSat?'color:#2563EB':''):''}">${c.d}</div>
+      <div class="mini-dots">${dotCols.map(col=>`<div class="mini-dot" style="background:${col};"></div>`).join('')}</div>
     </div>`;
-  }).join('');
+  });
+  h+=`</div>`;
+  el.innerHTML=h;
 }
-function changeMonth(d){S.calM+=d;if(S.calM>11){S.calM=0;S.calY++;}if(S.calM<0){S.calM=11;S.calY--;}renderCalendar();}
-function goToday(){S.calY=TODAY.getFullYear();S.calM=TODAY.getMonth();renderCalendar();}
+
+function renderWeekView(){
+  const el=document.getElementById('weekView');if(!el)return;
+  const selDate=S.selectedDate?dsDate(S.selectedDate):TODAY;
+  const mon=getMondayOf(selDate);
+  const days=[0,1,2,3,4].map(i=>addDays(mon,i));
+  const todayStr=dsStr(TODAY),selStr=S.selectedDate||todayStr;
+  const fri=addDays(mon,4);
+  const rangeLabel=`${mon.getFullYear()}년 ${mon.getMonth()+1}월 ${mon.getDate()}일 – ${fri.getMonth()+1}월 ${fri.getDate()}일`;
+  let h=`<div class="wv-header">
+    <div><div class="wv-subtitle">주간 스케줄</div><div class="wv-title">${rangeLabel}</div></div>
+    <div class="wk-nav">
+      <button class="wk-btn" onclick="navigateWeek(-1)">‹</button>
+      <button class="wk-btn" onclick="goTodayDetail()">오늘</button>
+      <button class="wk-btn" onclick="navigateWeek(1)">›</button>
+    </div>
+  </div>`;
+  h+=`<div class="week-cols" id="weekCols">`;
+  const dayNames=['월','화','수','목','금'];
+  days.forEach((d,i)=>{
+    const ds=dsStr(d);
+    const isToday=ds===todayStr,isSel=ds===selStr;
+    const evts=[...S.milestones.filter(m=>m.date===ds),...S.events.filter(e=>e.date===ds)];
+    const filt=S.activeCat==='all'?evts:evts.filter(e=>e.cat===S.activeCat);
+    h+=`<div class="week-col${isToday?' wc-center':''}">
+      <div class="wc-head" onclick="selectDate('${ds}')">
+        <div class="wc-day-name" style="${i===4?'color:#2563EB':''}">${dayNames[i]}</div>
+        <div class="wc-date-num${isToday?' is-today':isSel?' is-selected':''}">${d.getDate()}</div>
+      </div>
+      <div class="wc-body">`;
+    filt.forEach(e=>{
+      const col=cc(e.cat);
+      const isMs=!!S.milestones.find(m=>String(m.id)===String(e.id)&&m.date===e.date);
+      if(isMs){
+        h+=`<div class="wc-ms" style="background:${col}18;border-left:2px solid ${col};color:${col};" title="${e.name}">◆ <span style="overflow:hidden;text-overflow:ellipsis;flex:1;">${e.name}</span></div>`;
+      }else{
+        h+=`<div class="wc-event" style="background:${col}18;border-left:2px solid ${col};color:${col};"
+          onclick="openEditEventModal('${e.id}','ev','${ds}')" title="${e.name}">
+          <span style="overflow:hidden;text-overflow:ellipsis;flex:1;">${e.name}</span>
+          <span class="wce-del" onclick="delEventDetail(event,'${e.id}')">✕</span>
+        </div>`;
+      }
+    });
+    h+=`<button class="wc-add" onclick="openAddEventOnDate('${ds}')">+ 추가</button></div></div>`;
+  });
+  h+=`</div>`;
+  el.innerHTML=h;
+  const wc=document.getElementById('weekCols');
+  if(wc){
+    wc.ontouchstart=e=>{_detTouchX=e.touches[0].clientX;};
+    wc.ontouchend=e=>{const dx=e.changedTouches[0].clientX-_detTouchX;if(Math.abs(dx)>44)navigateWeek(dx<0?1:-1);};
+  }
+}
+
+function renderDayView(){
+  const el=document.getElementById('weekView');if(!el)return;
+  const selDate=S.selectedDate?dsDate(S.selectedDate):TODAY;
+  const days=[addDays(selDate,-1),selDate,addDays(selDate,1)];
+  const todayStr=dsStr(TODAY),selStr=dsStr(selDate);
+  const dayFull=['일','월','화','수','목','금','토'];
+  let h=`<div class="wv-header">
+    <div><div class="wv-subtitle">일간 스케줄</div><div class="wv-title">${selDate.getFullYear()}년 ${selDate.getMonth()+1}월 ${selDate.getDate()}일 (${dayFull[selDate.getDay()]})</div></div>
+    <div class="wk-nav">
+      <button class="wk-btn" onclick="navigateDay(-1)">‹</button>
+      <button class="wk-btn" onclick="goTodayDetail()">오늘</button>
+      <button class="wk-btn" onclick="navigateDay(1)">›</button>
+    </div>
+  </div>`;
+  h+=`<div class="week-cols" id="weekCols">`;
+  days.forEach((d,i)=>{
+    const ds=dsStr(d);
+    const isCenter=i===1,isToday=ds===todayStr;
+    const evts=[...S.milestones.filter(m=>m.date===ds),...S.events.filter(e=>e.date===ds)];
+    const filt=S.activeCat==='all'?evts:evts.filter(e=>e.cat===S.activeCat);
+    h+=`<div class="week-col${isCenter?' wc-center':''}" style="${!isCenter?'opacity:0.55;':''}">
+      <div class="wc-head" onclick="selectDate('${ds}')">
+        <div class="wc-day-name">${dayFull[d.getDay()]}</div>
+        <div class="wc-date-num${isToday?' is-today':isCenter?' is-selected':''}">${d.getDate()}</div>
+      </div>
+      <div class="wc-body">`;
+    filt.forEach(e=>{
+      const col=cc(e.cat);
+      const isMs=!!S.milestones.find(m=>String(m.id)===String(e.id)&&m.date===e.date);
+      if(isMs){
+        h+=`<div class="wc-ms" style="background:${col}18;border-left:2px solid ${col};color:${col};" title="${e.name}">◆ <span style="overflow:hidden;text-overflow:ellipsis;flex:1;">${e.name}</span></div>`;
+      }else{
+        h+=`<div class="wc-event" style="background:${col}18;border-left:2px solid ${col};color:${col};"
+          onclick="openEditEventModal('${e.id}','ev','${ds}')" title="${e.name}">
+          <span style="overflow:hidden;text-overflow:ellipsis;flex:1;">${e.name}</span>
+          ${isCenter?`<span class="wce-del" onclick="delEventDetail(event,'${e.id}')">✕</span>`:''}
+        </div>`;
+      }
+    });
+    if(isCenter) h+=`<button class="wc-add" onclick="openAddEventOnDate('${ds}')">+ 추가</button>`;
+    h+=`</div></div>`;
+  });
+  h+=`</div>`;
+  el.innerHTML=h;
+  const wc=document.getElementById('weekCols');
+  if(wc){
+    wc.ontouchstart=e=>{_detTouchX=e.touches[0].clientX;};
+    wc.ontouchend=e=>{const dx=e.changedTouches[0].clientX-_detTouchX;if(Math.abs(dx)>44)navigateDay(dx<0?1:-1);};
+  }
+}
+
+function selectDate(ds){
+  S.selectedDate=ds;
+  const d=dsDate(ds);
+  S.calY=d.getFullYear();S.calM=d.getMonth();
+  renderDetailCalendar();
+}
+function navigateWeek(dir){
+  const d=S.selectedDate?dsDate(S.selectedDate):TODAY;
+  S.selectedDate=dsStr(addDays(d,dir*7));
+  const nd=dsDate(S.selectedDate);S.calY=nd.getFullYear();S.calM=nd.getMonth();
+  renderDetailCalendar();
+}
+function navigateDay(dir){
+  const d=S.selectedDate?dsDate(S.selectedDate):TODAY;
+  S.selectedDate=dsStr(addDays(d,dir));
+  const nd=dsDate(S.selectedDate);S.calY=nd.getFullYear();S.calM=nd.getMonth();
+  renderDetailCalendar();
+}
+function goTodayDetail(){
+  S.selectedDate=dsStr(TODAY);S.calY=TODAY.getFullYear();S.calM=TODAY.getMonth();
+  renderDetailCalendar();
+}
+function changeMonth(dir){S.calM+=dir;if(S.calM>11){S.calM=0;S.calY++;}if(S.calM<0){S.calM=11;S.calY--;}renderMiniCal();}
+function delEventDetail(e,id){
+  e.stopPropagation();
+  S.events=S.events.filter(ev=>String(ev.id)!==String(id));
+  autoSave();renderDetailCalendar();
+}
 
 function openAddEventOnDate(ds){
   document.getElementById('evModalTitle').textContent='일정 추가';
@@ -924,7 +1126,7 @@ function openEditEventModal(id,type,ds){
 function delEvent(e,id){
   e.stopPropagation();
   S.events=S.events.filter(ev=>String(ev.id)!==String(id));
-  autoSave();renderCalendar();
+  autoSave();renderDetailCalendar();
 }
 function saveEvent(){
   const editId=document.getElementById('evEditId').value;
@@ -932,7 +1134,7 @@ function saveEvent(){
   if(!obj.name||!obj.date){alert('이름과 날짜를 입력하세요.');return;}
   if(editId){const idx=S.events.findIndex(e=>String(e.id)===String(editId));if(idx>=0)S.events[idx]={...S.events[idx],...obj};}
   else{obj.id=Date.now();S.events.push(obj);}
-  closeModal('evModal');autoSave();renderCalendar();
+  closeModal('evModal');autoSave();renderDetailCalendar();
 }
 
 // ═══ SETTINGS ═══
@@ -1018,7 +1220,7 @@ function renderCatFilter(){
 function filterCat(cat){
   S.activeCat=cat;
   renderCatFilter();
-  renderGantt();renderCalendar();
+  renderGantt();renderDetailCalendar();
 }
 
 function moveCat(i,dir){
@@ -1027,14 +1229,15 @@ function moveCat(i,dir){
   [S.cats[i],S.cats[j]]=[S.cats[j],S.cats[i]];
   save();
   renderCatFilter();
-  renderGantt();renderCalendar();
+  renderGantt();renderDetailCalendar();
   if(S.user?.role==='admin')renderSettings();
 }
 
-function renderAll(){renderCatFilter();renderProgress();renderGantt();renderCalendar();if(S.user?.role==='admin')renderSettings();}
+function renderAll(){renderCatFilter();renderProgress();renderGantt();renderDetailCalendar();if(S.user?.role==='admin')renderSettings();}
 
 // ═══ INIT ═══
 S.calY=TODAY.getFullYear();S.calM=TODAY.getMonth();
+S.selectedDate=`${TODAY.getFullYear()}-${p2(TODAY.getMonth()+1)}-${p2(TODAY.getDate())}`;
 initFirebase(); // Firebase 연결 → 데이터 로드 → 자동로그인 체크 순으로 진행
 </script>
 </body>
