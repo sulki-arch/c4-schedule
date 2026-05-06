@@ -557,28 +557,19 @@ function initFirebase(){
     applyFirebaseData(snapshot.val());
     if(firstLoad){
       firstLoad=false;
-      // 마지막 가져오기 배지 갱신
       const badge=document.getElementById('lastImportBadge');
       if(badge&&S.lastImport)badge.textContent='마지막 가져오기: '+S.lastImport;
-      // 로그인 칩 초기화
       initLogin();
-      // 로딩 숨기기
       document.getElementById('loadingOverlay').style.display='none';
-      // 자동 로그인 체크
       if(!checkAutoLogin()){
         document.getElementById('loginScreen').style.display='flex';
       }
     } else {
-      // 다른 사용자가 데이터 변경 → 실시간 반영
       initLogin();
-      if(S.user){
-        renderAll();
-        showSyncToast();
-      }
+      if(S.user){ renderAll(); showSyncToast(); }
     }
   }, err=>{
     console.warn('Firebase 연결 오류:', err);
-    // 오프라인 fallback
     document.getElementById('loadingMsg').textContent='오프라인 모드로 시작합니다...';
     reset();
     setTimeout(()=>{
@@ -680,14 +671,10 @@ function importExcel(input){
 
 function parseScheduleExcel(wb){
   const results=[];
-  // Try each sheet
   wb.SheetNames.forEach(sheetName=>{
     const ws=wb.Sheets[sheetName];
     const data=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false});
-    // Look for rows with: task name + start date + end date pattern
-    // Pattern: column with Korean text, followed by date-like values
     let dateRow=-1,nameCol=-1;
-    // Find header row with date values
     for(let r=0;r<Math.min(10,data.length);r++){
       const row=data[r];
       let dateCount=0;
@@ -697,13 +684,10 @@ function parseScheduleExcel(wb){
       }
       if(dateCount>=2){dateRow=r;break;}
     }
-    // Look for rows with Korean text in first few columns
     for(let r=0;r<data.length;r++){
       const row=data[r];
       if(!row||row.length<3)continue;
-      // Find name col (Korean text)
       let taskName='',startDate='',endDate='',catName='기타';
-      // Check if row has explicit start/end columns
       for(let c=0;c<Math.min(row.length,5);c++){
         const v=String(row[c]).trim();
         if(v.match(/[가-힣A-Za-z()\s]{3,}/)&&!v.match(/^\d/)&&v.length>2&&v.length<50){
@@ -714,7 +698,6 @@ function parseScheduleExcel(wb){
           else if(!endDate)endDate=v.replace(/\//g,'-');
         }
       }
-      // Try columns labeled 시작, 종료, start, end
       const headers=data[0]||[];
       headers.forEach((h,ci)=>{
         const hv=String(h).toLowerCase();
