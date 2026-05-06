@@ -221,6 +221,9 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .tt .ts{margin-top:5px;font-size:11px;font-weight:700;}
 
 .admin-only{display:none;}
+.cat-move-btn{width:16px;height:14px;background:transparent;border:1px solid var(--border2);border-radius:3px;color:var(--text4);font-size:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;transition:all 0.15s;}
+.cat-move-btn:hover{border-color:var(--accent);color:var(--accent);}
+.cat-chip-wrap{display:inline-flex;align-items:center;gap:3px;}
 
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:transparent;}
@@ -293,15 +296,8 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
     <div class="tab admin-only" onclick="switchTab('settings',this)">⚙️ 설정</div>
   </div>
 
-  <div class="cat-filter">
+  <div class="cat-filter" id="catFilter">
     <span class="cf-label">카테고리</span>
-    <button class="cat-btn all active" onclick="filterCat('all',this)">전체</button>
-    <button class="cat-btn active" data-cat="크래프톤" onclick="filterCat('크래프톤',this)">크래프톤</button>
-    <button class="cat-btn active" data-cat="한미글로벌" onclick="filterCat('한미글로벌',this)">한미글로벌</button>
-    <button class="cat-btn active" data-cat="삼우건축" onclick="filterCat('삼우건축',this)">삼우건축</button>
-    <button class="cat-btn active" data-cat="F+P" onclick="filterCat('F+P',this)">F+P</button>
-    <button class="cat-btn active" data-cat="인허가" onclick="filterCat('인허가',this)">인허가</button>
-    <button class="cat-btn active" data-cat="기타" onclick="filterCat('기타',this)">기타</button>
   </div>
 
   <!-- OVERVIEW -->
@@ -618,7 +614,7 @@ function initLogin(){
   const chips=document.getElementById('guestChips');chips.innerHTML='';
   S.accounts.forEach(a=>{
     const c=document.createElement('div');c.className='guest-chip';c.textContent=a.name||a.id;
-    c.onclick=()=>{document.getElementById('loginId').value=a.id;document.getElementById('loginPw').value=a.pw;};
+    c.onclick=()=>{document.getElementById('loginId').value=a.id;document.getElementById('loginPw').value='';document.getElementById('loginPw').focus();};
     chips.appendChild(c);
   });
 }
@@ -640,8 +636,6 @@ function performLogin(acc,animate){
   if(S.lastImport)document.getElementById('lastImportBadge').textContent='마지막 가져오기: '+S.lastImport;
   if(acc.role==='guest'&&acc.cat!=='all'){
     S.activeCat=acc.cat;
-    document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
-    document.querySelector(`.cat-btn[data-cat="${acc.cat}"]`)?.classList.add('active');
   }
   renderAll();
 }
@@ -910,6 +904,11 @@ function openAddEventOnDate(ds){
   document.getElementById('evDate').value=ds;
   document.getElementById('evDesc').value='';
   openModal('evModal');
+  // 게스트는 자신의 카테고리를 기본 선택
+  const evCatEl=document.getElementById('evCat');
+  if(evCatEl&&S.user?.role==='guest'&&S.user?.cat!=='all'){
+    evCatEl.value=S.user.cat;
+  }
 }
 function openEditEventModal(id,type,ds){
   if(type==='ms')return;
@@ -996,14 +995,43 @@ function hideTT(){document.getElementById('tooltip').classList.add('mh');}
 
 // ═══ TAB / FILTER ═══
 function switchTab(id,el){document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById(id+'Tab').classList.add('active');el.classList.add('active');if(id==='settings')renderSettings();}
-function filterCat(cat,btn){
+
+function renderCatFilter(){
+  const isAdmin=S.user?.role==='admin';
+  let h=`<span class="cf-label">카테고리</span>`;
+  h+=`<button class="cat-btn all ${S.activeCat==='all'?'active':''}" onclick="filterCat('all')">전체</button>`;
+  S.cats.forEach((cat,i)=>{
+    const active=S.activeCat==='all'||S.activeCat===cat.name;
+    h+=`<div class="cat-chip-wrap">`;
+    h+=`<button class="cat-btn ${active?'active':''}" data-cat="${cat.name}" onclick="filterCat('${cat.name}')">${cat.name}</button>`;
+    if(isAdmin){
+      h+=`<div style="display:flex;flex-direction:column;gap:1px;">`;
+      h+=`<button class="cat-move-btn" onclick="moveCat(${i},-1)" title="위로" ${i===0?'style="opacity:0.2;pointer-events:none;"':''}>▲</button>`;
+      h+=`<button class="cat-move-btn" onclick="moveCat(${i},1)" title="아래로" ${i===S.cats.length-1?'style="opacity:0.2;pointer-events:none;"':''}>▼</button>`;
+      h+=`</div>`;
+    }
+    h+=`</div>`;
+  });
+  document.getElementById('catFilter').innerHTML=h;
+}
+
+function filterCat(cat){
   S.activeCat=cat;
-  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
-  if(cat==='all')document.querySelector('.cat-btn.all').classList.add('active');
-  else btn.classList.add('active');
+  renderCatFilter();
   renderGantt();renderCalendar();
 }
-function renderAll(){renderProgress();renderGantt();renderCalendar();if(S.user?.role==='admin')renderSettings();}
+
+function moveCat(i,dir){
+  const j=i+dir;
+  if(j<0||j>=S.cats.length)return;
+  [S.cats[i],S.cats[j]]=[S.cats[j],S.cats[i]];
+  save();
+  renderCatFilter();
+  renderGantt();renderCalendar();
+  if(S.user?.role==='admin')renderSettings();
+}
+
+function renderAll(){renderCatFilter();renderProgress();renderGantt();renderCalendar();if(S.user?.role==='admin')renderSettings();}
 
 // ═══ INIT ═══
 S.calY=TODAY.getFullYear();S.calM=TODAY.getMonth();
