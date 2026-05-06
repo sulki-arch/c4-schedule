@@ -155,11 +155,11 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;}
 .cal-wd{text-align:center;padding:9px 4px;font-size:10px;color:var(--text4);font-weight:700;letter-spacing:0.5px;background:var(--bg3);}
 .cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;}
-.cal-day{background:#fff;min-height:112px;padding:10px;transition:background 0.12s;position:relative;}
+.cal-day{background:#fff;border-right:1px solid var(--border);border-bottom:1px solid var(--border);min-height:112px;padding:10px 10px 8px;transition:background 0.12s;position:relative;}
 .cal-day:hover{background:#FAFCFC;}
 .cal-day.today{background:#FFF8F6;}
-.cal-day.other{background:var(--bg);}
-.cal-day.cal-wknd:not(.today):not(.other){background:#FAFBFC;}
+.cal-day.other{background:var(--bg3);opacity:0.7;}
+.cal-day.cal-wknd:not(.today):not(.other){background:#FAFBFD;}
 .cdn{margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;}
 .cdn-num{width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border-radius:50%;color:var(--text2);flex-shrink:0;}
 .cal-day.today .cdn-num{background:var(--accent);color:#fff;}
@@ -954,7 +954,7 @@ function renderProgress(){
 
 // ═══ CALENDAR ═══
 function renderCalendar(){
-  const visibleCatNames=S.cats.filter(c=>canSeeCategory(c)).map(c=>c.name);
+  const visCatNames=S.cats.filter(c=>canSeeCategory(c)).map(c=>c.name);
   const yr=S.calY,mo=S.calM;
   const mN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
   document.getElementById('calTitle').textContent=`${yr}년 ${mN[mo]}`;
@@ -962,43 +962,44 @@ function renderCalendar(){
   const cells=[];
   for(let i=fd-1;i>=0;i--)cells.push({d:pl-i,m:mo-1,y:yr+(mo===0?-1:0),o:true});
   for(let d=1;d<=ld;d++)cells.push({d,m:mo,y:yr,o:false});
-  while(cells.length<42)cells.push({d:cells.length-fd-ld+1,m:mo+1,y:yr+(mo===11?1:0),o:true});
-  document.getElementById('calDays').innerHTML=cells.map((c,idx)=>{
-    const isT=!c.o&&c.d===TODAY.getDate()&&c.m===TODAY.getMonth()&&c.y===TODAY.getFullYear();
-    const ds=`${c.y}-${p2(c.m+1)}-${p2(c.d)}`;
+  while(cells.length<42){const n=cells.length;cells.push({d:n-fd-ld+1,m:mo+1,y:yr+(mo===11?1:0),o:true});}
+  let html='';
+  cells.forEach((cell,idx)=>{
+    const isT=!cell.o&&cell.d===TODAY.getDate()&&cell.m===TODAY.getMonth()&&cell.y===TODAY.getFullYear();
+    const ds=`${cell.y}-${p2(cell.m+1)}-${p2(cell.d)}`;
     const isSun=idx%7===0,isSat=idx%7===6;
-    // 수동 입력 단일 이벤트 & 마일스톤 (엑셀 phases 제외)
-    const singleEvts=[...S.milestones.filter(m=>m.date===ds&&visibleCatNames.includes(m.cat)),...S.events.filter(e=>e.date===ds&&!e.endDate&&visibleCatNames.includes(e.cat))];
-    // 기간 이벤트
-    const spanEvts=S.events.filter(e=>e.endDate&&e.date<=ds&&e.endDate>=ds&&visibleCatNames.includes(e.cat));
+    const singleEvts=[...S.milestones.filter(m=>m.date===ds&&visCatNames.includes(m.cat)),
+                      ...S.events.filter(e=>e.date===ds&&!e.endDate&&visCatNames.includes(e.cat))];
+    const spanEvts=S.events.filter(e=>e.endDate&&e.date<=ds&&e.endDate>=ds&&visCatNames.includes(e.cat));
     const filt=S.activeCat==='all'?singleEvts:singleEvts.filter(e=>e.cat===S.activeCat);
     const filtSpan=S.activeCat==='all'?spanEvts:spanEvts.filter(e=>e.cat===S.activeCat);
     let ev='';
-    // 기간 이벤트 바 렌더링
-    filtSpan.forEach(e=>{
-      const col=cc(e.cat);
-      const isFirst=e.date===ds,isLast=e.endDate===ds;
+    filtSpan.forEach(se=>{
+      const col=cc(se.cat);
+      const isF=se.date===ds,isL=se.endDate===ds;
       let st=`background:${col};color:#fff;border-left:none;`;
-      if(isFirst&&isLast)st+='border-radius:3px;';
-      else if(isFirst)st+='border-radius:3px 0 0 3px;margin-right:-10px;';
-      else if(isLast)st+='border-radius:0 3px 3px 0;margin-left:-10px;padding-left:14px;';
+      if(isF&&isL)st+='border-radius:3px;';
+      else if(isF)st+='border-radius:3px 0 0 3px;margin-right:-10px;';
+      else if(isL)st+='border-radius:0 3px 3px 0;margin-left:-10px;padding-left:14px;';
       else st+='border-radius:0;margin-left:-10px;padding-left:14px;margin-right:-10px;';
-      ev+=`<div class="ce" style="${st}" onclick="openEditEventModal('${e.id}','ev','${ds}')" title="${e.name}">${isFirst?`<span style="overflow:hidden;text-overflow:ellipsis;">${e.name}</span>`:''}</div>`;
+      ev+=`<div class="ce" style="${st}" onclick="openEditEventModal('${se.id}','ev','${ds}')" title="${se.name}">${isF?`<span>${se.name}</span>`:''}</div>`;
     });
-    // 단일 이벤트 렌더링
     filt.slice(0,3).forEach(e=>{
       const col=cc(e.cat);
-      const isMs=S.milestones.find(m=>m.id===e.id&&m.date===e.date);
-      ev+=`<div class="ce" style="background:${col}22;border-left:2px solid ${col};color:${col};" onclick="openEditEventModal('${e.id}','${isMs?'ms':'ev'}','${ds}')" title="${e.name}"><span style="overflow:hidden;text-overflow:ellipsis;">${e.name}</span></div>`;
+      const isMs=!!S.milestones.find(m=>String(m.id)===String(e.id)&&m.date===e.date);
+      ev+=`<div class="ce" style="background:${col}22;border-left:2px solid ${col};color:${col};" onclick="openEditEventModal('${e.id}','${isMs?'ms':'ev'}','${ds}')" title="${e.name}"><span>${e.name}</span></div>`;
     });
     if(filt.length>3)ev+=`<div class="c-more">+${filt.length-3}개 더</div>`;
     ev+=`<button class="add-event-btn" onclick="openAddEventOnDate('${ds}')">+ 추가</button>`;
-    const cls=['cal-day',c.o?'other':'',isT?'today':'',isSun?'cal-sun':'',isSat?'cal-sat':'',(isSun||isSat)&&!c.o?'cal-wknd':''].filter(Boolean).join(' ');
-    return`<div class="${cls}">
-      <div class="cdn"><span class="cdn-num">${c.d}</span>${isT?'<span class="today-badge">TODAY</span>':''}</div>
-      ${ev}
-    </div>`;
-  }).join('');
+    let cls='cal-day';
+    if(cell.o)cls+=' other';
+    if(isT)cls+=' today';
+    if(isSun)cls+=' cal-sun';
+    if(isSat)cls+=' cal-sat';
+    if((isSun||isSat)&&!cell.o)cls+=' cal-wknd';
+    html+=`<div class="${cls}"><div class="cdn"><span class="cdn-num">${cell.d}</span>${isT?'<span class="today-badge">TODAY</span>':''}</div>${ev}</div>`;
+  });
+  document.getElementById('calDays').innerHTML=html;
 }
 
 function changeMonth(d){S.calM+=d;if(S.calM>11){S.calM=0;S.calY++;}if(S.calM<0){S.calM=11;S.calY--;}renderCalendar();}
