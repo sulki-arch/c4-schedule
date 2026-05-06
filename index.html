@@ -153,9 +153,9 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .save-dot{width:5px;height:5px;border-radius:50%;background:var(--success);}
 .cal-grid{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:#fff;box-shadow:var(--shadow);}
 .cal-weekdays{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:0;}
-.cal-wd{text-align:center;padding:9px 4px;font-size:10px;color:var(--text4);font-weight:700;letter-spacing:0.5px;background:var(--bg3);border-right:0.25px solid #666;border-bottom:0.25px solid #666;box-sizing:border-box;}
+.cal-wd{text-align:center;padding:9px 4px;font-size:10px;color:var(--text4);font-weight:700;letter-spacing:0.5px;background:var(--bg3);border-right:0.25px solid rgba(80,80,80,0.35);border-bottom:0.25px solid rgba(80,80,80,0.35);box-sizing:border-box;}
 .cal-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:0;}
-.cal-day{background:#fff;border-right:0.25px solid #666;border-bottom:0.25px solid #666;box-sizing:border-box;padding:10px 10px 12px;min-height:72px;transition:background 0.12s;position:relative;}
+.cal-day{background:#fff;border-right:0.25px solid rgba(80,80,80,0.35);border-bottom:0.25px solid rgba(80,80,80,0.35);box-sizing:border-box;padding:10px 10px 10px;min-height:112px;transition:background 0.12s;position:relative;}
 .cal-day:hover{background:#FAFCFC;}
 .cal-day.today{background:#FFF8F6;}
 .cal-day.other{background:var(--bg3);opacity:0.7;}
@@ -981,12 +981,12 @@ function renderCalendar(){
     filtSpan.forEach(se=>{
       const col=cc(se.cat);
       const isF=se.date===ds,isL=se.endDate===ds;
-      let st=`background:${col};color:#fff;border-left:none;`;
-      if(isF&&isL)st+='border-radius:3px;';
-      else if(isF)st+='border-radius:3px 0 0 3px;margin-right:-10px;';
-      else if(isL)st+='border-radius:0 3px 3px 0;margin-left:-10px;padding-left:14px;';
-      else st+='border-radius:0;margin-left:-10px;padding-left:14px;margin-right:-10px;';
-      ev+=`<div class="ce" style="${st}" onclick="openEditEventModal('${se.id}','ev','${ds}')" title="${se.name}">${isF?`<span>${se.name}</span>`:''}</div>`;
+      // 솔리드 박스: 셀 좌우 패딩 10px을 음수 마진으로 상쇄해 셀 경계까지 채움
+      let ml='-10px',mr='-10px',rl='0',rr='0';
+      if(isF)rl='4px';
+      if(isL)rr='4px';
+      const st=`background:${col};color:#fff;margin-left:${ml};margin-right:${mr};border-radius:${rl} ${rr} ${rr} ${rl};padding:3px 10px 3px ${isF?'10px':'4px'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;`;
+      ev+=`<div class="ce" style="${st}" onclick="openEditEventModal('${se.id}','ev','${ds}')" title="${se.name}">${isF?`<span style="font-weight:700;">${se.name}</span>`:''}</div>`;
     });
     filt.slice(0,3).forEach(e=>{
       const col=cc(e.cat);
