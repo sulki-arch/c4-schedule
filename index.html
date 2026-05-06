@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KRAFTON C4 프로젝트 일정표</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 <style>
 :root {
   --bg:#F5F6F8; --bg2:#FFFFFF; --bg3:#F0F1F4; --bg4:#E8EAEE;
@@ -227,8 +229,23 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 </head>
 <body>
 
+<!-- LOADING OVERLAY -->
+<div id="loadingOverlay" style="position:fixed;inset:0;background:#F5F6F8;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2000;">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+    <div style="width:40px;height:40px;background:#E8401C;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:20px;color:#fff;">K</div>
+    <div><div style="font-size:18px;font-weight:800;">KRAFTON C4</div><div style="font-size:11px;color:#9CA3AF;letter-spacing:2px;text-transform:uppercase;">Project Schedule</div></div>
+  </div>
+  <div style="display:flex;gap:6px;">
+    <div style="width:8px;height:8px;border-radius:50%;background:#E8401C;animation:ldot 1.2s infinite 0s;"></div>
+    <div style="width:8px;height:8px;border-radius:50%;background:#E8401C;animation:ldot 1.2s infinite 0.2s;"></div>
+    <div style="width:8px;height:8px;border-radius:50%;background:#E8401C;animation:ldot 1.2s infinite 0.4s;"></div>
+  </div>
+  <div style="margin-top:14px;font-size:12px;color:#9CA3AF;" id="loadingMsg">데이터 불러오는 중...</div>
+</div>
+<style>@keyframes ldot{0%,100%{opacity:0.2;transform:scale(0.8);}50%{opacity:1;transform:scale(1);}}</style>
+
 <!-- LOGIN -->
-<div id="loginScreen">
+<div id="loginScreen" style="display:none;">
   <div class="login-box">
     <div class="login-brand">
       <div class="k-circle">K</div>
@@ -482,32 +499,109 @@ let importedPhases=null;
 let saveTimer=null;
 const TODAY=new Date();
 
-// ═══ STORAGE ═══
-function save(){
-  try{
-    localStorage.setItem('c4_sched',JSON.stringify({cats:S.cats,accounts:S.accounts,phases:S.phases,milestones:S.milestones,events:S.events,lastImport:S.lastImport}));
-    showSaveStatus();
-  }catch(e){}
-}
-function load(){
-  try{
-    const d=localStorage.getItem('c4_sched');
-    if(d){const p=JSON.parse(d);S.cats=p.cats||jc(DC);S.accounts=p.accounts||jc(DA);S.phases=p.phases||jc(DP);S.milestones=p.milestones||jc(DM);S.events=p.events||jc(DEV);S.lastImport=p.lastImport||null;}
-    else reset();
-  }catch(e){reset();}
-}
-function reset(){S.cats=jc(DC);S.accounts=jc(DA);S.phases=jc(DP);S.milestones=jc(DM);S.events=jc(DEV);S.lastImport=null;}
+// ═══ FIREBASE ═══
+const fbConfig = { databaseURL: 'https://krafton-cluster-default-rtdb.asia-southeast1.firebasedatabase.app/' };
+firebase.initializeApp(fbConfig);
+const db = firebase.database();
+const DB_REF = 'c4schedule';
+let firstLoad = true;
+
 function jc(o){return JSON.parse(JSON.stringify(o));}
 function cc(n){const c=S.cats.find(x=>x.name===n);return c?c.color:'#888';}
 
+// ── 저장: Firebase로 ──
+function save(){
+  const data={
+    cats:S.cats, accounts:S.accounts,
+    phases:S.phases, milestones:S.milestones,
+    events:S.events, lastImport:S.lastImport||null
+  };
+  db.ref(DB_REF).set(data)
+    .then(()=>showSaveStatus())
+    .catch(e=>console.warn('Firebase save error:',e));
+}
+function autoSave(){
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>save(),800);
+}
 function showSaveStatus(){
   const el=document.getElementById('saveStatus');
   if(!el)return;
   el.textContent='저장됨 '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
 }
-function autoSave(){
-  clearTimeout(saveTimer);
-  saveTimer=setTimeout(()=>save(),800);
+
+// ── 로드: Firebase 실시간 리스너 ──
+function applyFirebaseData(data){
+  if(data){
+    S.cats      = arr(data.cats)      || jc(DC);
+    S.accounts  = arr(data.accounts)  || jc(DA);
+    S.phases    = arr(data.phases)    || jc(DP);
+    S.milestones= arr(data.milestones)|| jc(DM);
+    S.events    = arr(data.events)    || jc(DEV);
+    S.lastImport= data.lastImport     || null;
+  } else {
+    reset();
+    save(); // Firebase에 기본값 초기화
+  }
+}
+// Firebase가 배열을 객체로 반환할 수 있으므로 변환
+function arr(v){
+  if(!v)return null;
+  if(Array.isArray(v))return v.filter(x=>x!=null);
+  return Object.values(v).filter(x=>x!=null);
+}
+function reset(){S.cats=jc(DC);S.accounts=jc(DA);S.phases=jc(DP);S.milestones=jc(DM);S.events=jc(DEV);S.lastImport=null;}
+
+function initFirebase(){
+  db.ref(DB_REF).on('value', snapshot => {
+    applyFirebaseData(snapshot.val());
+    if(firstLoad){
+      firstLoad=false;
+      // 마지막 가져오기 배지 갱신
+      const badge=document.getElementById('lastImportBadge');
+      if(badge&&S.lastImport)badge.textContent='마지막 가져오기: '+S.lastImport;
+      // 로그인 칩 초기화
+      initLogin();
+      // 로딩 숨기기
+      document.getElementById('loadingOverlay').style.display='none';
+      // 자동 로그인 체크
+      if(!checkAutoLogin()){
+        document.getElementById('loginScreen').style.display='flex';
+      }
+    } else {
+      // 다른 사용자가 데이터 변경 → 실시간 반영
+      initLogin();
+      if(S.user){
+        renderAll();
+        showSyncToast();
+      }
+    }
+  }, err=>{
+    console.warn('Firebase 연결 오류:', err);
+    // 오프라인 fallback
+    document.getElementById('loadingMsg').textContent='오프라인 모드로 시작합니다...';
+    reset();
+    setTimeout(()=>{
+      document.getElementById('loadingOverlay').style.display='none';
+      document.getElementById('loginScreen').style.display='flex';
+      initLogin();
+    },1200);
+  });
+}
+
+// 다른 사용자 변경 시 토스트 알림
+function showSyncToast(){
+  let t=document.getElementById('syncToast');
+  if(!t){
+    t=document.createElement('div');
+    t.id='syncToast';
+    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 20px;border-radius:20px;font-size:12px;z-index:999;transition:opacity 0.4s;';
+    document.body.appendChild(t);
+  }
+  t.textContent='🔄 다른 사용자가 일정을 업데이트했습니다';
+  t.style.opacity='1';
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.style.opacity='0',3000);
 }
 
 // ═══ 30-DAY AUTO LOGIN ═══
@@ -929,13 +1023,8 @@ function filterCat(cat,btn){
 function renderAll(){renderProgress();renderGantt();renderCalendar();if(S.user?.role==='admin')renderSettings();}
 
 // ═══ INIT ═══
-load();
-initLogin();
 S.calY=TODAY.getFullYear();S.calM=TODAY.getMonth();
-// Auto-login check
-if(!checkAutoLogin()){
-  document.getElementById('loginScreen').style.display='flex';
-}
+initFirebase(); // Firebase 연결 → 데이터 로드 → 자동로그인 체크 순으로 진행
 </script>
 </body>
 </html>
