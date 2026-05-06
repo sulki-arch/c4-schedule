@@ -583,7 +583,7 @@ const DEV=[
 ];
 
 // ═══ STATE ═══
-let S={user:null,cats:[],accounts:[],phases:[],milestones:[],events:[],activeCat:'all',calY:2026,calM:3};
+let S={user:null,cats:[],accounts:[],phases:[],milestones:[],events:[],activeCats:null,calY:2026,calM:3};
 let importedPhases=null;
 let saveTimer=null;
 const TODAY=new Date();
@@ -733,11 +733,7 @@ function performLogin(acc,animate){
   document.getElementById('userText').textContent=acc.name||acc.id;
   document.getElementById('todayBadge').textContent=`${TODAY.getFullYear()}.${p2(TODAY.getMonth()+1)}.${p2(TODAY.getDate())}`;
   if(S.lastImport)document.getElementById('lastImportBadge').textContent='마지막 가져오기: '+S.lastImport;
-  if(acc.role==='guest'&&acc.cat!=='all'){
-    S.activeCat=acc.cat;
-  }
-  // 로그인 후 현재 activeCat이 비공개 카테고리라면 전체로 초기화
-  if(S.activeCat!=='all'){const ac=S.cats.find(c=>c.name===S.activeCat);if(ac&&!canSeeCategory(ac))S.activeCat='all';}
+  S.activeCats=null; // 로그인 시 초기화 → renderCatFilter에서 전체 ON으로 세팅
   try{renderAll();}catch(e){console.error('[Login] renderAll 오류:', e);}
 }
 function doLogout(){
@@ -745,7 +741,7 @@ function doLogout(){
   document.getElementById('app').style.display='none';
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('loginId').value='';document.getElementById('loginPw').value='';
-  document.getElementById('loginError').textContent='';S.activeCat='all';
+  document.getElementById('loginError').textContent='';S.activeCats=null;
 }
 function p2(n){return String(n).padStart(2,'0');}
 
@@ -961,6 +957,8 @@ function renderProgress(){
 // ═══ CALENDAR ═══
 function renderCalendar(){
   const visCatNames=S.cats.filter(c=>canSeeCategory(c)).map(c=>c.name);
+  // activeCats: null이면 전체, 배열이면 해당 카테고리만 표시
+  const showCats=S.activeCats?S.activeCats.filter(n=>visCatNames.includes(n)):visCatNames;
   const yr=S.calY,mo=S.calM;
   const mN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
   document.getElementById('calTitle').textContent=`${yr}년 ${mN[mo]}`;
@@ -974,11 +972,11 @@ function renderCalendar(){
     const isT=!cell.o&&cell.d===TODAY.getDate()&&cell.m===TODAY.getMonth()&&cell.y===TODAY.getFullYear();
     const ds=`${cell.y}-${p2(cell.m+1)}-${p2(cell.d)}`;
     const isSun=idx%7===0,isSat=idx%7===6;
-    const singleEvts=[...S.milestones.filter(m=>m.date===ds&&visCatNames.includes(m.cat)),
-                      ...S.events.filter(e=>e.date===ds&&!e.endDate&&visCatNames.includes(e.cat))];
-    const spanEvts=S.events.filter(e=>e.endDate&&e.date<=ds&&e.endDate>=ds&&visCatNames.includes(e.cat));
-    const filt=S.activeCat==='all'?singleEvts:singleEvts.filter(e=>e.cat===S.activeCat);
-    const filtSpan=S.activeCat==='all'?spanEvts:spanEvts.filter(e=>e.cat===S.activeCat);
+    const singleEvts=[...S.milestones.filter(m=>m.date===ds&&showCats.includes(m.cat)),
+                      ...S.events.filter(e=>e.date===ds&&!e.endDate&&showCats.includes(e.cat))];
+    const spanEvts=S.events.filter(e=>e.endDate&&e.date<=ds&&e.endDate>=ds&&showCats.includes(e.cat));
+    const filt=singleEvts;
+    const filtSpan=spanEvts;
     let ev='';
     filtSpan.forEach(se=>{
       const col=cc(se.cat);
@@ -1160,21 +1158,34 @@ function renderCatFilter(){
   const calActive=document.getElementById('calendarTab')?.classList.contains('active');
   document.getElementById('catFilter').style.display=calActive?'flex':'none';
   const visCats=S.cats.filter(c=>canSeeCategory(c));
+  const visCatNames=visCats.map(c=>c.name);
+  // 초기화: null이면 전체 ON
+  if(!S.activeCats)S.activeCats=[...visCatNames];
+  // 더 이상 볼 수 없는 카테고리 제거
+  S.activeCats=S.activeCats.filter(n=>visCatNames.includes(n));
+  const allOn=visCatNames.length>0&&visCatNames.every(n=>S.activeCats.includes(n));
   let h=`<span class="cf-label">카테고리</span>`;
-  h+=`<button class="cat-btn all ${S.activeCat==='all'?'active':''}" onclick="filterCat('all')">전체</button>`;
-  visCats.forEach((cat,i)=>{
-    const active=S.activeCat==='all'||S.activeCat===cat.name;
-    h+=`<div class="cat-chip-wrap">`;
-    h+=`<button class="cat-btn ${active?'active':''}" data-cat="${cat.name}" onclick="filterCat('${cat.name}')">${cat.name}</button>`;
-    h+=`</div>`;
+  h+=`<button class="cat-btn all ${allOn?'active':''}" onclick="filterCat('all')">전체</button>`;
+  visCats.forEach(cat=>{
+    const on=S.activeCats.includes(cat.name);
+    h+=`<button class="cat-btn ${on?'active':''}" onclick="filterCat('${cat.name}')">${cat.name}</button>`;
   });
   document.getElementById('catFilter').innerHTML=h;
 }
 
 function filterCat(cat){
-  S.activeCat=cat;
+  const visCatNames=S.cats.filter(c=>canSeeCategory(c)).map(c=>c.name);
+  if(cat==='all'){
+    // 전체 버튼: 모두 ON으로 복원
+    S.activeCats=[...visCatNames];
+  } else {
+    if(!S.activeCats)S.activeCats=[...visCatNames];
+    const idx=S.activeCats.indexOf(cat);
+    if(idx>=0)S.activeCats.splice(idx,1); // ON → OFF
+    else S.activeCats.push(cat);           // OFF → ON
+  }
   renderCatFilter();
-  renderGantt();renderCalendar();
+  renderCalendar();
 }
 
 function moveCat(i,dir){
