@@ -696,9 +696,15 @@ function checkAutoLogin(){
     if(!s||Date.now()>s.exp){localStorage.removeItem(SESSION_KEY);return false;}
     const acc=S.accounts.find(a=>a.id===s.userId);
     if(!acc)return false;
-    performLogin(acc,false);
+    // 렌더 오류가 나도 로그인 자체는 성공으로 처리
+    try{performLogin(acc,false);}catch(e){
+      console.warn('[AutoLogin] 렌더 오류 (로그인은 유지):', e);
+      S.user=acc;
+      document.getElementById('loginScreen').style.display='none';
+      document.getElementById('app').style.display='block';
+    }
     return true;
-  }catch(e){return false;}
+  }catch(e){console.warn('[AutoLogin] 실패:', e);return false;}
 }
 function clearSession(){localStorage.removeItem(SESSION_KEY);}
 
@@ -732,7 +738,7 @@ function performLogin(acc,animate){
   }
   // 로그인 후 현재 activeCat이 비공개 카테고리라면 전체로 초기화
   if(S.activeCat!=='all'){const ac=S.cats.find(c=>c.name===S.activeCat);if(ac&&!canSeeCategory(ac))S.activeCat='all';}
-  renderAll();
+  try{renderAll();}catch(e){console.error('[Login] renderAll 오류:', e);}
 }
 function doLogout(){
   clearSession();S.user=null;
