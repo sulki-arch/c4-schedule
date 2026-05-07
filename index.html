@@ -103,43 +103,40 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .pb-fill{height:5px;border-radius:4px;}
 .pb-pct{font-size:11px;color:var(--text3);margin-top:4px;font-weight:500;}
 
-/* EXCEL IMPORT BAR */
-.excel-bar{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow);}
-.excel-bar-icon{font-size:22px;}
-.excel-bar-text{flex:1;}
-.excel-bar-text strong{font-size:13px;color:var(--text);display:block;}
-.excel-bar-text span{font-size:11px;color:var(--text3);}
-.excel-bar-badge{font-size:10px;background:var(--bg3);border:1px solid var(--border);padding:3px 9px;border-radius:10px;color:var(--text4);}
-.btn-import{padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
-.btn-import:hover{background:var(--accent2);}
+/* EXCEL IMPORT — compact inline */
+.gantt-update-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.gantt-update-badge{font-size:10px;background:var(--bg3);border:1px solid var(--border);padding:3px 10px;border-radius:10px;color:var(--text4);white-space:nowrap;}
+.btn-import{padding:5px 13px;background:var(--bg3);color:var(--text3);border:1px solid var(--border);border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.2s;white-space:nowrap;display:flex;align-items:center;gap:5px;}
+.btn-import:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
 #excelFileInput{display:none;}
 
 /* GANTT */
 .gantt-wrapper{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);}
 .gantt-scroll{overflow-x:auto;}
 .gantt-header-row{display:flex;background:var(--bg3);border-bottom:1px solid var(--border);}
-.glc{min-width:190px;max-width:190px;border-right:1px solid var(--border);padding:10px 16px;font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;font-weight:700;}
+.glc{min-width:200px;max-width:200px;border-right:1px solid var(--border);padding:10px 16px;font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;font-weight:700;}
 .gantt-time-header{flex:1;}
 .gantt-years{display:flex;border-bottom:1px solid var(--border);}
 .gy{text-align:center;padding:7px 0;font-size:11px;font-weight:800;color:var(--text2);border-right:1px solid var(--border);letter-spacing:1px;}
 .gantt-months{display:flex;}
 .gm{text-align:center;padding:5px 0;font-size:9px;color:var(--text3);border-right:1px solid var(--border);flex-shrink:0;font-weight:600;}
 .gm.cur{color:var(--accent);font-weight:800;background:var(--accent-dim);}
-.gantt-group-header{display:flex;background:#FAFBFC;border-bottom:1px solid var(--border);}
-.ggl{min-width:190px;max-width:190px;padding:8px 16px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:7px;border-right:1px solid var(--border);color:var(--text2);}
-.gg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
-.gantt-row{display:flex;border-bottom:1px solid var(--border);min-height:34px;transition:background 0.12s;}
-.gantt-row:hover{background:rgba(0,0,0,0.012);}
-.grl{min-width:190px;max-width:190px;padding:0 16px;font-size:11px;color:var(--text2);display:flex;align-items:center;border-right:1px solid var(--border);font-weight:500;line-height:1.4;}
+.gantt-group-header{display:flex;background:#F7F8FA;border-bottom:1px solid var(--border);border-top:2px solid var(--border);}
+.gantt-group-header:first-child{border-top:none;}
+.ggl{min-width:200px;max-width:200px;padding:9px 16px;font-size:11px;font-weight:800;display:flex;align-items:center;gap:8px;border-right:1px solid var(--border);color:var(--text1);letter-spacing:0.2px;}
+.gg-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+.gantt-row{display:flex;border-bottom:1px solid rgba(0,0,0,0.05);min-height:36px;transition:background 0.12s;}
+.gantt-row:hover{background:rgba(0,0,0,0.015);}
+.grl{min-width:200px;max-width:200px;padding:0 16px;font-size:11px;color:var(--text2);display:flex;align-items:center;border-right:1px solid rgba(0,0,0,0.06);font-weight:500;line-height:1.4;}
 .grt{flex:1;position:relative;overflow:hidden;}
-.gb{position:absolute;top:7px;height:20px;border-radius:5px;display:flex;align-items:center;padding:0 8px;font-size:9px;color:rgba(255,255,255,0.95);font-weight:700;overflow:hidden;white-space:nowrap;cursor:pointer;transition:filter 0.15s;box-shadow:0 1px 3px rgba(0,0,0,0.15);}
-.gb:hover{filter:brightness(1.1);}
-.gpf{position:absolute;top:7px;height:20px;border-radius:5px 0 0 5px;background:rgba(255,255,255,0.22);pointer-events:none;}
-.gnl{position:absolute;top:0;bottom:0;width:2px;background:var(--accent);z-index:10;pointer-events:none;}
-.gmbg{border-right:1px solid rgba(0,0,0,0.04);flex-shrink:0;height:100%;}
-.gmbg.cc{background:rgba(232,64,28,0.03);}
+.gb{position:absolute;top:8px;height:20px;border-radius:4px;display:flex;align-items:center;padding:0 8px;font-size:9px;color:rgba(255,255,255,0.97);font-weight:700;overflow:hidden;white-space:nowrap;cursor:pointer;transition:filter 0.15s;box-shadow:0 1px 4px rgba(0,0,0,0.18);}
+.gb:hover{filter:brightness(1.08);}
+.gpf{position:absolute;top:8px;height:20px;border-radius:4px 0 0 4px;background:rgba(255,255,255,0.28);pointer-events:none;}
+.gnl{position:absolute;top:0;bottom:0;width:1.5px;background:var(--accent);opacity:0.8;z-index:10;pointer-events:none;}
+.gmbg{border-right:1px solid rgba(0,0,0,0.035);flex-shrink:0;height:100%;}
+.gmbg.cc{background:rgba(232,64,28,0.025);}
 .gtbg{position:absolute;inset:0;display:flex;pointer-events:none;}
-.gms{position:absolute;top:10px;width:12px;height:12px;transform:rotate(45deg);cursor:pointer;z-index:5;border:2px solid;transition:transform 0.15s;}
+.gms{position:absolute;top:11px;width:11px;height:11px;transform:rotate(45deg);cursor:pointer;z-index:5;border:2px solid;transition:transform 0.15s;}
 .gms:hover{transform:rotate(45deg) scale(1.4);}
 
 /* CALENDAR */
@@ -378,21 +375,14 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
       <div class="sec-title">진행 현황 요약</div>
       <div class="progress-summary" id="progressSummary"></div>
 
-      <!-- EXCEL IMPORT BAR -->
-      <div class="excel-bar">
-        <div class="excel-bar-icon">📊</div>
-        <div class="excel-bar-text">
-          <strong>엑셀 파일로 전체 일정 업데이트</strong>
-          <span>설계일정표.xlsx 파일을 불러오면 간트차트가 자동으로 업데이트됩니다</span>
-        </div>
-        <div class="excel-bar-badge" id="lastImportBadge">마지막 가져오기: 없음</div>
-        <button class="btn-import" onclick="document.getElementById('excelFileInput').click()">📂 엑셀 가져오기</button>
-        <input type="file" id="excelFileInput" accept=".xlsx,.xls,.csv" onchange="importExcel(this)">
-      </div>
-
-      <div class="sec-title" style="display:flex;align-items:center;gap:10px;">
+      <div class="sec-title" style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
         전체 일정 타임라인 (2025 – 2031)
         <span style="color:var(--accent);font-size:10px;font-weight:400;">▌ 현재 위치</span>
+      </div>
+      <div class="gantt-update-row">
+        <span class="gantt-update-badge" id="lastImportBadge">마지막 업데이트: 없음</span>
+        <button class="btn-import" onclick="document.getElementById('excelFileInput').click()">📂 엑셀로 업데이트</button>
+        <input type="file" id="excelFileInput" accept=".xlsx,.xls,.csv" onchange="importExcel(this)">
       </div>
       <div class="gantt-wrapper"><div class="gantt-scroll" id="ganttChart"></div></div>
     </div>
@@ -539,28 +529,34 @@ const DA=[
   {id:'guest_etc',pw:'ET2026!',role:'guest',cat:'기타',name:'기타 게스트'},
 ];
 const DP=[
-  {id:1,name:'Pre-SD',cat:'F+P',start:'2025-08-10',end:'2025-09-07'},
-  {id:2,name:'SD (Schematic Design)',cat:'F+P',start:'2025-09-08',end:'2026-01-25'},
-  {id:3,name:'DD (Design Development)',cat:'F+P',start:'2026-01-26',end:'2026-10-08'},
-  {id:4,name:'CD (Construction Docs)',cat:'F+P',start:'2026-10-09',end:'2027-04-30'},
-  {id:5,name:'기본설계 및 전환설계',cat:'삼우건축',start:'2026-03-23',end:'2026-07-06'},
-  {id:6,name:'실시설계 (CD)',cat:'삼우건축',start:'2026-07-07',end:'2026-12-15'},
-  {id:7,name:'인테리어 Concept',cat:'기타',start:'2025-12-01',end:'2026-01-26'},
-  {id:8,name:'인테리어 SD',cat:'기타',start:'2026-01-26',end:'2026-04-20'},
-  {id:9,name:'인테리어 DD',cat:'기타',start:'2026-04-20',end:'2026-10-11'},
-  {id:10,name:'인테리어 CD',cat:'기타',start:'2026-10-11',end:'2027-02-07'},
-  {id:11,name:'지하안전평가 (16주)',cat:'인허가',start:'2026-07-01',end:'2026-11-30'},
-  {id:12,name:'도시건축공동위원회',cat:'인허가',start:'2026-10-01',end:'2027-01-31'},
-  {id:13,name:'건축심의',cat:'인허가',start:'2026-11-01',end:'2027-04-30'},
-  {id:14,name:'건축허가 접수→완료',cat:'인허가',start:'2027-03-31',end:'2027-06-30'},
-  {id:15,name:'특수구조심의',cat:'인허가',start:'2026-09-01',end:'2026-12-31'},
-  {id:16,name:'굴토심의',cat:'인허가',start:'2026-10-01',end:'2027-01-31'},
-  {id:17,name:'저영향평가·철도보호',cat:'인허가',start:'2026-08-01',end:'2027-01-31'},
-  {id:18,name:'PM 설계단계 (12M)',cat:'한미글로벌',start:'2026-01-08',end:'2027-01-08'},
-  {id:19,name:'시공사 선정',cat:'한미글로벌',start:'2027-01-01',end:'2027-07-31'},
-  {id:20,name:'PM 시공단계 (50M)',cat:'한미글로벌',start:'2027-08-01',end:'2031-06-30'},
-  {id:21,name:'해체공사',cat:'크래프톤',start:'2027-07-01',end:'2028-04-30'},
-  {id:22,name:'본공사 (47개월)',cat:'크래프톤',start:'2027-10-01',end:'2031-06-30'},
+  // ── F+P (해외 건축설계) ──
+  {id:1, name:'Pre-SD',                    cat:'F+P',      start:'2026-01-01', end:'2026-01-31'},
+  {id:2, name:'SD (Schematic Design)',      cat:'F+P',      start:'2026-02-01', end:'2026-06-15'},
+  {id:3, name:'DD (Design Development)',    cat:'F+P',      start:'2026-06-15', end:'2026-10-30'},
+  {id:4, name:'CD (Construction Docs)',     cat:'F+P',      start:'2026-11-01', end:'2027-03-30'},
+  // ── 삼우건축 (국내 건축설계) ──
+  {id:5, name:'기본설계 및 전환설계',       cat:'삼우건축', start:'2026-03-23', end:'2026-08-15'},
+  {id:6, name:'실시설계 (CD)',              cat:'삼우건축', start:'2026-08-15', end:'2027-05-31'},
+  // ── 인테리어 ──
+  {id:7, name:'인테리어 Concept',           cat:'기타',     start:'2026-01-01', end:'2026-08-15'},
+  {id:8, name:'인테리어 SD',                cat:'기타',     start:'2026-06-15', end:'2026-09-30'},
+  {id:9, name:'인테리어 DD',                cat:'기타',     start:'2026-10-01', end:'2027-01-15'},
+  {id:10,name:'인테리어 CD',                cat:'기타',     start:'2027-01-15', end:'2027-05-31'},
+  // ── 인허가·심의 ──
+  {id:11,name:'지하안전영향평가',           cat:'인허가',   start:'2026-07-01', end:'2026-12-31'},
+  {id:12,name:'도시건축공동위원회',          cat:'인허가',   start:'2026-10-01', end:'2027-01-31'},
+  {id:13,name:'통합심의 (건축·교통·경관)',   cat:'인허가',   start:'2026-10-15', end:'2027-02-15'},
+  {id:14,name:'건축심의·건축허가',           cat:'인허가',   start:'2026-11-01', end:'2027-06-30'},
+  {id:15,name:'구조안전심의·굴토심의',       cat:'인허가',   start:'2026-09-01', end:'2027-01-31'},
+  {id:16,name:'철도보호·저영향개발·녹색건축', cat:'인허가',  start:'2026-06-15', end:'2026-12-31'},
+  // ── 한미글로벌 (PM) ──
+  {id:17,name:'PM 설계단계 (12M)',          cat:'한미글로벌',start:'2026-05-06',end:'2027-04-30'},
+  {id:18,name:'시공사 선정',                cat:'한미글로벌',start:'2027-01-01',end:'2027-04-30'},
+  {id:19,name:'PM 시공단계 (50M)',          cat:'한미글로벌',start:'2027-05-01',end:'2031-06-30'},
+  // ── 크래프톤 (공사) ──
+  {id:20,name:'해체공사',                   cat:'크래프톤', start:'2026-06-01', end:'2026-12-15'},
+  {id:21,name:'본공사 (47개월)',             cat:'크래프톤', start:'2027-10-01', end:'2031-06-30'},
+  {id:22,name:'유지관리 인수인계',           cat:'크래프톤', start:'2031-07-01', end:'2031-08-31'},
 ];
 const DM=[
   {id:1,name:'Kick-off (Seoul)',cat:'F+P',date:'2025-08-10'},
@@ -578,8 +574,9 @@ const DM=[
   {id:13,name:'준공',cat:'크래프톤',date:'2031-06-30'},
 ];
 const DEV=[
-  {id:1,name:'DD 40% Workshop (Seoul)',cat:'F+P',date:'2026-04-08',desc:'F+P 설계팀 서울 방문'},
-  {id:2,name:'삼우 기본설계 착수',cat:'삼우건축',date:'2026-03-23',desc:''},
+  {id:1,name:'SD 40% Workshop (Seoul)',cat:'F+P',date:'2026-03-23',endDate:'2026-03-26',desc:'F+P 설계팀 서울 방문'},
+  {id:2,name:'Workspace Team Workshop (Seoul)',cat:'F+P',date:'2026-04-20',endDate:'2026-04-24',desc:'F+P 워크스페이스팀 서울 방문'},
+  {id:3,name:'DD KOM Workshop (London)',cat:'전체 공통',date:'2026-06-25',endDate:'2026-07-02',desc:'F+P 외 전체팀 런던 방문'},
 ];
 
 // ═══ STATE ═══
@@ -647,7 +644,7 @@ function initFirebase(){
     if(firstLoad){
       firstLoad=false;
       const badge=document.getElementById('lastImportBadge');
-      if(badge&&S.lastImport)badge.textContent='마지막 가져오기: '+S.lastImport;
+      if(badge&&S.lastImport)badge.textContent='마지막 업데이트:'+S.lastImport;
       initLogin();
       document.getElementById('loadingOverlay').style.display='none';
       if(!checkAutoLogin()){
@@ -732,7 +729,7 @@ function performLogin(acc,animate){
   if(acc.role==='admin'){document.querySelectorAll('.admin-only').forEach(el=>el.style.display='block');}
   document.getElementById('userText').textContent=acc.name||acc.id;
   document.getElementById('todayBadge').textContent=`${TODAY.getFullYear()}.${p2(TODAY.getMonth()+1)}.${p2(TODAY.getDate())}`;
-  if(S.lastImport)document.getElementById('lastImportBadge').textContent='마지막 가져오기: '+S.lastImport;
+  if(S.lastImport)document.getElementById('lastImportBadge').textContent='마지막 업데이트:'+S.lastImport;
   S.activeCats=null; // 로그인 시 초기화 → renderCatFilter에서 전체 ON으로 세팅
   try{renderAll();}catch(e){console.error('[Login] renderAll 오류:', e);}
 }
@@ -855,7 +852,7 @@ function applyImport(){
   });
   const now=new Date().toLocaleDateString('ko-KR');
   S.lastImport=now;
-  document.getElementById('lastImportBadge').textContent='마지막 가져오기: '+now;
+  document.getElementById('lastImportBadge').textContent='마지막 업데이트:'+now;
   save();renderAll();closeModal('excelModal');
   alert(`✅ 완료! 업데이트: ${updated}개, 신규 추가: ${added}개`);
 }
@@ -868,7 +865,9 @@ function d2x(ds){const d=new Date(ds+'T00:00:00');return(md(GS,d)+(d.getDate()-1
 function nx(){return(md(GS,TODAY)+(TODAY.getDate()-1)/30)*MW;}
 
 function renderGantt(){
-  const total=tm(),tw=total*MW,LW=190;
+  const total=tm(),tw=total*MW,LW=200;
+  // S.phases가 비어있으면 기본 데이터(DP)로 표시
+  const effectivePhases=(S.phases&&S.phases.length>0)?S.phases:jc(DP);
   let h=`<div style="min-width:${tw+LW}px;">`;
   h+=`<div class="gantt-header-row"><div class="glc">단계 / 업무</div><div class="gantt-time-header" style="min-width:${tw}px;">`;
   h+=`<div class="gantt-years">`;
@@ -889,7 +888,7 @@ function renderGantt(){
   const groups=S.cats.filter(c=>canSeeCategory(c)).map(c=>c.name);
   groups.forEach(grp=>{
     const col=cc(grp);
-    const phases=S.phases.filter(p=>p.cat===grp);
+    const phases=effectivePhases.filter(p=>p.cat===grp);
     const ms2=S.milestones.filter(m=>m.cat===grp);
     h+=`<div class="gantt-group-header">
       <div class="ggl"><div class="gg-dot" style="background:${col}"></div><span style="color:${col}">${gL[grp]||grp}</span></div>
@@ -918,7 +917,7 @@ function renderGantt(){
     });
     if(ms2.length){
       let bgc='';for(let i=0;i<total;i++){const d=new Date(GS.getFullYear(),GS.getMonth()+i,1);const ic=d.getFullYear()===TODAY.getFullYear()&&d.getMonth()===TODAY.getMonth();bgc+=`<div class="gmbg${ic?' cc':''}" style="width:${MW}px;"></div>`;}
-      h+=`<div class="gantt-row" style="${dim?'opacity:0.18':''}">
+      h+=`<div class="gantt-row">
         <div class="grl" style="color:var(--text3);font-size:10px;font-weight:600;">◆ 마일스톤</div>
         <div class="grt" style="min-width:${tw}px;">
           <div class="gtbg">${bgc}</div>
@@ -939,9 +938,12 @@ function esc(s){return s.replace(/'/g,"\\'").replace(/"/g,'&quot;');}
 // ═══ PROGRESS ═══
 function renderProgress(){
   const allData=[
-    {cat:'F+P',phase:'DD 40% 진행 중',pct:35},{cat:'삼우건축',phase:'기본설계 착수',pct:10},
-    {cat:'기타',phase:'인테리어 DD 진행 중',pct:22},{cat:'인허가',phase:'심의 준비 중',pct:5},
-    {cat:'한미글로벌',phase:'PM 설계단계',pct:30},{cat:'크래프톤',phase:'설계 감독',pct:18},
+    {cat:'F+P',phase:'DD 40% Submission (5/11)',pct:40},
+    {cat:'삼우건축',phase:'기본설계 진행 중',pct:15},
+    {cat:'기타',phase:'인테리어 Concept',pct:20},
+    {cat:'인허가',phase:'심의 준비 단계',pct:5},
+    {cat:'한미글로벌',phase:'PM 설계단계 착수',pct:5},
+    {cat:'크래프톤',phase:'해체공사 준비 (6월~)',pct:3},
   ];
   const data=allData.filter(s=>{const cat=S.cats.find(c=>c.name===s.cat);return!cat||canSeeCategory(cat);});
   document.getElementById('progressSummary').innerHTML=data.map(s=>{
