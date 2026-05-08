@@ -1151,7 +1151,8 @@ function renderProgress(){
     {cat:'크래프톤',phase:'본공사 준비 중',pct:2},
   ];
   const data=allData.filter(s=>{const cat=S.cats.find(c=>c.name===s.cat);return!cat||canSeeCategory(cat);});
-  document.getElementById('progressSummary').innerHTML=data.map(s=>{
+  const pEl=document.getElementById('progressSummary');if(!pEl)return;
+  pEl.innerHTML=data.map(s=>{
     const col=cc(s.cat);
     return`<div class="pc" data-cat="${s.cat}">
       <h4>${s.cat}</h4><div class="phase">${s.phase}</div>
