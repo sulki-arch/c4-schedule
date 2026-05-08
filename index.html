@@ -141,6 +141,44 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .gms{position:absolute;top:11px;width:11px;height:11px;transform:rotate(45deg);cursor:pointer;z-index:5;border:2px solid;transition:transform 0.15s;}
 .gms:hover{transform:rotate(45deg) scale(1.4);}
 
+/* ── GANTT v2 dark minimal ── */
+.gantt-wrapper{background:transparent!important;border:none!important;border-radius:16px;overflow:hidden;}
+.gantt-scroll{overflow-x:auto;background:#0D0D14;}
+/* year/month header rows */
+.gv2-yr,.gv2-mr{display:flex;background:#080810;}
+.gv2-lhdr{flex-shrink:0;border-right:1px solid rgba(255,255,255,0.07);}
+.gv2-y{flex-shrink:0;height:26px;display:flex;align-items:center;padding-left:14px;font-size:10px;font-weight:800;color:rgba(255,255,255,0.28);letter-spacing:3px;border-right:1px solid rgba(255,255,255,0.07);border-bottom:1px solid rgba(255,255,255,0.07);}
+.gv2-m{flex-shrink:0;height:20px;display:flex;align-items:center;justify-content:center;font-size:9px;color:rgba(255,255,255,0.2);border-right:1px solid rgba(255,255,255,0.04);border-bottom:1px solid rgba(255,255,255,0.1);font-family:monospace;font-weight:700;}
+.gv2-m.cur{color:#FF453A;background:rgba(255,69,58,0.08);border-right-color:rgba(255,69,58,0.4);}
+/* section header */
+.gv2-shdr{display:flex;height:34px;background:#0A0A12;border-top:1px solid rgba(255,255,255,0.05);}
+.gv2-shdr-l{flex-shrink:0;display:flex;align-items:center;padding:0 20px;gap:8px;border-right:1px solid rgba(255,255,255,0.07);}
+.gv2-shdr-dot{width:5px;height:5px;border-radius:1px;flex-shrink:0;}
+.gv2-shdr-txt{font-size:8px;font-weight:900;letter-spacing:3px;text-transform:uppercase;}
+.gv2-shdr-r{flex:1;position:relative;overflow:hidden;}
+.gv2-shdr-line{position:absolute;top:50%;left:0;right:0;height:1px;pointer-events:none;opacity:0.15;}
+/* item row — key: explicit height on rt prevents abs-pos collapse */
+.gv2-row{display:flex;height:28px;background:transparent;}
+.gv2-row:hover{background:rgba(255,255,255,0.025);}
+.gv2-rl{flex-shrink:0;display:flex;align-items:center;padding:0 20px 0 32px;font-size:10.5px;color:rgba(255,255,255,0.42);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-right:1px solid rgba(255,255,255,0.05);}
+.gv2-rt{position:relative;overflow:hidden;height:28px;}
+/* background month columns */
+.gv2-bg{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;pointer-events:none;z-index:0;}
+.gv2-mc{height:100%;flex-shrink:0;border-right:1px solid rgba(255,255,255,0.035);}
+.gv2-mc.cc{background:rgba(255,69,58,0.05);}
+/* bars */
+.gv2-bar{position:absolute;top:9px;height:10px;border-radius:2px;cursor:pointer;z-index:2;transition:filter 0.12s;}
+.gv2-bar:hover{filter:brightness(1.2);}
+.gv2-pf{position:absolute;top:9px;height:10px;border-radius:2px 0 0 2px;background:rgba(255,255,255,0.25);pointer-events:none;z-index:3;}
+/* today line */
+.gv2-now{position:absolute;top:0;bottom:0;width:1px;background:#FF453A;z-index:10;pointer-events:none;}
+.gv2-now-dot{position:absolute;top:-2px;left:-3px;width:7px;height:7px;background:#FF453A;border-radius:50%;}
+/* milestone row */
+.gv2-msrow{display:flex;height:22px;background:transparent;}
+.gv2-ms{position:absolute;top:5px;width:9px;height:9px;transform:translateX(-50%) rotate(45deg);cursor:pointer;border:1.5px solid;z-index:5;transition:transform 0.12s;}
+.gv2-ms:hover{transform:translateX(-50%) rotate(45deg) scale(1.4);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
 /* CALENDAR */
 .cal-nav{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
 .cal-nav h3{font-size:22px;font-weight:800;letter-spacing:-0.5px;}
@@ -960,7 +998,7 @@ function renderGantt(){
         <div class="gv2-shdr-dot" style="background:${sec.sc};"></div>
         <span class="gv2-shdr-txt" style="color:${sec.sc};">${sec.sec}</span>
       </div>
-      <div class="gv2-shdr-r" style="min-width:${tw}px;">
+      <div class="gv2-shdr-r" style="width:${tw}px;">
         <div class="gv2-shdr-line" style="background:${sec.sc};"></div>
         <div class="gv2-now" style="left:${NX}px;"><div class="gv2-now-dot"></div></div>
       </div>
@@ -978,8 +1016,8 @@ function renderGantt(){
         }
         h+=`<div class="gv2-msrow">
           <div class="gv2-rl" style="width:${LW}px;font-size:9px;color:rgba(255,255,255,0.2);letter-spacing:1.5px;text-transform:uppercase;">마일스톤</div>
-          <div class="gv2-rt" style="min-width:${tw}px;height:22px;">
-            <div class="gv2-bg" style="height:22px;">${bgc}</div>
+          <div class="gv2-rt" style="width:${tw}px;height:22px;">
+            <div class="gv2-bg">${bgc}</div>
             <div class="gv2-now" style="left:${NX}px;"></div>`;
         msList.forEach(m=>{
           const mx=d2x(m.date);
@@ -1008,19 +1046,17 @@ function renderGantt(){
         bgc+=`<div class="gv2-mc${ic?' cc':''}" style="width:${MW}px;"></div>`;
       }
 
-      const barH=item.thick?'top:11px;height:6px;':'top:9px;height:10px;';
-      const barStyle=`position:absolute;${barH}border-radius:2px;`;
-
+      const th=item.thick?'top:12px;height:5px;':'';
       h+=`<div class="gv2-row">
         <div class="gv2-rl" style="width:${LW}px;">${ri.n}</div>
-        <div class="gv2-rt" style="min-width:${tw}px;">
+        <div class="gv2-rt" style="width:${tw}px;">
           <div class="gv2-bg">${bgc}</div>
           <div class="gv2-now" style="left:${NX}px;"></div>
-          <div style="${barStyle}left:${x1}px;width:${w}px;background:${ri.col};cursor:pointer;transition:filter 0.12s;"
-            onmouseenter="showTT(event,this.getAttribute('data-n'),'','${ri.s}','${ri.e}','${stlbl}');this.style.filter='brightness(1.18)'"
-            onmouseleave="hideTT();this.style.filter=''"
-            data-n="${esc(ri.n)}" ></div>
-          ${el>0&&el<tot?`<div style="${barStyle}left:${x1}px;width:${Math.min(w,w*pct/100)}px;background:rgba(255,255,255,0.22);pointer-events:none;"></div>`:''}
+          <div class="gv2-bar" style="${th}left:${x1}px;width:${w}px;background:${ri.col};"
+            onmouseenter="showTT(event,this.dataset.n,'','${ri.s}','${ri.e}','${stlbl}')"
+            onmouseleave="hideTT()"
+            data-n="${esc(ri.n)}"></div>
+          ${el>0&&el<tot?`<div class="gv2-pf" style="${th}left:${x1}px;width:${Math.min(w,w*pct/100)}px;"></div>`:''}
         </div>
       </div>`;
     });
