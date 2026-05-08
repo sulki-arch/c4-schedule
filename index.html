@@ -21,6 +21,43 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 
 
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+/* ── GANTT v3 – white clean design ── */
+.gv3-outer{overflow-x:auto;border-radius:14px;border:1px solid #E2E8F0;box-shadow:0 2px 20px rgba(0,0,0,0.07);}
+.gv3-inner{display:inline-block;min-width:100%;}
+/* header rows */
+.gv3-hrow{display:flex;}
+.gv3-hpad{flex-shrink:0;background:#111;border-right:1px solid rgba(255,255,255,0.12);}
+.gv3-y{flex-shrink:0;height:22px;display:flex;align-items:center;padding-left:10px;font-size:9px;font-weight:800;color:rgba(255,255,255,0.45);letter-spacing:3px;background:#111;border-right:1px solid rgba(255,255,255,0.1);border-bottom:1px solid rgba(255,255,255,0.1);}
+.gv3-m{flex-shrink:0;height:30px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;background:#1A1A2E;border-right:1px solid rgba(255,255,255,0.08);}
+.gv3-m.cur{background:#E8401C;}
+/* milestone header row */
+.gv3-mshdr{display:flex;background:#F8FAFC;border-bottom:1px solid #E2E8F0;}
+.gv3-mshdr-pad{flex-shrink:0;border-right:1px solid #E2E8F0;}
+.gv3-mshdr-area{position:relative;flex:1;}
+/* section group */
+.gv3-section{display:flex;border-bottom:2px solid #E2E8F0;}
+.gv3-sec-lbl{flex-shrink:0;width:28px;writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;letter-spacing:2.5px;text-transform:uppercase;border-right:1px solid rgba(0,0,0,0.07);}
+.gv3-rows{flex:1;}
+/* item row */
+.gv3-row{display:flex;height:30px;border-bottom:1px solid rgba(0,0,0,0.05);}
+.gv3-row:last-child{border-bottom:none;}
+.gv3-row:hover{filter:brightness(0.975);}
+.gv3-iname{flex-shrink:0;display:flex;align-items:center;padding:0 12px;font-size:11px;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-right:1px solid rgba(0,0,0,0.06);}
+.gv3-bars{position:relative;height:30px;flex-shrink:0;}
+/* bar */
+.gv3-bar{position:absolute;top:9px;height:12px;border-radius:6px;cursor:pointer;z-index:2;transition:filter 0.12s;}
+.gv3-bar:hover{filter:brightness(0.88);}
+.gv3-pf{position:absolute;top:9px;height:12px;border-radius:6px 0 0 6px;background:rgba(0,0,0,0.15);pointer-events:none;z-index:3;}
+/* today line */
+.gv3-today{position:absolute;top:0;bottom:0;width:1.5px;background:#E8401C;z-index:10;pointer-events:none;opacity:0.7;}
+/* milestone marker */
+.gv3-ms-mrk{position:absolute;transform:translateX(-50%) rotate(45deg);cursor:pointer;border:2px solid;z-index:5;transition:transform 0.12s;}
+.gv3-ms-mrk:hover{filter:brightness(0.8) scale(1.3);}
+/* month bg grid */
+.gv3-grid{position:absolute;top:0;bottom:0;display:flex;pointer-events:none;z-index:0;}
+.gv3-gc{height:100%;flex-shrink:0;border-right:1px solid rgba(0,0,0,0.04);}
+.gv3-gc.cc{background:rgba(232,64,28,0.04);}
+
 /* LOGIN */
 #loginScreen{position:fixed;inset:0;background:linear-gradient(135deg,#F5F6F8,#EEF0F5);display:flex;align-items:center;justify-content:center;z-index:1000;}
 .login-box{width:420px;background:#fff;border:1px solid var(--border);border-radius:20px;padding:48px 40px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.1);}
@@ -142,8 +179,8 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .gms:hover{transform:rotate(45deg) scale(1.4);}
 
 /* ── GANTT v2 dark minimal ── */
-.gantt-wrapper{background:transparent!important;border:none!important;border-radius:16px;overflow:hidden;}
-.gantt-scroll{overflow-x:auto;background:#0D0D14;}
+.gantt-wrapper{background:transparent;border:none;border-radius:0;overflow:visible;}
+.gantt-scroll{overflow:visible;}
 /* year/month header rows */
 .gv2-yr,.gv2-mr{display:flex;background:#080810;}
 .gv2-lhdr{flex-shrink:0;border-right:1px solid rgba(255,255,255,0.07);}
@@ -178,6 +215,43 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .gv2-ms{position:absolute;top:5px;width:9px;height:9px;transform:translateX(-50%) rotate(45deg);cursor:pointer;border:1.5px solid;z-index:5;transition:transform 0.12s;}
 .gv2-ms:hover{transform:translateX(-50%) rotate(45deg) scale(1.4);}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+/* ── GANTT v3 – white clean design ── */
+.gv3-outer{overflow-x:auto;border-radius:14px;border:1px solid #E2E8F0;box-shadow:0 2px 20px rgba(0,0,0,0.07);}
+.gv3-inner{display:inline-block;min-width:100%;}
+/* header rows */
+.gv3-hrow{display:flex;}
+.gv3-hpad{flex-shrink:0;background:#111;border-right:1px solid rgba(255,255,255,0.12);}
+.gv3-y{flex-shrink:0;height:22px;display:flex;align-items:center;padding-left:10px;font-size:9px;font-weight:800;color:rgba(255,255,255,0.45);letter-spacing:3px;background:#111;border-right:1px solid rgba(255,255,255,0.1);border-bottom:1px solid rgba(255,255,255,0.1);}
+.gv3-m{flex-shrink:0;height:30px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;background:#1A1A2E;border-right:1px solid rgba(255,255,255,0.08);}
+.gv3-m.cur{background:#E8401C;}
+/* milestone header row */
+.gv3-mshdr{display:flex;background:#F8FAFC;border-bottom:1px solid #E2E8F0;}
+.gv3-mshdr-pad{flex-shrink:0;border-right:1px solid #E2E8F0;}
+.gv3-mshdr-area{position:relative;flex:1;}
+/* section group */
+.gv3-section{display:flex;border-bottom:2px solid #E2E8F0;}
+.gv3-sec-lbl{flex-shrink:0;width:28px;writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;letter-spacing:2.5px;text-transform:uppercase;border-right:1px solid rgba(0,0,0,0.07);}
+.gv3-rows{flex:1;}
+/* item row */
+.gv3-row{display:flex;height:30px;border-bottom:1px solid rgba(0,0,0,0.05);}
+.gv3-row:last-child{border-bottom:none;}
+.gv3-row:hover{filter:brightness(0.975);}
+.gv3-iname{flex-shrink:0;display:flex;align-items:center;padding:0 12px;font-size:11px;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-right:1px solid rgba(0,0,0,0.06);}
+.gv3-bars{position:relative;height:30px;flex-shrink:0;}
+/* bar */
+.gv3-bar{position:absolute;top:9px;height:12px;border-radius:6px;cursor:pointer;z-index:2;transition:filter 0.12s;}
+.gv3-bar:hover{filter:brightness(0.88);}
+.gv3-pf{position:absolute;top:9px;height:12px;border-radius:6px 0 0 6px;background:rgba(0,0,0,0.15);pointer-events:none;z-index:3;}
+/* today line */
+.gv3-today{position:absolute;top:0;bottom:0;width:1.5px;background:#E8401C;z-index:10;pointer-events:none;opacity:0.7;}
+/* milestone marker */
+.gv3-ms-mrk{position:absolute;transform:translateX(-50%) rotate(45deg);cursor:pointer;border:2px solid;z-index:5;transition:transform 0.12s;}
+.gv3-ms-mrk:hover{filter:brightness(0.8) scale(1.3);}
+/* month bg grid */
+.gv3-grid{position:absolute;top:0;bottom:0;display:flex;pointer-events:none;z-index:0;}
+.gv3-gc{height:100%;flex-shrink:0;border-right:1px solid rgba(0,0,0,0.04);}
+.gv3-gc.cc{background:rgba(232,64,28,0.04);}
+
 
 /* CALENDAR */
 .cal-nav{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
@@ -404,19 +478,8 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
   <!-- OVERVIEW -->
   <div id="overviewTab" class="tab-content active">
     <div class="cw">
-      <!-- PROJECT SWITCHER -->
-      <div class="proj-switcher">
-        <span class="cf-label" style="margin-right:4px;">프로젝트</span>
-        <button class="proj-btn active">C4</button>
-        <button class="proj-btn" disabled>C1</button>
-        <button class="proj-btn" disabled>C3</button>
-        <button class="proj-btn" disabled>HQ</button>
-      </div>
-      <div class="sec-title">진행 현황 요약</div>
-      <div class="progress-summary" id="progressSummary"></div>
-
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;margin-top:24px;">
-        <span style="font-size:11px;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:#111;">전체 일정 타임라인</span>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;margin-top:4px;">
+        <span style="font-size:10px;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:#111;">전체 일정 타임라인</span>
         <span style="font-size:10px;color:var(--text3);letter-spacing:1px;">2025 — 2031</span>
         <span style="margin-left:auto;font-size:9px;color:var(--accent);font-weight:800;letter-spacing:1.5px;text-transform:uppercase;display:flex;align-items:center;gap:5px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;animation:pulse 2s infinite;"></span>현재 위치</span>
       </div>
@@ -956,78 +1019,94 @@ function d2x(ds){const d=new Date(ds+'T00:00:00');return(md(GS,d)+(d.getDate()-1
 function nx(){return(md(GS,TODAY)+(TODAY.getDate()-1)/30)*MW;}
 
 function renderGantt(){
-  const total=tm(),tw=total*MW,LW=230;
+  const total=tm(),tw=total*MW,SLBL=28,INAME=188,LW=SLBL+INAME;
   const NX=nx();
   const phases=(S.phases&&S.phases.length>0)?S.phases:jc(DP);
 
-  // Resolve dates from S.phases by name
   const resolve=(item)=>{
     if(!item.dk)return item;
-    const p=phases.find(p=>p.name===item.dk||p.name.includes(item.dk.split(' ')[0])&&p.cat===item.dk.split(':')[1]);
     const p2=phases.find(p=>p.name===item.dk);
     return p2?{...item,s:p2.start,e:p2.end}:item;
   };
 
-  let h=`<div style="min-width:${tw+LW}px;background:#0D0D14;">`;
+  // Section background tints
+  const sBg={'과업 일정':'#F0F4FF','건축 설계':'#FAF5FF','인테리어':'#ECFEFF',
+              '인허가·심의':'#FEFCE8','한미글로벌  PM':'#F0FDF4','공사':'#F8FAFC'};
+
+  // Build month background columns (reusable)
+  const mkGrid=()=>{
+    let g='<div class="gv3-grid">';
+    for(let i=0;i<total;i++){
+      const d=new Date(GS.getFullYear(),GS.getMonth()+i,1);
+      const ic=d.getFullYear()===TODAY.getFullYear()&&d.getMonth()===TODAY.getMonth();
+      g+=`<div class="gv3-gc${ic?' cc':''}" style="width:${MW}px;"></div>`;
+    }
+    return g+'</div>';
+  };
+
+  let h=`<div class="gv3-outer"><div class="gv3-inner" style="width:${LW+tw}px;">`;
 
   // ── Year header ──
-  h+=`<div class="gv2-yr" style="min-width:${tw+LW}px;">`;
-  h+=`<div class="gv2-lhdr" style="width:${LW}px;height:26px;border-bottom:1px solid rgba(255,255,255,0.07);"></div>`;
+  h+=`<div class="gv3-hrow">`;
+  h+=`<div class="gv3-hpad" style="width:${LW}px;height:22px;border-bottom:1px solid rgba(255,255,255,0.1);"></div>`;
   [2025,2026,2027,2028,2029,2030,2031].forEach(yr=>{
     const ms=Math.max(0,md(GS,new Date(yr,0,1))),me=Math.min(total,md(GS,new Date(yr+1,0,1)));
-    const w=(me-ms)*MW;if(w<=0)return;
-    h+=`<div class="gv2-y" style="width:${w}px;">${yr}</div>`;
+    const w=(me-ms)*MW; if(w<=0)return;
+    h+=`<div class="gv3-y" style="width:${w}px;">${yr}</div>`;
   });
   h+=`</div>`;
 
   // ── Month header ──
-  h+=`<div class="gv2-mr" style="min-width:${tw+LW}px;">`;
-  h+=`<div class="gv2-lhdr" style="width:${LW}px;height:20px;border-bottom:1px solid rgba(255,255,255,0.1);"></div>`;
+  h+=`<div class="gv3-hrow">`;
+  h+=`<div class="gv3-hpad" style="width:${LW}px;height:30px;"></div>`;
   for(let i=0;i<total;i++){
     const d=new Date(GS.getFullYear(),GS.getMonth()+i,1);
     const ic=d.getFullYear()===TODAY.getFullYear()&&d.getMonth()===TODAY.getMonth();
-    h+=`<div class="gv2-m${ic?' cur':''}" style="width:${MW}px;">${d.getMonth()+1}</div>`;
+    h+=`<div class="gv3-m${ic?' cur':''}" style="width:${MW}px;">${d.getMonth()+1}</div>`;
   }
   h+=`</div>`;
 
+  // ── Milestone header strip (all milestones) ──
+  const allMs=S.milestones;
+  if(allMs.length){
+    h+=`<div class="gv3-mshdr" style="height:20px;">`;
+    h+=`<div class="gv3-mshdr-pad" style="width:${LW}px;height:20px;background:#F8FAFC;"></div>`;
+    h+=`<div class="gv3-mshdr-area" style="width:${tw}px;position:relative;height:20px;">`;
+    allMs.forEach(m=>{
+      const mx=d2x(m.date);
+      const col=cc(m.cat)||'#666';
+      const past=new Date(m.date+'T00:00:00')<TODAY;
+      h+=`<div style="position:absolute;top:5px;left:${mx}px;width:10px;height:10px;transform:translateX(-50%) rotate(45deg);background:${past?col:'transparent'};border:2px solid ${col};cursor:pointer;z-index:5;"
+        onmouseenter="showMTT(event,'${esc(m.name)}','${m.date}')" onmouseleave="hideTT()"></div>`;
+    });
+    h+=`</div></div>`;
+  }
+
   // ── Sections ──
   GSDEF.forEach(sec=>{
-    // Section header
-    h+=`<div class="gv2-shdr">
-      <div class="gv2-shdr-l" style="width:${LW}px;">
-        <div class="gv2-shdr-dot" style="background:${sec.sc};"></div>
-        <span class="gv2-shdr-txt" style="color:${sec.sc};">${sec.sec}</span>
-      </div>
-      <div class="gv2-shdr-r" style="width:${tw}px;">
-        <div class="gv2-shdr-line" style="background:${sec.sc};"></div>
-        <div class="gv2-now" style="left:${NX}px;"><div class="gv2-now-dot"></div></div>
-      </div>
-    </div>`;
+    const bg=sBg[sec.sec]||'#FAFAFA';
+    const msRows=sec.ms?S.milestones.filter(m=>sec.ms.includes(m.cat)):[];
+    const rowCount=sec.rows.length+(msRows.length?1:0);
+    const totalH=rowCount*30;
 
-    // Milestone row (if section has ms cats)
-    if(sec.ms){
-      const msList=S.milestones.filter(m=>sec.ms.includes(m.cat));
-      if(msList.length){
-        let bgc='';
-        for(let i=0;i<total;i++){
-          const d=new Date(GS.getFullYear(),GS.getMonth()+i,1);
-          const ic=d.getFullYear()===TODAY.getFullYear()&&d.getMonth()===TODAY.getMonth();
-          bgc+=`<div class="gv2-mc${ic?' cc':''}" style="width:${MW}px;height:22px;"></div>`;
-        }
-        h+=`<div class="gv2-msrow">
-          <div class="gv2-rl" style="width:${LW}px;font-size:9px;color:rgba(255,255,255,0.2);letter-spacing:1.5px;text-transform:uppercase;">마일스톤</div>
-          <div class="gv2-rt" style="width:${tw}px;height:22px;">
-            <div class="gv2-bg">${bgc}</div>
-            <div class="gv2-now" style="left:${NX}px;"></div>`;
-        msList.forEach(m=>{
-          const mx=d2x(m.date);
-          const past=new Date(m.date+'T00:00:00')<TODAY;
-          const mc=sec.sc;
-          h+=`<div class="gv2-ms" style="left:${mx}px;border-color:${mc};background:${past?mc:'transparent'};"
-            onmouseenter="showMTT(event,'${esc(m.name)}','${m.date}')" onmouseleave="hideTT()"></div>`;
-        });
-        h+=`</div></div>`;
-      }
+    h+=`<div class="gv3-section" style="background:${bg};">`;
+    h+=`<div class="gv3-sec-lbl" style="height:${totalH}px;color:${sec.sc};background:${bg};border-left:3px solid ${sec.sc};">${sec.sec}</div>`;
+    h+=`<div class="gv3-rows" style="flex:1;">`;
+
+    // Inline milestone row
+    if(msRows.length){
+      h+=`<div class="gv3-row" style="background:${bg};">
+        <div class="gv3-iname" style="width:${INAME}px;font-size:9px;color:rgba(0,0,0,0.3);letter-spacing:1.5px;text-transform:uppercase;">마일스톤</div>
+        <div class="gv3-bars" style="width:${tw}px;background:${bg};">
+          ${mkGrid()}
+          <div class="gv3-today" style="left:${NX}px;"></div>`;
+      msRows.forEach(m=>{
+        const mx=d2x(m.date);
+        const past=new Date(m.date+'T00:00:00')<TODAY;
+        h+=`<div class="gv3-ms-mrk" style="top:4px;left:${mx}px;width:9px;height:9px;border-color:${sec.sc};background:${past?sec.sc:'transparent'};"
+          onmouseenter="showMTT(event,'${esc(m.name)}','${m.date}')" onmouseleave="hideTT()"></div>`;
+      });
+      h+=`</div></div>`;
     }
 
     // Item rows
@@ -1039,32 +1118,27 @@ function renderGantt(){
       const pct=Math.min(100,Math.round(el/tot*100));
       const stlbl=el<=0?'예정':el>=tot?'완료':`진행 ${pct}%`;
 
-      let bgc='';
-      for(let i=0;i<total;i++){
-        const d=new Date(GS.getFullYear(),GS.getMonth()+i,1);
-        const ic=d.getFullYear()===TODAY.getFullYear()&&d.getMonth()===TODAY.getMonth();
-        bgc+=`<div class="gv2-mc${ic?' cc':''}" style="width:${MW}px;"></div>`;
-      }
-
-      const th=item.thick?'top:12px;height:5px;':'';
-      h+=`<div class="gv2-row">
-        <div class="gv2-rl" style="width:${LW}px;">${ri.n}</div>
-        <div class="gv2-rt" style="width:${tw}px;">
-          <div class="gv2-bg">${bgc}</div>
-          <div class="gv2-now" style="left:${NX}px;"></div>
-          <div class="gv2-bar" style="${th}left:${x1}px;width:${w}px;background:${ri.col};"
+      h+=`<div class="gv3-row" style="background:${bg};">
+        <div class="gv3-iname" style="width:${INAME}px;">${ri.n}</div>
+        <div class="gv3-bars" style="width:${tw}px;background:${bg};">
+          ${mkGrid()}
+          <div class="gv3-today" style="left:${NX}px;"></div>
+          <div class="gv3-bar" style="left:${x1}px;width:${w}px;background:${ri.col};opacity:0.88;"
             onmouseenter="showTT(event,this.dataset.n,'','${ri.s}','${ri.e}','${stlbl}')"
             onmouseleave="hideTT()"
             data-n="${esc(ri.n)}"></div>
-          ${el>0&&el<tot?`<div class="gv2-pf" style="${th}left:${x1}px;width:${Math.min(w,w*pct/100)}px;"></div>`:''}
+          ${el>0&&el<tot?`<div class="gv3-pf" style="left:${x1}px;width:${Math.min(w,w*pct/100)}px;"></div>`:''}
         </div>
       </div>`;
     });
+
+    h+=`</div></div>`;
   });
 
-  h+=`</div>`;
+  h+=`</div></div>`;
   document.getElementById('ganttChart').innerHTML=h;
 }
+
 
 function esc(s){return s.replace(/'/g,"\\'").replace(/"/g,'&quot;');}
 
