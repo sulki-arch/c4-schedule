@@ -529,34 +529,37 @@ const DA=[
   {id:'guest_etc',pw:'ET2026!',role:'guest',cat:'기타',name:'기타 게스트'},
 ];
 const DP=[
-  // ── F+P (해외 건축설계) ──
+  // ── F+P (건축설계 + 인테리어) ──
   {id:1, name:'Pre-SD',                    cat:'F+P',      start:'2026-01-01', end:'2026-01-31'},
   {id:2, name:'SD (Schematic Design)',      cat:'F+P',      start:'2026-02-01', end:'2026-06-15'},
   {id:3, name:'DD (Design Development)',    cat:'F+P',      start:'2026-06-15', end:'2026-10-30'},
   {id:4, name:'CD (Construction Docs)',     cat:'F+P',      start:'2026-11-01', end:'2027-03-30'},
-  // ── 삼우건축 (국내 건축설계) ──
-  {id:5, name:'기본설계 및 전환설계',       cat:'삼우건축', start:'2026-03-23', end:'2026-08-15'},
-  {id:6, name:'실시설계 (CD)',              cat:'삼우건축', start:'2026-08-15', end:'2027-05-31'},
-  // ── 인테리어 ──
-  {id:7, name:'인테리어 Concept',           cat:'기타',     start:'2026-01-01', end:'2026-08-15'},
-  {id:8, name:'인테리어 SD',                cat:'기타',     start:'2026-06-15', end:'2026-09-30'},
-  {id:9, name:'인테리어 DD',                cat:'기타',     start:'2026-10-01', end:'2027-01-15'},
-  {id:10,name:'인테리어 CD',                cat:'기타',     start:'2027-01-15', end:'2027-05-31'},
-  // ── 인허가·심의 ──
-  {id:11,name:'지하안전영향평가',           cat:'인허가',   start:'2026-07-01', end:'2026-12-31'},
-  {id:12,name:'도시건축공동위원회',          cat:'인허가',   start:'2026-10-01', end:'2027-01-31'},
-  {id:13,name:'통합심의 (건축·교통·경관)',   cat:'인허가',   start:'2026-10-15', end:'2027-02-15'},
-  {id:14,name:'건축심의·건축허가',           cat:'인허가',   start:'2026-11-01', end:'2027-06-30'},
-  {id:15,name:'구조안전심의·굴토심의',       cat:'인허가',   start:'2026-09-01', end:'2027-01-31'},
-  {id:16,name:'철도보호·저영향개발·녹색건축', cat:'인허가',  start:'2026-06-15', end:'2026-12-31'},
-  // ── 한미글로벌 (PM) ──
-  {id:17,name:'PM 설계단계 (12M)',          cat:'한미글로벌',start:'2026-05-06',end:'2027-04-30'},
-  {id:18,name:'시공사 선정',                cat:'한미글로벌',start:'2027-01-01',end:'2027-04-30'},
-  {id:19,name:'PM 시공단계 (50M)',          cat:'한미글로벌',start:'2027-05-01',end:'2031-06-30'},
-  // ── 크래프톤 (공사) ──
-  {id:20,name:'해체공사',                   cat:'크래프톤', start:'2026-06-01', end:'2026-12-15'},
-  {id:21,name:'본공사 (47개월)',             cat:'크래프톤', start:'2027-10-01', end:'2031-06-30'},
-  {id:22,name:'유지관리 인수인계',           cat:'크래프톤', start:'2031-07-01', end:'2031-08-31'},
+  {id:5, name:'인테리어 Concept',           cat:'F+P',      start:'2026-03-23', end:'2026-05-22'},
+  {id:6, name:'인테리어 SD',                cat:'F+P',      start:'2026-03-25', end:'2026-08-15'},
+  {id:7, name:'인테리어 DD',                cat:'F+P',      start:'2026-08-15', end:'2027-01-31'},
+  {id:8, name:'인테리어 CD',                cat:'F+P',      start:'2027-02-01', end:'2027-05-31'},
+  // ── 삼우건축 (설계 + 인허가·심의) ──
+  {id:9, name:'기본설계 및 전환설계',       cat:'삼우건축', start:'2026-03-23', end:'2026-08-15'},
+  {id:10,name:'실시설계 (CD)',              cat:'삼우건축', start:'2026-08-15', end:'2027-05-31'},
+  {id:11,name:'도시건축공동위원회',          cat:'삼우건축', start:'2026-01-01', end:'2026-08-15'},
+  {id:12,name:'통합심의 (건축·교통·경관)',   cat:'삼우건축', start:'2026-06-15', end:'2026-09-30'},
+  {id:13,name:'건축허가',                   cat:'삼우건축', start:'2026-10-01', end:'2027-01-15'},
+  {id:14,name:'지하안전영향평가',           cat:'삼우건축', start:'2026-08-15', end:'2027-01-15'},
+  {id:15,name:'철도보호지구 행위신고',       cat:'삼우건축', start:'2026-09-01', end:'2027-01-15'},
+  {id:16,name:'저영향개발 사전협의',         cat:'삼우건축', start:'2026-10-01', end:'2027-01-15'},
+  {id:17,name:'녹색건축물 예비인증',         cat:'삼우건축', start:'2026-11-15', end:'2027-02-15'},
+  {id:18,name:'구조안전심의·굴토심의',       cat:'삼우건축', start:'2026-12-15', end:'2027-02-15'},
+  {id:19,name:'좋은빛위원회 심의',           cat:'삼우건축', start:'2026-12-15', end:'2027-02-15'},
+  {id:20,name:'매장문화재 표본조사',         cat:'삼우건축', start:'2027-02-15', end:'2027-03-15'},
+  {id:21,name:'설계안전보건대장 제출',       cat:'삼우건축', start:'2027-02-15', end:'2027-03-15'},
+  // ── 한미글로벌 (PM + 해체공사) ──
+  {id:22,name:'PM 설계단계 (12M)',          cat:'한미글로벌',start:'2026-05-06',end:'2027-04-30'},
+  {id:23,name:'시공사 선정',                cat:'한미글로벌',start:'2027-01-01',end:'2027-04-30'},
+  {id:24,name:'PM 시공단계 (50M)',          cat:'한미글로벌',start:'2027-05-01',end:'2031-06-30'},
+  {id:25,name:'해체공사',                   cat:'한미글로벌',start:'2026-06-01',end:'2026-12-15'},
+  // ── 크래프톤 (본공사·유지관리) ──
+  {id:26,name:'본공사 (50개월)',             cat:'크래프톤', start:'2027-05-01', end:'2031-06-30'},
+  {id:27,name:'유지관리 인수인계',           cat:'크래프톤', start:'2031-07-01', end:'2031-08-31'},
 ];
 const DM=[
   {id:1,name:'Kick-off (Seoul)',cat:'F+P',date:'2025-08-10'},
@@ -576,7 +579,7 @@ const DM=[
 const DEV=[
   {id:1,name:'SD 40% Workshop (Seoul)',cat:'F+P',date:'2026-03-23',endDate:'2026-03-26',desc:'F+P 설계팀 서울 방문'},
   {id:2,name:'Workspace Team Workshop (Seoul)',cat:'F+P',date:'2026-04-20',endDate:'2026-04-24',desc:'F+P 워크스페이스팀 서울 방문'},
-  {id:3,name:'DD KOM Workshop (London)',cat:'전체 공통',date:'2026-06-25',endDate:'2026-07-02',desc:'F+P 외 전체팀 런던 방문'},
+  {id:3,name:'DD KOM Workshop (London)',cat:'공통',date:'2026-06-25',endDate:'2026-07-02',desc:'F+P 외 전체팀 런던 방문'},
 ];
 
 // ═══ STATE ═══
@@ -884,12 +887,13 @@ function renderGantt(){
   }
   h+=`</div></div></div>`;
   const NX=nx();
-  const gL={'F+P':'F+P (해외설계사)','삼우건축':'삼우건축 (국내)','기타':'인테리어','인허가':'인허가·심의','한미글로벌':'한미글로벌 (PM)','크래프톤':'크래프톤 (공사)'};
+  const gL={'F+P':'F+P (건축·인테리어)','삼우건축':'삼우건축 (설계·인허가)','기타':'기타','인허가':'인허가','한미글로벌':'한미글로벌 (PM·공사)','크래프톤':'크래프톤 (본공사)'};
   const groups=S.cats.filter(c=>canSeeCategory(c)).map(c=>c.name);
   groups.forEach(grp=>{
     const col=cc(grp);
     const phases=effectivePhases.filter(p=>p.cat===grp);
     const ms2=S.milestones.filter(m=>m.cat===grp);
+    if(!phases.length&&!ms2.length)return; // 데이터 없는 카테고리 숨김
     h+=`<div class="gantt-group-header">
       <div class="ggl"><div class="gg-dot" style="background:${col}"></div><span style="color:${col}">${gL[grp]||grp}</span></div>
       <div style="flex:1;min-width:${tw}px;position:relative;"><div class="gnl" style="left:${NX}px;"></div></div>
@@ -939,11 +943,9 @@ function esc(s){return s.replace(/'/g,"\\'").replace(/"/g,'&quot;');}
 function renderProgress(){
   const allData=[
     {cat:'F+P',phase:'DD 40% Submission (5/11)',pct:40},
-    {cat:'삼우건축',phase:'기본설계 진행 중',pct:15},
-    {cat:'기타',phase:'인테리어 Concept',pct:20},
-    {cat:'인허가',phase:'심의 준비 단계',pct:5},
-    {cat:'한미글로벌',phase:'PM 설계단계 착수',pct:5},
-    {cat:'크래프톤',phase:'해체공사 준비 (6월~)',pct:3},
+    {cat:'삼우건축',phase:'기본설계 진행 중 / 인허가 준비',pct:15},
+    {cat:'한미글로벌',phase:'PM 설계단계 착수 / 해체공사 준비',pct:5},
+    {cat:'크래프톤',phase:'본공사 준비 중',pct:2},
   ];
   const data=allData.filter(s=>{const cat=S.cats.find(c=>c.name===s.cat);return!cat||canSeeCategory(cat);});
   document.getElementById('progressSummary').innerHTML=data.map(s=>{
@@ -974,9 +976,10 @@ function renderCalendar(){
     const isT=!cell.o&&cell.d===TODAY.getDate()&&cell.m===TODAY.getMonth()&&cell.y===TODAY.getFullYear();
     const ds=`${cell.y}-${p2(cell.m+1)}-${p2(cell.d)}`;
     const isSun=idx%7===0,isSat=idx%7===6;
-    const singleEvts=[...S.milestones.filter(m=>m.date===ds&&showCats.includes(m.cat)),
-                      ...S.events.filter(e=>e.date===ds&&!e.endDate&&showCats.includes(e.cat))];
-    const spanEvts=S.events.filter(e=>e.endDate&&e.date<=ds&&e.endDate>=ds&&showCats.includes(e.cat));
+    const isCmnCat=c=>c==='공통'||c==='전체 공통';
+    const singleEvts=[...S.milestones.filter(m=>m.date===ds&&(showCats.includes(m.cat)||isCmnCat(m.cat))),
+                      ...S.events.filter(e=>e.date===ds&&!e.endDate&&(showCats.includes(e.cat)||isCmnCat(e.cat)))];
+    const spanEvts=S.events.filter(e=>e.endDate&&e.date<=ds&&e.endDate>=ds&&(showCats.includes(e.cat)||isCmnCat(e.cat)));
     const filt=singleEvts;
     const filtSpan=spanEvts;
     let ev='';
