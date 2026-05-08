@@ -26,9 +26,9 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .gv3-inner{display:inline-block;min-width:100%;}
 /* header rows */
 .gv3-hrow{display:flex;}
-.gv3-hpad{flex-shrink:0;background:#111;border-right:1px solid rgba(255,255,255,0.12);}
-.gv3-y{flex-shrink:0;height:22px;display:flex;align-items:center;padding-left:10px;font-size:9px;font-weight:800;color:rgba(255,255,255,0.45);letter-spacing:3px;background:#111;border-right:1px solid rgba(255,255,255,0.1);border-bottom:1px solid rgba(255,255,255,0.1);}
-.gv3-m{flex-shrink:0;height:30px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;background:#1A1A2E;border-right:1px solid rgba(255,255,255,0.08);}
+.gv3-hpad{flex-shrink:0;background:#64748B;border-right:1px solid rgba(255,255,255,0.15);}
+.gv3-y{flex-shrink:0;height:22px;display:flex;align-items:center;padding-left:10px;font-size:11px;font-weight:800;color:#fff;letter-spacing:2px;background:#64748B;border-right:1px solid rgba(255,255,255,0.15);border-bottom:1px solid rgba(255,255,255,0.15);}
+.gv3-m{flex-shrink:0;height:30px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;background:#475569;border-right:1px solid rgba(255,255,255,0.12);}
 .gv3-m.cur{background:#E8401C;}
 /* milestone header row */
 .gv3-mshdr{display:flex;background:#F8FAFC;border-bottom:1px solid #E2E8F0;}
@@ -36,23 +36,24 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .gv3-mshdr-area{position:relative;flex:1;}
 /* section group */
 .gv3-section{display:flex;border-bottom:2px solid #E2E8F0;}
-.gv3-sec-lbl{flex-shrink:0;width:28px;writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;letter-spacing:2.5px;text-transform:uppercase;border-right:1px solid rgba(0,0,0,0.07);}
+.gv3-sec-lbl{flex-shrink:0;width:28px;writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;letter-spacing:2.5px;text-transform:uppercase;border-right:1px solid rgba(0,0,0,0.07);}
 .gv3-rows{flex:1;}
 /* item row */
 .gv3-row{display:flex;height:30px;border-bottom:1px solid rgba(0,0,0,0.05);}
 .gv3-row:last-child{border-bottom:none;}
 .gv3-row:hover{filter:brightness(0.975);}
-.gv3-iname{flex-shrink:0;display:flex;align-items:center;padding:0 12px;font-size:11px;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-right:1px solid rgba(0,0,0,0.06);}
+.gv3-iname{flex-shrink:0;display:flex;align-items:center;padding:0 10px;font-size:13px;color:#1F2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-right:1px solid rgba(0,0,0,0.08);font-weight:600;}
 .gv3-bars{position:relative;height:30px;flex-shrink:0;}
 /* bar */
 .gv3-bar{position:absolute;top:9px;height:12px;border-radius:6px;cursor:pointer;z-index:2;transition:filter 0.12s;}
 .gv3-bar:hover{filter:brightness(0.88);}
 .gv3-pf{position:absolute;top:9px;height:12px;border-radius:6px 0 0 6px;background:rgba(0,0,0,0.15);pointer-events:none;z-index:3;}
+.gv3-bar-lbl{position:absolute;top:9px;height:12px;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:4;overflow:hidden;}
 /* today line */
 .gv3-today{position:absolute;top:0;bottom:0;width:1.5px;background:#E8401C;z-index:10;pointer-events:none;opacity:0.7;}
-/* milestone marker */
-.gv3-ms-mrk{position:absolute;transform:translateX(-50%) rotate(45deg);cursor:pointer;border:2px solid;z-index:5;transition:transform 0.12s;}
-.gv3-ms-mrk:hover{filter:brightness(0.8) scale(1.3);}
+/* milestone marker – solid circle */
+.gv3-ms-mrk{position:absolute;transform:translateX(-50%);cursor:pointer;border-radius:50%;z-index:5;transition:filter 0.12s;}
+.gv3-ms-mrk:hover{filter:brightness(0.7);}
 /* month bg grid */
 .gv3-grid{position:absolute;top:0;bottom:0;display:flex;pointer-events:none;z-index:0;}
 .gv3-gc{height:100%;flex-shrink:0;border-right:1px solid rgba(0,0,0,0.04);}
@@ -220,9 +221,9 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .gv3-inner{display:inline-block;min-width:100%;}
 /* header rows */
 .gv3-hrow{display:flex;}
-.gv3-hpad{flex-shrink:0;background:#111;border-right:1px solid rgba(255,255,255,0.12);}
-.gv3-y{flex-shrink:0;height:22px;display:flex;align-items:center;padding-left:10px;font-size:9px;font-weight:800;color:rgba(255,255,255,0.45);letter-spacing:3px;background:#111;border-right:1px solid rgba(255,255,255,0.1);border-bottom:1px solid rgba(255,255,255,0.1);}
-.gv3-m{flex-shrink:0;height:30px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;background:#1A1A2E;border-right:1px solid rgba(255,255,255,0.08);}
+.gv3-hpad{flex-shrink:0;background:#64748B;border-right:1px solid rgba(255,255,255,0.15);}
+.gv3-y{flex-shrink:0;height:22px;display:flex;align-items:center;padding-left:10px;font-size:11px;font-weight:800;color:#fff;letter-spacing:2px;background:#64748B;border-right:1px solid rgba(255,255,255,0.15);border-bottom:1px solid rgba(255,255,255,0.15);}
+.gv3-m{flex-shrink:0;height:30px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;background:#475569;border-right:1px solid rgba(255,255,255,0.12);}
 .gv3-m.cur{background:#E8401C;}
 /* milestone header row */
 .gv3-mshdr{display:flex;background:#F8FAFC;border-bottom:1px solid #E2E8F0;}
@@ -230,23 +231,24 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .gv3-mshdr-area{position:relative;flex:1;}
 /* section group */
 .gv3-section{display:flex;border-bottom:2px solid #E2E8F0;}
-.gv3-sec-lbl{flex-shrink:0;width:28px;writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;letter-spacing:2.5px;text-transform:uppercase;border-right:1px solid rgba(0,0,0,0.07);}
+.gv3-sec-lbl{flex-shrink:0;width:28px;writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;letter-spacing:2.5px;text-transform:uppercase;border-right:1px solid rgba(0,0,0,0.07);}
 .gv3-rows{flex:1;}
 /* item row */
 .gv3-row{display:flex;height:30px;border-bottom:1px solid rgba(0,0,0,0.05);}
 .gv3-row:last-child{border-bottom:none;}
 .gv3-row:hover{filter:brightness(0.975);}
-.gv3-iname{flex-shrink:0;display:flex;align-items:center;padding:0 12px;font-size:11px;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-right:1px solid rgba(0,0,0,0.06);}
+.gv3-iname{flex-shrink:0;display:flex;align-items:center;padding:0 10px;font-size:13px;color:#1F2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-right:1px solid rgba(0,0,0,0.08);font-weight:600;}
 .gv3-bars{position:relative;height:30px;flex-shrink:0;}
 /* bar */
 .gv3-bar{position:absolute;top:9px;height:12px;border-radius:6px;cursor:pointer;z-index:2;transition:filter 0.12s;}
 .gv3-bar:hover{filter:brightness(0.88);}
 .gv3-pf{position:absolute;top:9px;height:12px;border-radius:6px 0 0 6px;background:rgba(0,0,0,0.15);pointer-events:none;z-index:3;}
+.gv3-bar-lbl{position:absolute;top:9px;height:12px;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:4;overflow:hidden;}
 /* today line */
 .gv3-today{position:absolute;top:0;bottom:0;width:1.5px;background:#E8401C;z-index:10;pointer-events:none;opacity:0.7;}
-/* milestone marker */
-.gv3-ms-mrk{position:absolute;transform:translateX(-50%) rotate(45deg);cursor:pointer;border:2px solid;z-index:5;transition:transform 0.12s;}
-.gv3-ms-mrk:hover{filter:brightness(0.8) scale(1.3);}
+/* milestone marker – solid circle */
+.gv3-ms-mrk{position:absolute;transform:translateX(-50%);cursor:pointer;border-radius:50%;z-index:5;transition:filter 0.12s;}
+.gv3-ms-mrk:hover{filter:brightness(0.7);}
 /* month bg grid */
 .gv3-grid{position:absolute;top:0;bottom:0;display:flex;pointer-events:none;z-index:0;}
 .gv3-gc{height:100%;flex-shrink:0;border-right:1px solid rgba(0,0,0,0.04);}
@@ -1069,14 +1071,14 @@ function renderGantt(){
   // ── Milestone header strip (all milestones) ──
   const allMs=S.milestones;
   if(allMs.length){
-    h+=`<div class="gv3-mshdr" style="height:20px;">`;
-    h+=`<div class="gv3-mshdr-pad" style="width:${LW}px;height:20px;background:#F8FAFC;"></div>`;
-    h+=`<div class="gv3-mshdr-area" style="width:${tw}px;position:relative;height:20px;">`;
+    h+=`<div class="gv3-mshdr" style="height:22px;">`;
+    h+=`<div class="gv3-mshdr-pad" style="width:${LW}px;height:22px;background:#F8FAFC;"></div>`;
+    h+=`<div class="gv3-mshdr-area" style="width:${tw}px;position:relative;height:22px;">`;
     allMs.forEach(m=>{
       const mx=d2x(m.date);
       const col=cc(m.cat)||'#666';
       const past=new Date(m.date+'T00:00:00')<TODAY;
-      h+=`<div style="position:absolute;top:5px;left:${mx}px;width:10px;height:10px;transform:translateX(-50%) rotate(45deg);background:${past?col:'transparent'};border:2px solid ${col};cursor:pointer;z-index:5;"
+      h+=`<div style="position:absolute;top:5px;left:${mx}px;width:12px;height:12px;transform:translateX(-50%);border-radius:50%;background:${col};opacity:${past?1:0.35};cursor:pointer;z-index:5;box-shadow:0 1px 3px rgba(0,0,0,0.2);"
         onmouseenter="showMTT(event,'${esc(m.name)}','${m.date}')" onmouseleave="hideTT()"></div>`;
     });
     h+=`</div></div>`;
@@ -1086,25 +1088,28 @@ function renderGantt(){
   GSDEF.forEach(sec=>{
     const bg=sBg[sec.sec]||'#FAFAFA';
     const msRows=sec.ms?S.milestones.filter(m=>sec.ms.includes(m.cat)):[];
-    const rowCount=sec.rows.length+(msRows.length?1:0);
-    const totalH=rowCount*30;
+    const rowCount=sec.rows.length;
+    const totalH=rowCount*30+(msRows.length?38:0);
 
     h+=`<div class="gv3-section" style="background:${bg};">`;
-    h+=`<div class="gv3-sec-lbl" style="height:${totalH}px;color:${sec.sc};background:${bg};border-left:3px solid ${sec.sc};">${sec.sec}</div>`;
+    h+=`<div class="gv3-sec-lbl" style="height:${totalH}px;color:#fff;background:${sec.sc};border-left:3px solid ${sec.sc};">${sec.sec}</div>`;
     h+=`<div class="gv3-rows" style="flex:1;">`;
 
     // Inline milestone row
     if(msRows.length){
-      h+=`<div class="gv3-row" style="background:${bg};">
-        <div class="gv3-iname" style="width:${INAME}px;font-size:9px;color:rgba(0,0,0,0.3);letter-spacing:1.5px;text-transform:uppercase;">마일스톤</div>
-        <div class="gv3-bars" style="width:${tw}px;background:${bg};">
+      h+=`<div class="gv3-row" style="background:${bg};height:38px;">
+        <div class="gv3-iname" style="width:${INAME}px;font-size:9px;color:rgba(0,0,0,0.3);letter-spacing:1.5px;text-transform:uppercase;height:38px;">마일스톤</div>
+        <div class="gv3-bars" style="width:${tw}px;background:${bg};height:38px;">
           ${mkGrid()}
           <div class="gv3-today" style="left:${NX}px;"></div>`;
       msRows.forEach(m=>{
         const mx=d2x(m.date);
-        const past=new Date(m.date+'T00:00:00')<TODAY;
-        h+=`<div class="gv3-ms-mrk" style="top:4px;left:${mx}px;width:9px;height:9px;border-color:${sec.sc};background:${past?sec.sc:'transparent'};"
-          onmouseenter="showMTT(event,'${esc(m.name)}','${m.date}')" onmouseleave="hideTT()"></div>`;
+        const mShort=m.name.length>11?m.name.substring(0,11)+'…':m.name;
+        h+=`<div style="position:absolute;left:${mx}px;top:4px;transform:translateX(-50%);text-align:center;cursor:pointer;z-index:5;"
+          onmouseenter="showMTT(event,'${esc(m.name)}','${m.date}')" onmouseleave="hideTT()">
+          <div style="width:11px;height:11px;border-radius:50%;background:${sec.sc};margin:0 auto;box-shadow:0 0 0 2px rgba(255,255,255,0.9),0 1px 4px rgba(0,0,0,0.25);"></div>
+          <div style="font-size:7.5px;color:${sec.sc};white-space:nowrap;font-weight:700;line-height:1.3;margin-top:2px;max-width:56px;overflow:hidden;text-overflow:ellipsis;">${mShort}</div>
+        </div>`;
       });
       h+=`</div></div>`;
     }
@@ -1117,9 +1122,14 @@ function renderGantt(){
       const tot=(ed-sd)/86400000,el=Math.max(0,(TODAY-sd)/86400000);
       const pct=Math.min(100,Math.round(el/tot*100));
       const stlbl=el<=0?'예정':el>=tot?'완료':`진행 ${pct}%`;
+      // Duration label
+      const durM=(ed-sd)/(1000*60*60*24*30.44);
+      const durLabel=durM>=1?Math.round(durM)+'M':(Math.round(durM*10)/10)+'M';
+      // iname tinted background (15% opacity of bar color)
+      const inameBg=ri.col+'26';
 
       h+=`<div class="gv3-row" style="background:${bg};">
-        <div class="gv3-iname" style="width:${INAME}px;">${ri.n}</div>
+        <div class="gv3-iname" style="width:${INAME}px;background:${inameBg};">${ri.n}</div>
         <div class="gv3-bars" style="width:${tw}px;background:${bg};">
           ${mkGrid()}
           <div class="gv3-today" style="left:${NX}px;"></div>
@@ -1128,6 +1138,7 @@ function renderGantt(){
             onmouseleave="hideTT()"
             data-n="${esc(ri.n)}"></div>
           ${el>0&&el<tot?`<div class="gv3-pf" style="left:${x1}px;width:${Math.min(w,w*pct/100)}px;"></div>`:''}
+          ${w>=28?`<div class="gv3-bar-lbl" style="left:${x1}px;width:${w}px;"><span style="font-size:8px;font-weight:800;color:rgba(255,255,255,0.95);letter-spacing:0.2px;">${durLabel}</span></div>`:''}
         </div>
       </div>`;
     });
