@@ -19,6 +19,8 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 /* LOGIN */
 #loginScreen{position:fixed;inset:0;background:linear-gradient(135deg,#F5F6F8,#EEF0F5);display:flex;align-items:center;justify-content:center;z-index:1000;}
 .login-box{width:420px;background:#fff;border:1px solid var(--border);border-radius:20px;padding:48px 40px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.1);}
@@ -111,7 +113,7 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 #excelFileInput{display:none;}
 
 /* GANTT */
-.gantt-wrapper{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);}
+.gantt-wrapper{background:transparent;border:none;border-radius:16px;overflow:hidden;}
 .gantt-scroll{overflow-x:auto;}
 .gantt-header-row{display:flex;background:var(--bg3);border-bottom:1px solid var(--border);}
 .glc{min-width:200px;max-width:200px;border-right:1px solid var(--border);padding:10px 16px;font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;font-weight:700;}
@@ -375,9 +377,10 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
       <div class="sec-title">진행 현황 요약</div>
       <div class="progress-summary" id="progressSummary"></div>
 
-      <div class="sec-title" style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-        전체 일정 타임라인 (2025 – 2031)
-        <span style="color:var(--accent);font-size:10px;font-weight:400;">▌ 현재 위치</span>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;margin-top:24px;">
+        <span style="font-size:11px;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:#111;">전체 일정 타임라인</span>
+        <span style="font-size:10px;color:var(--text3);letter-spacing:1px;">2025 — 2031</span>
+        <span style="margin-left:auto;font-size:9px;color:var(--accent);font-weight:800;letter-spacing:1.5px;text-transform:uppercase;display:flex;align-items:center;gap:5px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;animation:pulse 2s infinite;"></span>현재 위치</span>
       </div>
       <div class="gantt-update-row">
         <span class="gantt-update-badge" id="lastImportBadge">마지막 업데이트: 없음</span>
@@ -580,6 +583,53 @@ const DEV=[
   {id:1,name:'SD 40% Workshop (Seoul)',cat:'F+P',date:'2026-03-23',endDate:'2026-03-26',desc:'F+P 설계팀 서울 방문'},
   {id:2,name:'Workspace Team Workshop (Seoul)',cat:'F+P',date:'2026-04-20',endDate:'2026-04-24',desc:'F+P 워크스페이스팀 서울 방문'},
   {id:3,name:'DD KOM Workshop (London)',cat:'공통',date:'2026-06-25',endDate:'2026-07-02',desc:'F+P 외 전체팀 런던 방문'},
+];
+
+
+// ═══ GANTT LAYOUT DEFINITION ═══
+// 이미지 기반 계층 구조: section > rows (각 row는 dpKey로 S.phases 날짜를 조회)
+const GSDEF=[
+  {sec:'과업 일정', sc:'#6366F1', rows:[
+    {n:'설계단계  12M', s:'2026-02-01', e:'2027-04-30', col:'#6366F1', dk:null, thick:true},
+    {n:'시공단계  50M', s:'2027-05-01', e:'2031-06-30', col:'#374151', dk:null, thick:true},
+  ]},
+  {sec:'건축 설계', sc:'#8B5CF6', ms:['F+P'], rows:[
+    {n:'Pre-SD',             s:'2026-01-01', e:'2026-01-31', col:'#A78BFA', dk:'Pre-SD'},
+    {n:'SD  계획설계',        s:'2026-02-01', e:'2026-06-15', col:'#8B5CF6', dk:'SD (Schematic Design)'},
+    {n:'DD  기본설계',        s:'2026-06-15', e:'2026-10-30', col:'#7C3AED', dk:'DD (Design Development)'},
+    {n:'CD  실시설계',        s:'2026-11-01', e:'2027-03-30', col:'#6D28D9', dk:'CD (Construction Docs)'},
+    {n:'기본설계  삼우건축',  s:'2026-03-23', e:'2026-08-15', col:'#60A5FA', dk:'기본설계 및 전환설계'},
+    {n:'실시설계  삼우건축',  s:'2026-08-15', e:'2027-05-31', col:'#3B82F6', dk:'실시설계 (CD)'},
+  ]},
+  {sec:'인테리어', sc:'#22D3EE', rows:[
+    {n:'Concept  기획',  s:'2026-03-23', e:'2026-05-22', col:'#67E8F9', dk:'인테리어 Concept'},
+    {n:'SD  계획',       s:'2026-03-25', e:'2026-08-15', col:'#22D3EE', dk:'인테리어 SD'},
+    {n:'DD  기본',       s:'2026-08-15', e:'2027-01-31', col:'#06B6D4', dk:'인테리어 DD'},
+    {n:'CD  실시',       s:'2027-02-01', e:'2027-05-31', col:'#0891B2', dk:'인테리어 CD'},
+  ]},
+  {sec:'인허가·심의', sc:'#F59E0B', ms:['인허가'], rows:[
+    {n:'도시건축공동위원회',       s:'2026-01-01', e:'2026-08-15', col:'#FCD34D', dk:'도시건축공동위원회'},
+    {n:'통합심의  건축·교통·경관', s:'2026-06-15', e:'2026-09-30', col:'#FBBF24', dk:'통합심의 (건축·교통·경관)'},
+    {n:'건축허가',                 s:'2026-10-01', e:'2027-01-15', col:'#F59E0B', dk:'건축허가'},
+    {n:'지하안전영향평가',         s:'2026-08-15', e:'2027-01-15', col:'#D97706', dk:'지하안전영향평가'},
+    {n:'철도보호지구 행위신고',    s:'2026-09-01', e:'2027-01-15', col:'#B45309', dk:'철도보호지구 행위신고'},
+    {n:'저영향개발 사전협의',      s:'2026-10-01', e:'2027-01-15', col:'#92400E', dk:'저영향개발 사전협의'},
+    {n:'녹색건축물 예비인증',      s:'2026-11-15', e:'2027-02-15', col:'#34D399', dk:'녹색건축물 예비인증'},
+    {n:'구조안전심의·굴토심의',    s:'2026-12-15', e:'2027-02-15', col:'#10B981', dk:'구조안전심의·굴토심의'},
+    {n:'좋은빛위원회 심의',        s:'2026-12-15', e:'2027-02-15', col:'#059669', dk:'좋은빛위원회 심의'},
+    {n:'매장문화재 표본조사',      s:'2027-02-15', e:'2027-03-15', col:'#F472B6', dk:'매장문화재 표본조사'},
+    {n:'설계안전보건대장 제출',    s:'2027-02-15', e:'2027-03-15', col:'#EC4899', dk:'설계안전보건대장 제출'},
+  ]},
+  {sec:'한미글로벌  PM', sc:'#34D399', rows:[
+    {n:'PM 설계단계  12M', s:'2026-05-06', e:'2027-04-30', col:'#34D399', dk:'PM 설계단계 (12M)'},
+    {n:'시공사 선정',      s:'2027-01-01', e:'2027-04-30', col:'#6EE7B7', dk:'시공사 선정'},
+    {n:'PM 시공단계  50M', s:'2027-05-01', e:'2031-06-30', col:'#059669', dk:'PM 시공단계 (50M)'},
+  ]},
+  {sec:'공사', sc:'#94A3B8', ms:['크래프톤'], rows:[
+    {n:'해체공사',           s:'2026-06-01', e:'2026-12-15', col:'#94A3B8', dk:'해체공사'},
+    {n:'본공사  50개월',     s:'2027-05-01', e:'2031-06-30', col:'#64748B', dk:'본공사 (50개월)'},
+    {n:'유지관리 인수인계',  s:'2031-07-01', e:'2031-08-31', col:'#475569', dk:'유지관리 인수인계'},
+  ]},
 ];
 
 // ═══ STATE ═══
@@ -861,82 +911,125 @@ function applyImport(){
 }
 
 // ═══ GANTT ═══
-const GS=new Date(2025,7,1),GE=new Date(2031,11,31),MW=18;
+const GS=new Date(2025,7,1),GE=new Date(2031,11,31),MW=20;
 function md(a,b){return(b.getFullYear()-a.getFullYear())*12+(b.getMonth()-a.getMonth());}
 function tm(){return md(GS,GE)+1;}
 function d2x(ds){const d=new Date(ds+'T00:00:00');return(md(GS,d)+(d.getDate()-1)/30)*MW;}
 function nx(){return(md(GS,TODAY)+(TODAY.getDate()-1)/30)*MW;}
 
 function renderGantt(){
-  const total=tm(),tw=total*MW,LW=200;
-  // S.phases가 비어있으면 기본 데이터(DP)로 표시
-  const effectivePhases=(S.phases&&S.phases.length>0)?S.phases:jc(DP);
-  let h=`<div style="min-width:${tw+LW}px;">`;
-  h+=`<div class="gantt-header-row"><div class="glc">단계 / 업무</div><div class="gantt-time-header" style="min-width:${tw}px;">`;
-  h+=`<div class="gantt-years">`;
+  const total=tm(),tw=total*MW,LW=230;
+  const NX=nx();
+  const phases=(S.phases&&S.phases.length>0)?S.phases:jc(DP);
+
+  // Resolve dates from S.phases by name
+  const resolve=(item)=>{
+    if(!item.dk)return item;
+    const p=phases.find(p=>p.name===item.dk||p.name.includes(item.dk.split(' ')[0])&&p.cat===item.dk.split(':')[1]);
+    const p2=phases.find(p=>p.name===item.dk);
+    return p2?{...item,s:p2.start,e:p2.end}:item;
+  };
+
+  let h=`<div style="min-width:${tw+LW}px;background:#0D0D14;">`;
+
+  // ── Year header ──
+  h+=`<div class="gv2-yr" style="min-width:${tw+LW}px;">`;
+  h+=`<div class="gv2-lhdr" style="width:${LW}px;height:26px;border-bottom:1px solid rgba(255,255,255,0.07);"></div>`;
   [2025,2026,2027,2028,2029,2030,2031].forEach(yr=>{
     const ms=Math.max(0,md(GS,new Date(yr,0,1))),me=Math.min(total,md(GS,new Date(yr+1,0,1)));
     const w=(me-ms)*MW;if(w<=0)return;
-    h+=`<div class="gy" style="width:${w}px;flex-shrink:0;">${yr}</div>`;
+    h+=`<div class="gv2-y" style="width:${w}px;">${yr}</div>`;
   });
-  h+=`</div><div class="gantt-months">`;
+  h+=`</div>`;
+
+  // ── Month header ──
+  h+=`<div class="gv2-mr" style="min-width:${tw+LW}px;">`;
+  h+=`<div class="gv2-lhdr" style="width:${LW}px;height:20px;border-bottom:1px solid rgba(255,255,255,0.1);"></div>`;
   for(let i=0;i<total;i++){
     const d=new Date(GS.getFullYear(),GS.getMonth()+i,1);
     const ic=d.getFullYear()===TODAY.getFullYear()&&d.getMonth()===TODAY.getMonth();
-    h+=`<div class="gm${ic?' cur':''}" style="width:${MW}px;flex-shrink:0;">${d.getMonth()+1}</div>`;
+    h+=`<div class="gv2-m${ic?' cur':''}" style="width:${MW}px;">${d.getMonth()+1}</div>`;
   }
-  h+=`</div></div></div>`;
-  const NX=nx();
-  const gL={'F+P':'F+P (건축·인테리어)','삼우건축':'삼우건축 (설계·인허가)','기타':'기타','인허가':'인허가','한미글로벌':'한미글로벌 (PM·공사)','크래프톤':'크래프톤 (본공사)'};
-  const groups=S.cats.filter(c=>canSeeCategory(c)).map(c=>c.name);
-  groups.forEach(grp=>{
-    const col=cc(grp);
-    const phases=effectivePhases.filter(p=>p.cat===grp);
-    const ms2=S.milestones.filter(m=>m.cat===grp);
-    if(!phases.length&&!ms2.length)return; // 데이터 없는 카테고리 숨김
-    h+=`<div class="gantt-group-header">
-      <div class="ggl"><div class="gg-dot" style="background:${col}"></div><span style="color:${col}">${gL[grp]||grp}</span></div>
-      <div style="flex:1;min-width:${tw}px;position:relative;"><div class="gnl" style="left:${NX}px;"></div></div>
+  h+=`</div>`;
+
+  // ── Sections ──
+  GSDEF.forEach(sec=>{
+    // Section header
+    h+=`<div class="gv2-shdr">
+      <div class="gv2-shdr-l" style="width:${LW}px;">
+        <div class="gv2-shdr-dot" style="background:${sec.sc};"></div>
+        <span class="gv2-shdr-txt" style="color:${sec.sc};">${sec.sec}</span>
+      </div>
+      <div class="gv2-shdr-r" style="min-width:${tw}px;">
+        <div class="gv2-shdr-line" style="background:${sec.sc};"></div>
+        <div class="gv2-now" style="left:${NX}px;"><div class="gv2-now-dot"></div></div>
+      </div>
     </div>`;
-    phases.forEach(p=>{
-      const x1=Math.max(0,d2x(p.start)),x2=Math.min(tw,d2x(p.end)),w=Math.max(4,x2-x1);
-      const sd=new Date(p.start+'T00:00:00'),ed=new Date(p.end+'T00:00:00');
+
+    // Milestone row (if section has ms cats)
+    if(sec.ms){
+      const msList=S.milestones.filter(m=>sec.ms.includes(m.cat));
+      if(msList.length){
+        let bgc='';
+        for(let i=0;i<total;i++){
+          const d=new Date(GS.getFullYear(),GS.getMonth()+i,1);
+          const ic=d.getFullYear()===TODAY.getFullYear()&&d.getMonth()===TODAY.getMonth();
+          bgc+=`<div class="gv2-mc${ic?' cc':''}" style="width:${MW}px;height:22px;"></div>`;
+        }
+        h+=`<div class="gv2-msrow">
+          <div class="gv2-rl" style="width:${LW}px;font-size:9px;color:rgba(255,255,255,0.2);letter-spacing:1.5px;text-transform:uppercase;">마일스톤</div>
+          <div class="gv2-rt" style="min-width:${tw}px;height:22px;">
+            <div class="gv2-bg" style="height:22px;">${bgc}</div>
+            <div class="gv2-now" style="left:${NX}px;"></div>`;
+        msList.forEach(m=>{
+          const mx=d2x(m.date);
+          const past=new Date(m.date+'T00:00:00')<TODAY;
+          const mc=sec.sc;
+          h+=`<div class="gv2-ms" style="left:${mx}px;border-color:${mc};background:${past?mc:'transparent'};"
+            onmouseenter="showMTT(event,'${esc(m.name)}','${m.date}')" onmouseleave="hideTT()"></div>`;
+        });
+        h+=`</div></div>`;
+      }
+    }
+
+    // Item rows
+    sec.rows.forEach(item=>{
+      const ri=resolve(item);
+      const x1=Math.max(0,d2x(ri.s)),x2=Math.min(tw,d2x(ri.e)),w=Math.max(4,x2-x1);
+      const sd=new Date(ri.s+'T00:00:00'),ed=new Date(ri.e+'T00:00:00');
       const tot=(ed-sd)/86400000,el=Math.max(0,(TODAY-sd)/86400000);
       const pct=Math.min(100,Math.round(el/tot*100));
-      const st=el<=0?'예정':el>=tot?'완료':`진행중 ${pct}%`;
-      let bgc='';for(let i=0;i<total;i++){const d=new Date(GS.getFullYear(),GS.getMonth()+i,1);const ic=d.getFullYear()===TODAY.getFullYear()&&d.getMonth()===TODAY.getMonth();bgc+=`<div class="gmbg${ic?' cc':''}" style="width:${MW}px;"></div>`;}
-      h+=`<div class="gantt-row">
-        <div class="grl">${p.name}</div>
-        <div class="grt" style="min-width:${tw}px;">
-          <div class="gtbg">${bgc}</div>
-          <div class="gnl" style="left:${NX}px;"></div>
-          <div class="gb" style="left:${x1}px;width:${w}px;background:${col};"
-            onmouseenter="showTT(event,'${esc(p.name)}','${p.cat}','${p.start}','${p.end}','${st}')"
-            onmouseleave="hideTT()">
-            ${w>50?p.name:''}
-          </div>
-          ${el>0&&el<tot?`<div class="gpf" style="left:${x1}px;width:${Math.min(w,w*pct/100)}px;"></div>`:''}
+      const stlbl=el<=0?'예정':el>=tot?'완료':`진행 ${pct}%`;
+
+      let bgc='';
+      for(let i=0;i<total;i++){
+        const d=new Date(GS.getFullYear(),GS.getMonth()+i,1);
+        const ic=d.getFullYear()===TODAY.getFullYear()&&d.getMonth()===TODAY.getMonth();
+        bgc+=`<div class="gv2-mc${ic?' cc':''}" style="width:${MW}px;"></div>`;
+      }
+
+      const barH=item.thick?'top:11px;height:6px;':'top:9px;height:10px;';
+      const barStyle=`position:absolute;${barH}border-radius:2px;`;
+
+      h+=`<div class="gv2-row">
+        <div class="gv2-rl" style="width:${LW}px;">${ri.n}</div>
+        <div class="gv2-rt" style="min-width:${tw}px;">
+          <div class="gv2-bg">${bgc}</div>
+          <div class="gv2-now" style="left:${NX}px;"></div>
+          <div style="${barStyle}left:${x1}px;width:${w}px;background:${ri.col};cursor:pointer;transition:filter 0.12s;"
+            onmouseenter="showTT(event,this.getAttribute('data-n'),'','${ri.s}','${ri.e}','${stlbl}');this.style.filter='brightness(1.18)'"
+            onmouseleave="hideTT();this.style.filter=''"
+            data-n="${esc(ri.n)}" ></div>
+          ${el>0&&el<tot?`<div style="${barStyle}left:${x1}px;width:${Math.min(w,w*pct/100)}px;background:rgba(255,255,255,0.22);pointer-events:none;"></div>`:''}
         </div>
       </div>`;
     });
-    if(ms2.length){
-      let bgc='';for(let i=0;i<total;i++){const d=new Date(GS.getFullYear(),GS.getMonth()+i,1);const ic=d.getFullYear()===TODAY.getFullYear()&&d.getMonth()===TODAY.getMonth();bgc+=`<div class="gmbg${ic?' cc':''}" style="width:${MW}px;"></div>`;}
-      h+=`<div class="gantt-row">
-        <div class="grl" style="color:var(--text3);font-size:10px;font-weight:600;">◆ 마일스톤</div>
-        <div class="grt" style="min-width:${tw}px;">
-          <div class="gtbg">${bgc}</div>
-          <div class="gnl" style="left:${NX}px;"></div>`;
-      ms2.forEach(m=>{
-        const mx=d2x(m.date);const past=new Date(m.date+'T00:00:00')<TODAY;
-        h+=`<div class="gms" style="left:${mx}px;background:${past?col:'transparent'};border-color:${col};"
-          onmouseenter="showMTT(event,'${esc(m.name)}','${m.date}')" onmouseleave="hideTT()"></div>`;
-      });
-      h+=`</div></div>`;
-    }
   });
+
   h+=`</div>`;
   document.getElementById('ganttChart').innerHTML=h;
 }
+
 function esc(s){return s.replace(/'/g,"\\'").replace(/"/g,'&quot;');}
 
 // ═══ PROGRESS ═══
