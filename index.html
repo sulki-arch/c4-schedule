@@ -520,10 +520,10 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
       </div>
       <div class="cal-grid">
         <div class="cal-weekdays">
-          <div class="cal-wd" style="color:#DC2626;">일</div>
           <div class="cal-wd">월</div><div class="cal-wd">화</div><div class="cal-wd">수</div>
           <div class="cal-wd">목</div><div class="cal-wd">금</div>
           <div class="cal-wd" style="color:#2563EB;">토</div>
+          <div class="cal-wd" style="color:#DC2626;">일</div>
         </div>
         <div class="cal-days" id="calDays"></div>
       </div>
@@ -1208,7 +1208,8 @@ function renderCalendar(){
   const yr=S.calY,mo=S.calM;
   const mN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
   document.getElementById('calTitle').textContent=`${yr}년 ${mN[mo]}`;
-  const fd=new Date(yr,mo,1).getDay(),ld=new Date(yr,mo+1,0).getDate(),pl=new Date(yr,mo,0).getDate();
+  // Monday-first: shift getDay() so Mon=0 … Sun=6
+  const fd=(new Date(yr,mo,1).getDay()+6)%7,ld=new Date(yr,mo+1,0).getDate(),pl=new Date(yr,mo,0).getDate();
   const cells=[];
   for(let i=fd-1;i>=0;i--)cells.push({d:pl-i,m:mo-1,y:yr+(mo===0?-1:0),o:true});
   for(let d=1;d<=ld;d++)cells.push({d,m:mo,y:yr,o:false});
@@ -1217,7 +1218,7 @@ function renderCalendar(){
   cells.forEach((cell,idx)=>{
     const isT=!cell.o&&cell.d===TODAY.getDate()&&cell.m===TODAY.getMonth()&&cell.y===TODAY.getFullYear();
     const ds=`${cell.y}-${p2(cell.m+1)}-${p2(cell.d)}`;
-    const isSun=idx%7===0,isSat=idx%7===6;
+    const isSat=idx%7===5,isSun=idx%7===6; // Mon-first: col5=Sat, col6=Sun
     const isCmnCat=c=>c==='공통'||c==='전체 공통';
     const singleEvts=[...S.milestones.filter(m=>m.date===ds&&(showCats.includes(m.cat)||isCmnCat(m.cat))),
                       ...S.events.filter(e=>e.date===ds&&!e.endDate&&(showCats.includes(e.cat)||isCmnCat(e.cat)))];
