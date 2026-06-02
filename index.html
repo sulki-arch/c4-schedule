@@ -125,9 +125,15 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .gantt-months{display:flex;}
 .gm{text-align:center;padding:5px 0;font-size:9px;color:var(--text3);border-right:1px solid var(--border);flex-shrink:0;font-weight:600;}
 .gm.cur{color:var(--accent);font-weight:800;background:var(--accent-dim);}
-.gantt-group-header{display:flex;background:#FAFBFC;border-bottom:1px solid var(--border);}
+.gantt-group-header{display:flex;background:#FAFBFC;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;}
+.gantt-group-header:hover{background:#F3F4F6;}
 .ggl{min-width:190px;max-width:190px;padding:8px 16px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:7px;border-right:1px solid var(--border);color:var(--text2);}
 .gg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.gg-toggle{margin-left:auto;font-size:10px;color:var(--text3);transition:transform 0.2s;flex-shrink:0;}
+.gantt-group-body.collapsed{display:none;}
+.gantt-ms-row{display:flex;border-bottom:1px solid var(--border);min-height:34px;background:#FDFCFF;}
+.gantt-ms-label{min-width:190px;max-width:190px;padding:0 16px;font-size:10px;color:var(--text3);display:flex;align-items:center;border-right:1px solid var(--border);font-weight:700;gap:5px;letter-spacing:0.3px;}
+.gantt-ms-bar{flex:1;position:relative;overflow:hidden;}
 .gantt-row{display:flex;border-bottom:1px solid var(--border);min-height:34px;transition:background 0.12s;}
 .gantt-row:hover{background:rgba(0,0,0,0.012);}
 .grl{min-width:190px;max-width:190px;padding:0 16px;font-size:11px;color:var(--text2);display:flex;align-items:center;border-right:1px solid var(--border);font-weight:500;line-height:1.4;}
@@ -973,14 +979,35 @@ function renderGantt(){
   const NX=nx();
   const gL={'F+P':'F+P (해외설계사)','삼우건축':'삼우건축 (국내)','기타':'인테리어','인허가':'인허가·심의','한미글로벌':'한미글로벌 (PM)','크래프톤':'크래프톤 (공사)'};
   const groups=S.cats.filter(c=>canSeeCategory(c)).map(c=>c.name);
+  if(!window._ganttCollapsed) window._ganttCollapsed={};
   groups.forEach(grp=>{
     const col=cc(grp);
     const phases=S.phases.filter(p=>p.cat===grp);
     const ms2=S.milestones.filter(m=>m.cat===grp);
-    h+=`<div class="gantt-group-header">
-      <div class="ggl"><div class="gg-dot" style="background:${col}"></div><span style="color:${col}">${gL[grp]||grp}</span></div>
+    const gid='gg_'+grp.replace(/[^a-zA-Z0-9]/g,'_');
+    const collapsed=window._ganttCollapsed[grp]===true;
+    const toggleIcon=collapsed?'▶':'▼';
+    h+=`<div class="gantt-group-header" onclick="toggleGanttGroup('${grp}')">
+      <div class="ggl"><div class="gg-dot" style="background:${col}"></div><span style="color:${col}">${gL[grp]||grp}</span><span class="gg-toggle" id="gg-icon-${gid}">${toggleIcon}</span></div>
       <div style="flex:1;min-width:${tw}px;position:relative;"><div class="gnl" style="left:${NX}px;"></div></div>
     </div>`;
+    h+=`<div class="gantt-group-body${collapsed?' collapsed':''}" id="${gid}">`;
+    // 마일스톤 행 (최상단)
+    if(ms2.length){
+      let bgc='';for(let i=0;i<total;i++){const d=new Date(GS.getFullYear(),GS.getMonth()+i,1);const ic=d.getFullYear()===TODAY.getFullYear()&&d.getMonth()===TODAY.getMonth();bgc+=`<div class="gmbg${ic?' cc':''}" style="width:${MW}px;"></div>`;}
+      h+=`<div class="gantt-ms-row">
+        <div class="gantt-ms-label">◆ 마일스톤</div>
+        <div class="gantt-ms-bar" style="min-width:${tw}px;">
+          <div class="gtbg">${bgc}</div>
+          <div class="gnl" style="left:${NX}px;"></div>`;
+      ms2.forEach(m=>{
+        const mx=d2x(m.date);const past=new Date(m.date+'T00:00:00')<TODAY;
+        h+=`<div class="gms" style="left:${mx}px;background:${past?col:'transparent'};border-color:${col};"
+          onmouseenter="showMTT(event,'${esc(m.name)}','${m.date}')" onmouseleave="hideTT()"></div>`;
+      });
+      h+=`</div></div>`;
+    }
+    // 단계(phase) 행
     phases.forEach(p=>{
       const x1=Math.max(0,d2x(p.start)),x2=Math.min(tw,d2x(p.end)),w=Math.max(4,x2-x1);
       const sd=new Date(p.start+'T00:00:00'),ed=new Date(p.end+'T00:00:00');
@@ -991,7 +1018,7 @@ function renderGantt(){
       h+=`<div class="gantt-row">
         <div class="grl">
           <span class="grl-name">${p.name}</span>
-          ${canEdit()?`<button class="gantt-edit-btn" onclick="openEditPhaseModal(${p.id})" title="날짜 편집">✏️</button>`:''}
+          ${canEdit()?`<button class="gantt-edit-btn" onclick="event.stopPropagation();openEditPhaseModal(${p.id})" title="날짜 편집">✏️</button>`:''}
         </div>
         <div class="grt" style="min-width:${tw}px;">
           <div class="gtbg">${bgc}</div>
@@ -1005,23 +1032,19 @@ function renderGantt(){
         </div>
       </div>`;
     });
-    if(ms2.length){
-      let bgc='';for(let i=0;i<total;i++){const d=new Date(GS.getFullYear(),GS.getMonth()+i,1);const ic=d.getFullYear()===TODAY.getFullYear()&&d.getMonth()===TODAY.getMonth();bgc+=`<div class="gmbg${ic?' cc':''}" style="width:${MW}px;"></div>`;}
-      h+=`<div class="gantt-row" style="">
-        <div class="grl" style="color:var(--text3);font-size:10px;font-weight:600;">◆ 마일스톤</div>
-        <div class="grt" style="min-width:${tw}px;">
-          <div class="gtbg">${bgc}</div>
-          <div class="gnl" style="left:${NX}px;"></div>`;
-      ms2.forEach(m=>{
-        const mx=d2x(m.date);const past=new Date(m.date+'T00:00:00')<TODAY;
-        h+=`<div class="gms" style="left:${mx}px;background:${past?col:'transparent'};border-color:${col};"
-          onmouseenter="showMTT(event,'${esc(m.name)}','${m.date}')" onmouseleave="hideTT()"></div>`;
-      });
-      h+=`</div></div>`;
-    }
+    h+=`</div>`;
   });
   h+=`</div>`;
   document.getElementById('ganttChart').innerHTML=h;
+}
+function toggleGanttGroup(grp){
+  if(!window._ganttCollapsed) window._ganttCollapsed={};
+  window._ganttCollapsed[grp]=!window._ganttCollapsed[grp];
+  const gid='gg_'+grp.replace(/[^a-zA-Z0-9]/g,'_');
+  const body=document.getElementById(gid);
+  const icon=document.getElementById('gg-icon-'+gid);
+  if(body) body.classList.toggle('collapsed',window._ganttCollapsed[grp]);
+  if(icon) icon.textContent=window._ganttCollapsed[grp]?'▶':'▼';
 }
 function esc(s){return s.replace(/'/g,"\\'").replace(/"/g,'&quot;');}
 
