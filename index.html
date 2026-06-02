@@ -297,23 +297,11 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 </head>
 <body>
 
-<!-- LOADING OVERLAY -->
-<div id="loadingOverlay" style="position:fixed;inset:0;background:#F5F6F8;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2000;">
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-    <div style="width:40px;height:40px;background:#E8401C;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:20px;color:#fff;">K</div>
-    <div><div style="font-size:18px;font-weight:800;">KRAFTON C4</div><div style="font-size:11px;color:#9CA3AF;letter-spacing:2px;text-transform:uppercase;">Project Schedule</div></div>
-  </div>
-  <div style="display:flex;gap:6px;">
-    <div style="width:8px;height:8px;border-radius:50%;background:#E8401C;animation:ldot 1.2s infinite 0s;"></div>
-    <div style="width:8px;height:8px;border-radius:50%;background:#E8401C;animation:ldot 1.2s infinite 0.2s;"></div>
-    <div style="width:8px;height:8px;border-radius:50%;background:#E8401C;animation:ldot 1.2s infinite 0.4s;"></div>
-  </div>
-  <div style="margin-top:14px;font-size:12px;color:#9CA3AF;" id="loadingMsg">데이터 불러오는 중...</div>
-</div>
+<div id="loadingOverlay" style="display:none;"></div>
 <style>@keyframes ldot{0%,100%{opacity:0.2;transform:scale(0.8);}50%{opacity:1;transform:scale(1);}}</style>
 
 <!-- LOGIN -->
-<div id="loginScreen" style="display:none;">
+<div id="loginScreen" style="display:flex;">
   <div class="login-box">
     <div class="login-brand">
       <div class="k-circle">K</div>
@@ -618,39 +606,27 @@ function startOfflineMode(){
   },800);
 }
 
-function hideLoading(){
-  document.getElementById('loadingOverlay').style.display='none';
-}
-function initFirebase(){
-  // Firebase 응답 없을 때를 대비한 타임아웃 (3초)
-  const fbTimeout = setTimeout(startOfflineMode, 3000);
+function hideLoading(){ document.getElementById('loadingOverlay').style.display='none'; }
 
+function initFirebase(){
+  // 로그인 화면은 즉시 표시, Firebase는 백그라운드 동기화
   db.ref(DB_REF).on('value', snapshot => {
-    clearTimeout(fbTimeout);
     try { applyFirebaseData(snapshot.val()); } catch(e){ console.warn('applyFirebaseData 오류:',e); reset(); }
     if(firstLoad){
       firstLoad=false;
+      try { initLogin(); } catch(e){ console.warn('initLogin 오류:',e); }
       try {
-        const badge=document.getElementById('lastImportBadge');
-        if(badge)badge.textContent=S.lastImport?'마지막 가져오기: '+S.lastImport:'기준 버전: '+SCHEDULE_VERSION;
-        initLogin();
-      } catch(e){ console.warn('initLogin 오류:',e); }
-      hideLoading();
-      try {
-        if(!checkAutoLogin()){
-          document.getElementById('loginScreen').style.display='flex';
-        }
-      } catch(e){
-        console.warn('checkAutoLogin 오류:',e);
-        document.getElementById('loginScreen').style.display='flex';
-      }
+        if(checkAutoLogin()) return; // 자동로그인 성공 시 로그인 화면 유지
+      } catch(e){ console.warn('checkAutoLogin 오류:',e); }
+      // 자동로그인 없으면 로그인 화면 유지 (이미 표시 중)
     } else {
+      // 이미 로그인 중일 때 다른 기기 변경사항 동기화
       try { initLogin(); if(S.user){ renderAll(); showSyncToast(); } } catch(e){ console.warn('sync 오류:',e); }
     }
   }, err=>{
-    clearTimeout(fbTimeout);
-    console.warn('Firebase 연결 오류:', err);
-    startOfflineMode();
+    console.warn('Firebase 연결 오류 (오프라인 모드):', err);
+    reset();
+    try { initLogin(); } catch(e){}
   });
 }
 
@@ -1255,7 +1231,13 @@ function renderAll(){renderCatFilter();renderProgress();renderGantt();renderCale
 
 // ═══ INIT ═══
 S.calY=TODAY.getFullYear();S.calM=TODAY.getMonth();
-initFirebase(); // Firebase 연결 → 데이터 로드 → 자동로그인 체크 순으로 진행
+// 즉시 기본 데이터로 초기화 후 로그인 화면 표시
+reset();
+initLogin();
+// 자동로그인 체크 (Firebase 연결 전에도 동작)
+try { checkAutoLogin(); } catch(e){}
+// Firebase 백그라운드 동기화 시작
+initFirebase();
 </script>
 </body>
 </html>
