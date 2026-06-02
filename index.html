@@ -618,25 +618,34 @@ function startOfflineMode(){
   },800);
 }
 
+function hideLoading(){
+  document.getElementById('loadingOverlay').style.display='none';
+}
 function initFirebase(){
-  // Firebase 응답 없을 때를 대비한 타임아웃 (5초)
-  const fbTimeout = setTimeout(startOfflineMode, 5000);
+  // Firebase 응답 없을 때를 대비한 타임아웃 (3초)
+  const fbTimeout = setTimeout(startOfflineMode, 3000);
 
   db.ref(DB_REF).on('value', snapshot => {
     clearTimeout(fbTimeout);
-    applyFirebaseData(snapshot.val());
+    try { applyFirebaseData(snapshot.val()); } catch(e){ console.warn('applyFirebaseData 오류:',e); reset(); }
     if(firstLoad){
       firstLoad=false;
-      const badge=document.getElementById('lastImportBadge');
-      if(badge)badge.textContent=S.lastImport?'마지막 가져오기: '+S.lastImport:'기준 버전: '+SCHEDULE_VERSION;
-      initLogin();
-      document.getElementById('loadingOverlay').style.display='none';
-      if(!checkAutoLogin()){
+      try {
+        const badge=document.getElementById('lastImportBadge');
+        if(badge)badge.textContent=S.lastImport?'마지막 가져오기: '+S.lastImport:'기준 버전: '+SCHEDULE_VERSION;
+        initLogin();
+      } catch(e){ console.warn('initLogin 오류:',e); }
+      hideLoading();
+      try {
+        if(!checkAutoLogin()){
+          document.getElementById('loginScreen').style.display='flex';
+        }
+      } catch(e){
+        console.warn('checkAutoLogin 오류:',e);
         document.getElementById('loginScreen').style.display='flex';
       }
     } else {
-      initLogin();
-      if(S.user){ renderAll(); showSyncToast(); }
+      try { initLogin(); if(S.user){ renderAll(); showSyncToast(); } } catch(e){ console.warn('sync 오류:',e); }
     }
   }, err=>{
     clearTimeout(fbTimeout);
