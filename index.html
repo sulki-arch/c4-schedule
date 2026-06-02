@@ -715,9 +715,7 @@ function exportExcel(){
   const phRows = [
     ['KRAFTON C4 프로젝트 — 전체 일정 (단계)'],
     ['※ 이 파일을 편집한 후 웹 앱의 [엑셀 가져오기] 버튼으로 업로드하면 전체 일정이 자동 업데이트됩니다.'],
-    ['구분','분야','단계명','세부 단계','카테고리','시작일
-(YYYY-MM-DD)','종료일
-(YYYY-MM-DD)','비고'],
+    ['구분','분야','단계명','세부 단계','카테고리','시작일(YYYY-MM-DD)','종료일(YYYY-MM-DD)','비고'],
     ...S.phases.map(p=>['','',p.name,'',dispCat(p.cat),p.start,p.end,''])
   ];
   const ws1 = XLSX.utils.aoa_to_sheet(phRows);
@@ -728,8 +726,7 @@ function exportExcel(){
   const msRows = [
     ['KRAFTON C4 프로젝트 — 마일스톤'],
     ['※ 마일스톤은 참조용입니다. 웹 앱에서 직접 추가/편집하세요.'],
-    ['ID','마일스톤명','카테고리','날짜
-(YYYY-MM-DD)','비고'],
+    ['ID','마일스톤명','카테고리','날짜(YYYY-MM-DD)','비고'],
     ...S.milestones.map((m,i)=>[i+1,m.name,m.cat,m.date,''])
   ];
   const ws2 = XLSX.utils.aoa_to_sheet(msRows);
@@ -740,9 +737,7 @@ function exportExcel(){
   const evRows = [
     ['KRAFTON C4 프로젝트 — 상세 일정 (월간 캘린더 이벤트)'],
     ['※ 상세 일정은 웹 앱 [상세 일정] 탭에서 직접 추가/편집/삭제하세요. Firebase에 실시간 저장됩니다.'],
-    ['ID','일정명','카테고리','시작일
-(YYYY-MM-DD)','종료일
-(YYYY-MM-DD)','설명','비고'],
+    ['ID','일정명','카테고리','시작일(YYYY-MM-DD)','종료일(YYYY-MM-DD)','설명','비고'],
     ...S.events.map((e,i)=>[i+1,e.name,e.cat,e.date,e.endDate||'',e.desc||'',''])
   ];
   const ws3 = XLSX.utils.aoa_to_sheet(evRows);
@@ -751,7 +746,7 @@ function exportExcel(){
 
   // 파일명: 버전 날짜 포함
   const ver = SCHEDULE_VERSION.replace(/-/g,'').slice(2); // '20260508' → '260508'
-  XLSX.writeFile(wb, \`C4_프로젝트_일정표_\${ver}.xlsx\`);
+  XLSX.writeFile(wb, 'C4_프로젝트_일정표_'+ver+'.xlsx');
 }
 
 // ═══ EXCEL IMPORT ═══
