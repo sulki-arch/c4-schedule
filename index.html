@@ -597,13 +597,9 @@ function startOfflineMode(){
   if(!firstLoad)return;
   firstLoad=false;
   console.warn('Firebase 타임아웃 → 오프라인 모드');
-  document.getElementById('loadingMsg').textContent='오프라인 모드로 시작합니다...';
   reset();
-  setTimeout(()=>{
-    document.getElementById('loadingOverlay').style.display='none';
-    document.getElementById('loginScreen').style.display='flex';
-    initLogin();
-  },800);
+  document.getElementById('loginScreen').style.display='flex';
+  initLogin();
 }
 
 function hideLoading(){ document.getElementById('loadingOverlay').style.display='none'; }
@@ -931,7 +927,7 @@ function renderGantt(){
     });
     if(ms2.length){
       let bgc='';for(let i=0;i<total;i++){const d=new Date(GS.getFullYear(),GS.getMonth()+i,1);const ic=d.getFullYear()===TODAY.getFullYear()&&d.getMonth()===TODAY.getMonth();bgc+=`<div class="gmbg${ic?' cc':''}" style="width:${MW}px;"></div>`;}
-      h+=`<div class="gantt-row" style="${dim?'opacity:0.18':''}">
+      h+=`<div class="gantt-row" style="">
         <div class="grl" style="color:var(--text3);font-size:10px;font-weight:600;">◆ 마일스톤</div>
         <div class="grt" style="min-width:${tw}px;">
           <div class="gtbg">${bgc}</div>
@@ -1231,12 +1227,12 @@ function renderAll(){renderCatFilter();renderProgress();renderGantt();renderCale
 
 // ═══ INIT ═══
 S.calY=TODAY.getFullYear();S.calM=TODAY.getMonth();
-// 즉시 기본 데이터로 초기화 후 로그인 화면 표시
+// 기본 데이터로 즉시 시작 (Firebase 연결 전에도 로그인 가능)
 reset();
 initLogin();
-// 자동로그인 체크 (Firebase 연결 전에도 동작)
-try { checkAutoLogin(); } catch(e){}
-// Firebase 백그라운드 동기화 시작
+// 자동로그인 체크
+try{ if(!checkAutoLogin()){ document.getElementById('loginScreen').style.display='flex'; } }catch(e){ document.getElementById('loginScreen').style.display='flex'; }
+// Firebase 백그라운드 동기화
 initFirebase();
 </script>
 </body>
