@@ -260,6 +260,28 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 
 .admin-only{display:none;}
 .admin-only-strict{display:none;}
+/* 편집 모드 토글 버튼 */
+.gantt-edit-mode-btn{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--border2);color:var(--text4);background:#fff;transition:all 0.2s;}
+.gantt-edit-mode-btn:hover{border-color:var(--accent);color:var(--accent);}
+.gantt-edit-mode-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 2px 8px rgba(232,64,28,0.3);}
+/* 편집 모드 활성 시 간트 래퍼 */
+#ganttWrapper.edit-mode{border:2px solid rgba(232,64,28,0.35);border-radius:14px;}
+/* 편집 모드 배너 */
+.gantt-edit-banner{display:none;background:rgba(232,64,28,0.06);border-bottom:1px solid rgba(232,64,28,0.2);padding:7px 16px;font-size:11px;color:var(--accent);font-weight:600;gap:8px;align-items:center;}
+#ganttWrapper.edit-mode .gantt-edit-banner{display:flex;}
+/* 편집 모드에서 버튼 항상 표시 */
+#ganttWrapper.edit-mode .gantt-edit-btn{opacity:1 !important;}
+#ganttWrapper.edit-mode .gms-add-btn{display:flex !important;}
+#ganttWrapper.edit-mode .gms-add-new-btn{display:inline-block !important;}
+/* 편집 모드에서 그룹 헤더 표시명 클릭 가능 */
+#ganttWrapper.edit-mode .gg-label-editable{cursor:pointer;border-bottom:1px dashed rgba(232,64,28,0.4);padding-bottom:1px;}
+#ganttWrapper.edit-mode .gg-label-editable:hover{color:var(--accent);}
+/* 편집 모드에서 단계 추가 버튼 */
+.gantt-add-phase-btn{display:none;width:100%;background:transparent;border:none;border-top:1px dashed var(--border);padding:6px 16px;font-size:11px;color:var(--text3);cursor:pointer;text-align:left;transition:all 0.15s;}
+#ganttWrapper.edit-mode .gantt-add-phase-btn{display:block;}
+.gantt-add-phase-btn:hover{background:var(--accent-dim);color:var(--accent);}
+/* 편집 모드 아닐 때 + 버튼 숨기기 */
+.gms-add-new-btn{display:none;}
 .grl{display:flex;align-items:center;gap:4px;}
 .grl-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .gantt-edit-btn{flex-shrink:0;background:none;border:none;cursor:pointer;font-size:11px;padding:2px 4px;border-radius:4px;opacity:0;transition:opacity 0.15s;line-height:1;}
@@ -413,11 +435,20 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
         <input type="file" id="excelFileInput" accept=".xlsx,.xls,.csv" onchange="importExcel(this)" style="display:none">
       </div>
 
-      <div class="sec-title" style="display:flex;align-items:center;gap:10px;">
+      <div class="sec-title" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
         전체 일정 타임라인 (2025 – 2031)
         <span style="color:var(--accent);font-size:10px;font-weight:400;">▌ 현재 위치</span>
+        <div id="ganttEditToggleWrap" style="display:none;margin-left:auto;">
+          <button id="ganttEditToggleBtn" onclick="toggleGanttEditMode()" class="gantt-edit-mode-btn">✏️ 편집 모드</button>
+        </div>
       </div>
-      <div class="gantt-wrapper"><div class="gantt-scroll" id="ganttChart"></div></div>
+      <div class="gantt-wrapper" id="ganttWrapper">
+        <div class="gantt-edit-banner" id="ganttEditBanner">
+          ✏️ 편집 모드 활성 중 — 항목을 클릭해서 바로 수정하세요
+          <button onclick="toggleGanttEditMode()" style="margin-left:auto;background:none;border:1px solid rgba(232,64,28,0.3);border-radius:12px;padding:2px 10px;font-size:10px;color:var(--accent);cursor:pointer;font-weight:700;">완료</button>
+        </div>
+        <div class="gantt-scroll" id="ganttChart"></div>
+      </div>
     </div>
   </div>
 
@@ -814,8 +845,11 @@ function performLogin(acc,animate){
   S.user=acc;
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('app').style.display='block';
-  // 편집 권한 있으면 admin-only 영역 표시
-  if(acc.role==='admin'||acc.editPerm===true){document.querySelectorAll('.admin-only').forEach(el=>el.style.display='block');}
+  // 편집 권한 있으면 admin-only 영역 및 편집 모드 버튼 표시
+  if(acc.role==='admin'||acc.editPerm===true){
+    document.querySelectorAll('.admin-only').forEach(el=>el.style.display='block');
+    document.getElementById('ganttEditToggleWrap').style.display='flex';
+  }
   // 계정·카테고리 관리는 관리자만
   if(acc.role==='admin'){document.querySelectorAll('.admin-only-strict').forEach(el=>el.style.display='block');}
   document.getElementById('userText').textContent=acc.name||acc.id;
@@ -826,6 +860,12 @@ function performLogin(acc,animate){
 }
 function doLogout(){
   clearSession();S.user=null;
+  // 편집 모드 초기화
+  const wr=document.getElementById('ganttWrapper');
+  if(wr) wr.classList.remove('edit-mode');
+  const eb=document.getElementById('ganttEditToggleBtn');
+  if(eb){eb.classList.remove('active');eb.textContent='✏️ 편집 모드';}
+  document.getElementById('ganttEditToggleWrap').style.display='none';
   document.getElementById('app').style.display='none';
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('loginId').value='';document.getElementById('loginPw').value='';
@@ -1029,8 +1069,12 @@ function renderGantt(){
     const gid='gg_idx_'+gi;  // 인덱스 기반 ID로 버그 수정
     const collapsed=window._ganttCollapsed[gid]===true;
     const toggleIcon=collapsed?'▶':'▼';
+    const catIdx=S.cats.indexOf(catObj);
     h+=`<div class="gantt-group-header" onclick="toggleGanttGroup('${gid}')">
-      <div class="ggl"><div class="gg-dot" style="background:${col}"></div><span style="color:${col}">${dispLabel}</span><span class="gg-toggle" id="gg-icon-${gid}">${toggleIcon}</span></div>
+      <div class="ggl"><div class="gg-dot" style="background:${col}"></div>
+        <span class="gg-label-editable" style="color:${col}" onclick="event.stopPropagation();editCatLabelInline(${catIdx})" title="표시명 편집">${dispLabel}</span>
+        <span class="gg-toggle" id="gg-icon-${gid}">${toggleIcon}</span>
+      </div>
       <div style="flex:1;min-width:${tw}px;position:relative;"><div class="gnl" style="left:${NX}px;"></div></div>
     </div>`;
     h+=`<div class="gantt-group-body${collapsed?' collapsed':''}" id="${gid}">`;
@@ -1096,10 +1140,40 @@ function renderGantt(){
         </div>
       </div>`;
     });
+    if(canEdit()){
+      h+=`<button class="gantt-add-phase-btn" onclick="openAddPhaseModalForGroup('${esc(grp)}')">＋ ${dispLabel} 단계 추가</button>`;
+    }
     h+=`</div>`;
   });
   h+=`</div>`;
   document.getElementById('ganttChart').innerHTML=h;
+}
+// ═══ 편집 모드 ═══
+function toggleGanttEditMode(){
+  const wrapper=document.getElementById('ganttWrapper');
+  const btn=document.getElementById('ganttEditToggleBtn');
+  const isOn=wrapper.classList.toggle('edit-mode');
+  btn.classList.toggle('active',isOn);
+  btn.textContent=isOn?'✏️ 편집 중':'✏️ 편집 모드';
+}
+function editCatLabelInline(i){
+  if(!document.getElementById('ganttWrapper').classList.contains('edit-mode')) return;
+  const c=S.cats[i];
+  const cur=c.label||c.name;
+  const n=prompt('간트 표시명 편집:\n예: 크래프톤 (공사), 한미글로벌 (PM)',cur);
+  if(n===null) return;
+  S.cats[i].label=n.trim()||c.name;
+  save(); renderGantt();
+}
+function openAddPhaseModalForGroup(grp){
+  document.getElementById('phaseModalTitle').textContent='일정 단계 추가';
+  document.getElementById('editPhaseId').value='';
+  document.getElementById('pName').value='';
+  document.getElementById('pStart').value='';
+  document.getElementById('pEnd').value='';
+  openModal('phaseModal');
+  const sel=document.getElementById('pCat');
+  if(sel){for(let i=0;i<sel.options.length;i++){if(sel.options[i].value===grp){sel.selectedIndex=i;break;}}}
 }
 function toggleGanttGroup(gid){
   if(!window._ganttCollapsed) window._ganttCollapsed={};
