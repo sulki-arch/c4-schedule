@@ -610,7 +610,7 @@ const DA=[
   {id:'guest_permit',pw:'IH2026!',role:'guest',cat:'인허가',name:'인허가 게스트',editPerm:false},
   {id:'guest_etc',pw:'ET2026!',role:'guest',cat:'기타',name:'기타 게스트',editPerm:false},
 ];
-const SCHEDULE_VERSION = '2026-06-02';
+const SCHEDULE_VERSION = '2026-06-04';
 const DP=[
   {id:1,name:'설계 단계',cat:'크래프톤',start:'2026-02-01',end:'2027-04-30'},
   {id:2,name:'시공 단계',cat:'크래프톤',start:'2027-05-01',end:'2031-06-30'},
@@ -710,6 +710,7 @@ function cc(n){const c=S.cats.find(x=>x.name===n);return c?c.color:'#888';}
 // ── 저장: Firebase로 ──
 function save(){
   const data={
+    scheduleVersion: SCHEDULE_VERSION,
     cats:S.cats, accounts:S.accounts,
     phases:S.phases, milestones:S.milestones,
     events:S.events, lastImport:S.lastImport||null
@@ -733,12 +734,25 @@ function showSaveStatus(){
 function fa(v,def){const a=arr(v);return(a&&a.length)?a:jc(def);}
 function applyFirebaseData(data){
   if(data){
-    S.cats      = fa(data.cats,      DC);
+    // 계정·이벤트는 항상 Firebase 우선 (사용자 편집 보존)
     S.accounts  = fa(data.accounts,  DA);
-    S.phases    = fa(data.phases,    DP);
-    S.milestones= fa(data.milestones,DM);
     S.events    = fa(data.events,    DEV);
     S.lastImport= data.lastImport    || null;
+
+    // scheduleVersion이 다르면 → 코드 기본값으로 cats/phases/milestones 자동 갱신
+    const fbVer = data.scheduleVersion || '';
+    if(fbVer !== SCHEDULE_VERSION){
+      console.log(`[버전 업데이트] Firebase(${fbVer}) → 코드(${SCHEDULE_VERSION}): 기본 데이터 적용`);
+      S.cats       = jc(DC);
+      S.phases     = jc(DP);
+      S.milestones = jc(DM);
+      // 백그라운드 저장 (버전 포함)
+      setTimeout(()=>save(), 500);
+    } else {
+      S.cats       = fa(data.cats,       DC);
+      S.phases     = fa(data.phases,     DP);
+      S.milestones = fa(data.milestones, DM);
+    }
   } else {
     reset();
     save(); // Firebase에 기본값 초기화
