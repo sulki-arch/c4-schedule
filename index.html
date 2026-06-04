@@ -134,6 +134,8 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .gantt-ms-row{display:flex;border-bottom:1px solid var(--border);min-height:34px;background:#FDFCFF;}
 .gantt-ms-label{min-width:190px;max-width:190px;padding:0 16px;font-size:10px;color:var(--text3);display:flex;align-items:center;border-right:1px solid var(--border);font-weight:700;gap:5px;letter-spacing:0.3px;}
 .gantt-ms-bar{flex:1;position:relative;overflow:hidden;}
+.gantt-ms-row:hover{background:rgba(0,0,0,0.012);}
+.gantt-ms-row:hover .gantt-edit-btn{opacity:1 !important;}
 .gantt-row{display:flex;border-bottom:1px solid var(--border);min-height:34px;transition:background 0.12s;}
 .gantt-row:hover{background:rgba(0,0,0,0.012);}
 .grl{min-width:190px;max-width:190px;padding:0 16px;font-size:11px;color:var(--text2);display:flex;align-items:center;border-right:1px solid var(--border);font-weight:500;line-height:1.4;}
@@ -453,7 +455,16 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
             <button class="btn-s" onclick="openAddMilestoneModal()">+ 마일스톤 추가</button>
             <button class="btn-s admin-only-strict" style="margin-left:auto;color:#DC2626;border-color:#DC2626;" onclick="resetToDefault()">🔄 기본 데이터로 초기화</button>
           </div>
-          <div style="max-height:320px;overflow-y:auto;" id="phaseList"></div>
+          <div style="display:flex;gap:16px;align-items:flex-start;">
+            <div style="flex:1;min-width:0;">
+              <div class="sec-title" style="margin-bottom:8px;">단계 (${S&&S.phases?S.phases.length:0}개)</div>
+              <div style="max-height:320px;overflow-y:auto;" id="phaseList"></div>
+            </div>
+            <div style="width:280px;flex-shrink:0;">
+              <div class="sec-title" style="margin-bottom:8px;">마일스톤</div>
+              <div style="max-height:320px;overflow-y:auto;" id="milestoneList"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -474,11 +485,16 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 </div>
 <div class="mo mh" id="msModal">
   <div class="mb">
-    <h3>마일스톤 추가</h3>
+    <h3 id="msModalTitle">마일스톤 추가</h3>
+    <input type="hidden" id="mEditId">
     <div class="fg"><label>마일스톤명</label><input type="text" id="mName"></div>
     <div class="fg"><label>카테고리</label><select id="mCat"></select></div>
     <div class="fg"><label>날짜</label><input type="date" id="mDate"></div>
-    <div class="ma"><button class="btn-s" onclick="closeModal('msModal')">취소</button><button class="btn-p" onclick="saveMilestone()">저장</button></div>
+    <div class="ma">
+      <button id="msDeleteBtn" class="btn-s" style="color:#DC2626;border-color:#DC2626;margin-right:auto;display:none;" onclick="deleteCurrentMilestone()">삭제</button>
+      <button class="btn-s" onclick="closeModal('msModal')">취소</button>
+      <button class="btn-p" onclick="saveMilestone()">저장</button>
+    </div>
   </div>
 </div>
 <div class="mo mh" id="evModal">
@@ -531,13 +547,13 @@ const DC=[
   {name:'인허가',color:'#D97706'},{name:'기타',color:'#475569'},
 ];
 const DA=[
-  {id:'admin',pw:'C4Admin2026!',role:'admin',cat:'all',name:'관리자'},
-  {id:'guest_krafton',pw:'KR2026!',role:'guest',cat:'크래프톤',name:'크래프톤 게스트'},
-  {id:'guest_hanmi',pw:'HM2026!',role:'guest',cat:'한미글로벌',name:'한미글로벌 게스트'},
-  {id:'guest_samoo',pw:'SW2026!',role:'guest',cat:'삼우건축',name:'삼우건축 게스트'},
-  {id:'guest_fp',pw:'FP2026!',role:'guest',cat:'F+P',name:'F+P 게스트'},
-  {id:'guest_permit',pw:'IH2026!',role:'guest',cat:'인허가',name:'인허가 게스트'},
-  {id:'guest_etc',pw:'ET2026!',role:'guest',cat:'기타',name:'기타 게스트'},
+  {id:'admin',pw:'C4Admin2026!',role:'admin',cat:'all',name:'관리자',editPerm:true},
+  {id:'guest_krafton',pw:'KR2026!',role:'guest',cat:'크래프톤',name:'크래프톤 게스트',editPerm:false},
+  {id:'guest_hanmi',pw:'HM2026!',role:'guest',cat:'한미글로벌',name:'한미글로벌 게스트',editPerm:true},
+  {id:'guest_samoo',pw:'SW2026!',role:'guest',cat:'삼우건축',name:'삼우건축 게스트',editPerm:false},
+  {id:'guest_fp',pw:'FP2026!',role:'guest',cat:'F+P',name:'F+P 게스트',editPerm:false},
+  {id:'guest_permit',pw:'IH2026!',role:'guest',cat:'인허가',name:'인허가 게스트',editPerm:false},
+  {id:'guest_etc',pw:'ET2026!',role:'guest',cat:'기타',name:'기타 게스트',editPerm:false},
 ];
 const SCHEDULE_VERSION = '2026-06-02';
 const DP=[
@@ -774,7 +790,8 @@ function performLogin(acc,animate){
   S.user=acc;
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('app').style.display='block';
-  if(acc.role==='admin'||acc.cat==='한미글로벌'){document.querySelectorAll('.admin-only').forEach(el=>el.style.display='block');}
+  // 편집 권한 있으면 admin-only 영역 표시
+  if(acc.role==='admin'||acc.editPerm===true){document.querySelectorAll('.admin-only').forEach(el=>el.style.display='block');}
   // 계정·카테고리 관리는 관리자만
   if(acc.role==='admin'){document.querySelectorAll('.admin-only-strict').forEach(el=>el.style.display='block');}
   document.getElementById('userText').textContent=acc.name||acc.id;
@@ -992,21 +1009,24 @@ function renderGantt(){
       <div style="flex:1;min-width:${tw}px;position:relative;"><div class="gnl" style="left:${NX}px;"></div></div>
     </div>`;
     h+=`<div class="gantt-group-body${collapsed?' collapsed':''}" id="${gid}">`;
-    // 마일스톤 행 (최상단)
-    if(ms2.length){
+    // 마일스톤 행 (최상단) - 각 마일스톤별 개별 행
+    ms2.forEach(m=>{
       let bgc='';for(let i=0;i<total;i++){const d=new Date(GS.getFullYear(),GS.getMonth()+i,1);const ic=d.getFullYear()===TODAY.getFullYear()&&d.getMonth()===TODAY.getMonth();bgc+=`<div class="gmbg${ic?' cc':''}" style="width:${MW}px;"></div>`;}
+      const mx=d2x(m.date);const past=new Date(m.date+'T00:00:00')<TODAY;
       h+=`<div class="gantt-ms-row">
-        <div class="gantt-ms-label">◆ 마일스톤</div>
+        <div class="gantt-ms-label">
+          <span style="color:${col};margin-right:2px;">◆</span>
+          <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text2);font-size:10px;">${m.name}</span>
+          ${canEdit()?`<button class="gantt-edit-btn" onclick="event.stopPropagation();openEditMilestoneModal(${m.id})" title="마일스톤 편집" style="opacity:0;">✏️</button>`:''}
+        </div>
         <div class="gantt-ms-bar" style="min-width:${tw}px;">
           <div class="gtbg">${bgc}</div>
-          <div class="gnl" style="left:${NX}px;"></div>`;
-      ms2.forEach(m=>{
-        const mx=d2x(m.date);const past=new Date(m.date+'T00:00:00')<TODAY;
-        h+=`<div class="gms" style="left:${mx}px;background:${past?col:'transparent'};border-color:${col};"
-          onmouseenter="showMTT(event,'${esc(m.name)}','${m.date}')" onmouseleave="hideTT()"></div>`;
-      });
-      h+=`</div></div>`;
-    }
+          <div class="gnl" style="left:${NX}px;"></div>
+          <div class="gms" style="left:${mx}px;background:${past?col:'transparent'};border-color:${col};"
+            onmouseenter="showMTT(event,'${esc(m.name)}','${m.date}')" onmouseleave="hideTT()"></div>
+        </div>
+      </div>`;
+    });
     // 단계(phase) 행
     phases.forEach(p=>{
       const x1=Math.max(0,d2x(p.start)),x2=Math.min(tw,d2x(p.end)),w=Math.max(4,x2-x1);
@@ -1198,9 +1218,14 @@ function renderSettings(){
   const isAdmin=S.user.role==='admin';
   document.getElementById('accountList').innerHTML=S.accounts.map(a=>{
     const col=a.cat==='all'?'#888':cc(a.cat);
+    const isAdmin=a.role==='admin';
+    const perm=isAdmin?true:!!a.editPerm;
+    const permLabel=isAdmin?'<span style="font-size:10px;background:rgba(232,64,28,0.1);color:var(--accent);padding:2px 7px;border-radius:10px;font-weight:700;border:1px solid rgba(232,64,28,0.2);">관리자</span>':
+      `<button class="ab perm-btn${perm?' perm-on':''}" onclick="toggleEditPerm('${a.id}')" title="편집 권한 토글" style="${perm?'color:#059669;border-color:#059669;background:rgba(5,150,105,0.07);':'color:var(--text3);'}">${perm?'✏️ 편집가능':'👁 읽기전용'}</button>`;
     return`<div class="acc-row"><div class="acc-dot" style="background:${col}"></div>
-      <div class="acc-info"><div class="acc-id">${a.id} <span style="font-size:10px;color:var(--text3)">[${a.role==='admin'?'관리자':'게스트'}]</span></div><div class="acc-cat">${a.cat}</div></div>
+      <div class="acc-info"><div class="acc-id">${a.name||a.id} <span style="font-size:10px;color:var(--text3)">[${a.id}]</span></div><div class="acc-cat">${a.cat}</div></div>
       <div class="acc-pw">${a.pw}</div>
+      ${permLabel}
       <button class="ab" onclick="editAcc('${a.id}')">편집</button>
       ${a.id!=='admin'?`<button class="ab d" onclick="delAcc('${a.id}')">삭제</button>`:''}
     </div>`;
@@ -1223,8 +1248,22 @@ function renderSettings(){
       <button class="ab" onclick="openEditPhaseModal(${p.id})">편집</button>
       <button class="ab d" onclick="delPhase(${p.id})">삭제</button>
     </div>`).join('');
+  const mlEl=document.getElementById('milestoneList');
+  if(mlEl) mlEl.innerHTML=S.milestones.map(m=>`
+    <div class="phase-item"><div style="width:9px;height:9px;border-radius:2px;transform:rotate(45deg);background:${cc(m.cat)};flex-shrink:0;"></div>
+      <div style="flex:1;"><div style="font-size:12px;font-weight:600;">${m.name}</div>
+      <div style="font-size:10px;color:var(--text3);">${m.date} · ${m.cat}</div></div>
+      <button class="ab" onclick="openEditMilestoneModal(${m.id})">편집</button>
+      <button class="ab d" onclick="delMilestone(${m.id})">삭제</button>
+    </div>`).join('');
   // nCat: 관리자용 새 계정 추가 드롭다운 (모든 카테고리 표시)
   const nCatEl=document.getElementById('nCat');if(nCatEl)nCatEl.innerHTML=S.cats.map(c=>`<option value="${c.name}">${c.name}${c.restricted?' 🔒':''}</option>`).join('');
+}
+function toggleEditPerm(id){
+  const a=S.accounts.find(x=>x.id===id);
+  if(!a||a.role==='admin')return;
+  a.editPerm=!a.editPerm;
+  save();renderSettings();
 }
 function addAccount(){const id=document.getElementById('nId').value.trim(),pw=document.getElementById('nPw').value.trim(),cat=document.getElementById('nCat').value,role=document.getElementById('nRole').value;if(!id||!pw)return alert('아이디와 비밀번호를 입력하세요.');if(S.accounts.find(a=>a.id===id))return alert('이미 존재하는 아이디입니다.');S.accounts.push({id,pw,role,cat,name:`${cat} 게스트`});save();renderSettings();initLogin();document.getElementById('nId').value='';document.getElementById('nPw').value='';}
 function editAcc(id){const a=S.accounts.find(x=>x.id===id);if(!a)return;const pw=prompt(`"${id}" 새 비밀번호:`,a.pw);if(pw===null)return;a.pw=pw;save();renderSettings();initLogin();}
@@ -1239,8 +1278,48 @@ function openAddPhaseModal(){document.getElementById('phaseModalTitle').textCont
 function openEditPhaseModal(id){const p=S.phases.find(x=>x.id===id);if(!p)return;document.getElementById('phaseModalTitle').textContent='일정 단계 편집';document.getElementById('editPhaseId').value=id;document.getElementById('pName').value=p.name;document.getElementById('pCat').value=p.cat;document.getElementById('pStart').value=p.start;document.getElementById('pEnd').value=p.end;openModal('phaseModal');}
 function savePhase(){const id=document.getElementById('editPhaseId').value;const obj={name:document.getElementById('pName').value,cat:document.getElementById('pCat').value,start:document.getElementById('pStart').value,end:document.getElementById('pEnd').value};if(!obj.name||!obj.start||!obj.end){alert('모든 필드를 입력하세요.');return;}if(id){const idx=S.phases.findIndex(x=>x.id==id);S.phases[idx]={...S.phases[idx],...obj};}else{obj.id=Date.now();S.phases.push(obj);}closeModal('phaseModal');save();renderAll();}
 function delPhase(id){if(!confirm('삭제하시겠습니까?'))return;S.phases=S.phases.filter(p=>p.id!==id);save();renderAll();}
-function openAddMilestoneModal(){openModal('msModal');}
-function saveMilestone(){const obj={id:Date.now(),name:document.getElementById('mName').value,cat:document.getElementById('mCat').value,date:document.getElementById('mDate').value};if(!obj.name||!obj.date){alert('이름과 날짜를 입력하세요.');return;}S.milestones.push(obj);closeModal('msModal');save();renderAll();}
+function delMilestone(id){if(!confirm('마일스톤을 삭제하시겠습니까?'))return;S.milestones=S.milestones.filter(m=>m.id!==id);save();renderAll();}
+function openAddMilestoneModal(){
+  document.getElementById('msModalTitle').textContent='마일스톤 추가';
+  document.getElementById('mEditId').value='';
+  document.getElementById('mName').value='';
+  document.getElementById('mDate').value='';
+  document.getElementById('msDeleteBtn').style.display='none';
+  openModal('msModal');
+}
+function openEditMilestoneModal(id){
+  if(!canEdit())return;
+  const m=S.milestones.find(x=>x.id===id);
+  if(!m)return;
+  document.getElementById('msModalTitle').textContent='마일스톤 편집';
+  document.getElementById('mEditId').value=id;
+  document.getElementById('mName').value=m.name;
+  document.getElementById('mDate').value=m.date;
+  document.getElementById('msDeleteBtn').style.display='inline-block';
+  openModal('msModal');
+  // 카테고리 선택
+  const sel=document.getElementById('mCat');
+  if(sel){for(let i=0;i<sel.options.length;i++){if(sel.options[i].value===m.cat){sel.selectedIndex=i;break;}}}
+}
+function saveMilestone(){
+  const editId=document.getElementById('mEditId').value;
+  const obj={name:document.getElementById('mName').value,cat:document.getElementById('mCat').value,date:document.getElementById('mDate').value};
+  if(!obj.name||!obj.date){alert('이름과 날짜를 입력하세요.');return;}
+  if(editId){
+    const idx=S.milestones.findIndex(x=>String(x.id)===String(editId));
+    if(idx>=0)S.milestones[idx]={...S.milestones[idx],...obj};
+  } else {
+    obj.id=Date.now();S.milestones.push(obj);
+  }
+  closeModal('msModal');save();renderAll();
+}
+function deleteCurrentMilestone(){
+  const editId=document.getElementById('mEditId').value;
+  if(!editId)return;
+  if(!confirm('이 마일스톤을 삭제하시겠습니까?'))return;
+  S.milestones=S.milestones.filter(m=>String(m.id)!==String(editId));
+  closeModal('msModal');save();renderAll();
+}
 
 // ═══ MODAL HELPERS ═══
 function openModal(id){
@@ -1319,8 +1398,12 @@ function canSeeCategory(cat){
   if(S.user.role==='admin')return true;
   return S.user.cat!=='all'&&cat.name.startsWith(S.user.cat);
 }
-// 편집 권한: 관리자 또는 한미글로벌 계정
-function canEdit(){return S.user&&(S.user.role==='admin'||S.user.cat==='한미글로벌');}
+// 편집 권한: 관리자이거나 계정의 editPerm=true인 경우
+function canEdit(){
+  if(!S.user) return false;
+  if(S.user.role==='admin') return true;
+  return S.user.editPerm===true;
+}
 function toggleCatRestrict(i){
   S.cats[i].restricted=!S.cats[i].restricted;
   save();renderAll();
