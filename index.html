@@ -125,25 +125,28 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .gantt-months{display:flex;}
 .gm{text-align:center;padding:5px 0;font-size:9px;color:var(--text3);border-right:1px solid var(--border);flex-shrink:0;font-weight:600;}
 .gm.cur{color:var(--accent);font-weight:800;background:var(--accent-dim);}
-.gantt-group-header{display:flex;background:#FAFBFC;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;}
+.gantt-group-header{display:flex;background:#FAFBFC;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;min-height:52px;}
 .gantt-group-header:hover{background:#F3F4F6;}
+.gantt-group-header .grt-ms{flex:1;position:relative;overflow:visible;min-height:52px;}
 .ggl{min-width:190px;max-width:190px;padding:8px 16px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:7px;border-right:1px solid var(--border);color:var(--text2);}
 .gg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
 .gg-toggle{margin-left:auto;font-size:10px;color:var(--text3);transition:transform 0.2s;flex-shrink:0;}
 .gantt-group-body.collapsed{display:none;}
-.gantt-ms-row{display:flex;border-bottom:1px solid var(--border);min-height:72px;background:#FDFCFF;}
-.gantt-ms-label{min-width:190px;max-width:190px;padding:0 16px;font-size:10px;color:var(--text3);display:flex;align-items:center;justify-content:center;border-right:1px solid var(--border);font-weight:700;gap:5px;letter-spacing:0.3px;}
-.gantt-ms-bar{flex:1;position:relative;overflow:hidden;}
-.gantt-ms-row:hover{background:rgba(0,0,0,0.012);}
-/* 마일스톤 아이템 (다이아몬드 + 레이블) */
-.gms-wrap{position:absolute;display:flex;flex-direction:column;align-items:center;transform:translateX(-50%);z-index:6;cursor:pointer;}
-.gms-diamond{width:13px;height:13px;transform:rotate(45deg);border:2px solid;transition:transform 0.15s,box-shadow 0.15s;margin-top:10px;flex-shrink:0;}
-.gms-wrap:hover .gms-diamond{transform:rotate(45deg) scale(1.35);box-shadow:0 2px 8px rgba(0,0,0,0.18);}
-.gms-name{font-size:9px;font-weight:700;margin-top:5px;white-space:nowrap;max-width:72px;overflow:hidden;text-overflow:ellipsis;text-align:center;line-height:1.2;}
-.gms-date{font-size:8px;color:var(--text3);white-space:nowrap;margin-top:1px;text-align:center;}
-.gms-note{font-size:8px;color:var(--text4);white-space:nowrap;max-width:90px;overflow:hidden;text-overflow:ellipsis;margin-top:1px;text-align:center;font-style:italic;}
-.gms-add-btn{position:absolute;top:2px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;border:none;border-radius:50%;width:14px;height:14px;font-size:10px;line-height:1;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:10;padding:0;box-shadow:0 1px 4px rgba(0,0,0,0.2);}
-.gms-wrap:hover .gms-add-btn{display:flex;}
+/* 마일스톤 — 그룹 헤더 행 안에 표시 */
+.gantt-group-header{overflow:visible;}
+/* 마일스톤 아이템 (원형 솔리드 버튼 + 레이블) */
+.gms-wrap{position:absolute;display:flex;flex-direction:column;align-items:center;transform:translateX(-50%);z-index:6;cursor:default;top:0;bottom:0;justify-content:center;}
+.gms-circle{width:11px;height:11px;border-radius:50%;border:2px solid;transition:transform 0.15s,box-shadow 0.15s;flex-shrink:0;cursor:pointer;}
+.gms-wrap:hover .gms-circle{transform:scale(1.35);box-shadow:0 2px 8px rgba(0,0,0,0.2);}
+.gms-name{font-size:8px;font-weight:700;margin-top:3px;white-space:nowrap;max-width:72px;overflow:hidden;text-overflow:ellipsis;text-align:center;line-height:1.2;}
+.gms-date{font-size:7px;color:var(--text3);white-space:nowrap;margin-top:1px;text-align:center;}
+.gms-note{font-size:7px;color:var(--text4);white-space:nowrap;max-width:90px;overflow:hidden;text-overflow:ellipsis;margin-top:1px;text-align:center;font-style:italic;}
+/* 편집 모드에서만 보이는 마일스톤 편집 버튼 */
+.gms-edit-btn{display:none;position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;border:none;border-radius:50%;width:13px;height:13px;font-size:9px;line-height:1;cursor:pointer;align-items:center;justify-content:center;z-index:10;padding:0;box-shadow:0 1px 4px rgba(0,0,0,0.25);}
+#ganttWrapper.edit-mode .gms-edit-btn{display:flex;}
+/* 편집 모드에서 + 마일스톤 추가 버튼 */
+.gms-add-new-btn{display:none;}
+#ganttWrapper.edit-mode .gms-add-new-btn{display:inline-block;}
 /* 마일스톤 인라인 편집 팝오버 */
 .ms-popover{position:fixed;background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;box-shadow:0 8px 28px rgba(0,0,0,0.15);z-index:300;width:240px;}
 .ms-popover h4{font-size:12px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
@@ -168,8 +171,8 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .gmbg{border-right:1px solid rgba(0,0,0,0.04);flex-shrink:0;height:100%;}
 .gmbg.cc{background:rgba(232,64,28,0.03);}
 .gtbg{position:absolute;inset:0;display:flex;pointer-events:none;}
-.gms{position:absolute;top:10px;width:12px;height:12px;transform:rotate(45deg);cursor:pointer;z-index:5;border:2px solid;transition:transform 0.15s;}
-.gms:hover{transform:rotate(45deg) scale(1.4);}
+/* phase bar 외부 텍스트 (내용이 bar보다 길 때) */
+.gb-ext-text{position:absolute;top:50%;transform:translateY(-50%);font-size:9px;color:#111;font-weight:600;white-space:nowrap;pointer-events:none;z-index:4;}
 
 /* CALENDAR */
 .cal-nav{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
@@ -532,7 +535,12 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
     <div class="fg"><label>카테고리</label><select id="pCat"></select></div>
     <div class="fg"><label>시작일</label><input type="date" id="pStart"></div>
     <div class="fg"><label>종료일</label><input type="date" id="pEnd"></div>
-    <div class="ma"><button class="btn-s" onclick="closeModal('phaseModal')">취소</button><button class="btn-p" onclick="savePhase()">저장</button></div>
+    <div class="fg"><label>내용 <span style="font-weight:400;color:var(--text3);">(간트 바에 표시, 선택)</span></label><input type="text" id="pContent" placeholder="예: SD 진행중, 설계 완료 등"></div>
+    <div class="ma">
+      <button id="phaseDeleteBtn" class="btn-s" style="color:#DC2626;border-color:#DC2626;margin-right:auto;display:none;" onclick="deleteCurrentPhase()">삭제</button>
+      <button class="btn-s" onclick="closeModal('phaseModal')">취소</button>
+      <button class="btn-p" onclick="savePhase()">저장</button>
+    </div>
   </div>
 </div>
 <div class="mo mh" id="msModal">
@@ -1084,73 +1092,75 @@ function renderGantt(){
     const collapsed=window._ganttCollapsed[gid]===true;
     const toggleIcon=collapsed?'▶':'▼';
     const catIdx=S.cats.indexOf(catObj);
+    // ── 배경 그리드 공통 생성 ──
+    const mkBgc=()=>{let b='';for(let i=0;i<total;i++){const d=new Date(GS.getFullYear(),GS.getMonth()+i,1);const ic=d.getFullYear()===TODAY.getFullYear()&&d.getMonth()===TODAY.getMonth();b+=`<div class="gmbg${ic?' cc':''}" style="width:${MW}px;"></div>`;}return b;};
+
+    // ── 그룹 헤더 + 마일스톤 통합 ──
     h+=`<div class="gantt-group-header" onclick="toggleGanttGroup('${gid}')">
       <div class="ggl"><div class="gg-dot" style="background:${col}"></div>
         <span class="gg-label-editable" style="color:${col}" onclick="event.stopPropagation();editCatLabelInline(${catIdx})" title="표시명 편집">${dispLabel}</span>
         <span class="gg-toggle" id="gg-icon-${gid}">${toggleIcon}</span>
       </div>
-      <div style="flex:1;min-width:${tw}px;position:relative;"><div class="gnl" style="left:${NX}px;"></div></div>
-    </div>`;
-    h+=`<div class="gantt-group-body${collapsed?' collapsed':''}" id="${gid}">`;
-    // 마일스톤 행 (최상단) - 모든 마일스톤을 단일 행에 표시
-    if(ms2.length){
-      let bgc='';for(let i=0;i<total;i++){const d=new Date(GS.getFullYear(),GS.getMonth()+i,1);const ic=d.getFullYear()===TODAY.getFullYear()&&d.getMonth()===TODAY.getMonth();bgc+=`<div class="gmbg${ic?' cc':''}" style="width:${MW}px;"></div>`;}
-      h+=`<div class="gantt-ms-row">
-        <div class="gantt-ms-label" style="flex-direction:column;gap:2px;justify-content:center;">
-          <span style="color:${col};font-size:10px;font-weight:700;">◆ 마일스톤</span>
-          ${canEdit()?`<span style="font-size:9px;color:var(--text3);font-weight:400;">마커 hover → +</span>`:''}
-        </div>
-        <div class="gantt-ms-bar" style="min-width:${tw}px;">
-          <div class="gtbg">${bgc}</div>
-          <div class="gnl" style="left:${NX}px;"></div>`;
-      ms2.forEach(m=>{
-        const mx=d2x(m.date);const past=new Date(m.date+'T00:00:00')<TODAY;
-        const nameEsc=esc(m.name);const noteEsc=m.note?esc(m.note):'';
-        const noteExtra=noteEsc?`'<div style=\\'margin-top:4px;font-size:10px;opacity:0.75;\\'>'+'${noteEsc}'+'</div>'`:`''`;
-        h+=`<div class="gms-wrap" style="left:${mx}px;">
-          ${canEdit()?`<button class="gms-add-btn" onclick="event.stopPropagation();openMsPopover(event,${m.id})" title="편집">+</button>`:''}
-          <div class="gms-diamond" style="background:${past?col:'transparent'};border-color:${col};"
-            onmouseenter="showMTT(event,'${nameEsc}','${m.date}',${noteExtra})" onmouseleave="hideTT()"></div>
-          <div class="gms-name" style="color:${col};">${m.name}</div>
-          <div class="gms-date">${m.date.slice(5).replace('-','/')}</div>
-          ${m.note?`<div class="gms-note">${m.note}</div>`:''}
-        </div>`;
-      });
-      if(canEdit()){
-        h+=`<button class="gms-add-new-btn" onclick="openAddMilestoneModalForGroup('${grp}')" title="${grp} 마일스톤 추가" style="position:absolute;top:4px;right:8px;background:transparent;border:1px dashed var(--border2);border-radius:20px;padding:2px 8px;font-size:10px;color:var(--text3);cursor:pointer;z-index:5;">+ 마일스톤</button>`;
-      }
-      h+=`</div></div>`;
-    } else if(canEdit()){
-      let bgc='';for(let i=0;i<total;i++){const d=new Date(GS.getFullYear(),GS.getMonth()+i,1);const ic=d.getFullYear()===TODAY.getFullYear()&&d.getMonth()===TODAY.getMonth();bgc+=`<div class="gmbg${ic?' cc':''}" style="width:${MW}px;"></div>`;}
-      h+=`<div class="gantt-ms-row" style="min-height:40px;">
-        <div class="gantt-ms-label"><span style="color:var(--text3);font-size:10px;">◆ 마일스톤</span></div>
-        <div class="gantt-ms-bar" style="min-width:${tw}px;"><div class="gtbg">${bgc}</div>
-          <button class="gms-add-new-btn" onclick="openAddMilestoneModalForGroup('${grp}')" title="${grp} 마일스톤 추가" style="position:absolute;top:50%;left:12px;transform:translateY(-50%);background:transparent;border:1px dashed var(--border2);border-radius:20px;padding:3px 10px;font-size:10px;color:var(--text3);cursor:pointer;">+ 마일스톤 추가</button>
-        </div>
+      <div class="grt-ms" style="min-width:${tw}px;">
+        <div class="gtbg">${mkBgc()}</div>
+        <div class="gnl" style="left:${NX}px;"></div>`;
+    // 마일스톤을 헤더 행 안에 원형 버튼으로 표시
+    ms2.forEach(m=>{
+      const mx=d2x(m.date);const past=new Date(m.date+'T00:00:00')<TODAY;
+      const nameEsc=esc(m.name);const noteEsc=m.note?esc(m.note):'';
+      const noteExtra=noteEsc?`'<div style=\\'margin-top:4px;font-size:10px;opacity:0.75;\\'>'+'${noteEsc}'+'</div>'`:`''`;
+      h+=`<div class="gms-wrap" style="left:${mx}px;">
+        ${canEdit()?`<button class="gms-edit-btn" onclick="event.stopPropagation();openMsPopover(event,${m.id})" title="마일스톤 편집">✏</button>`:''}
+        <div class="gms-circle" style="background:${past?col:'#fff'};border-color:${col};"
+          onmouseenter="showMTT(event,'${nameEsc}','${m.date}',${noteExtra})" onmouseleave="hideTT()"></div>
+        <div class="gms-name" style="color:${col};">${m.name}</div>
+        <div class="gms-date">${m.date.slice(5).replace('-','/')}</div>
+        ${m.note?`<div class="gms-note">${m.note}</div>`:''}
       </div>`;
+    });
+    if(canEdit()){
+      h+=`<button class="gms-add-new-btn" onclick="event.stopPropagation();openAddMilestoneModalForGroup('${esc(grp)}')" style="position:absolute;top:4px;right:8px;background:transparent;border:1px dashed var(--border2);border-radius:20px;padding:2px 8px;font-size:10px;color:var(--text3);cursor:pointer;z-index:5;">+ 마일스톤</button>`;
     }
-    // 단계(phase) 행
+    h+=`</div></div>`;
+
+    // ── 그룹 바디 (단계 행들 — 접기 가능) ──
+    h+=`<div class="gantt-group-body${collapsed?' collapsed':''}" id="${gid}">`;
     phases.forEach(p=>{
       const x1=Math.max(0,d2x(p.start)),x2=Math.min(tw,d2x(p.end)),w=Math.max(4,x2-x1);
       const sd=new Date(p.start+'T00:00:00'),ed=new Date(p.end+'T00:00:00');
       const tot=(ed-sd)/86400000,el=Math.max(0,(TODAY-sd)/86400000);
       const pct=Math.min(100,Math.round(el/tot*100));
       const st=el<=0?'예정':el>=tot?'완료':`진행중 ${pct}%`;
-      let bgc='';for(let i=0;i<total;i++){const d=new Date(GS.getFullYear(),GS.getMonth()+i,1);const ic=d.getFullYear()===TODAY.getFullYear()&&d.getMonth()===TODAY.getMonth();bgc+=`<div class="gmbg${ic?' cc':''}" style="width:${MW}px;"></div>`;}
+      // content 텍스트 처리 (바 너비 vs 텍스트 추정 너비)
+      const content=p.content||'';
+      const estTxtW=content.length*6.5+10;
+      const barHasRoom=w>estTxtW+8;
+      let contentHtml='';
+      if(content){
+        if(barHasRoom){
+          // 바 안에 흰색 텍스트로 표시
+          contentHtml=`<span style="margin-left:4px;opacity:0.9;font-weight:400;">${content}</span>`;
+        } else {
+          // 바 오른쪽 끝에서 시작하는 검정 텍스트
+          contentHtml=`<div class="gb-ext-text" style="left:${x1+w+5}px;">${content}</div>`;
+        }
+      }
       h+=`<div class="gantt-row">
         <div class="grl">
           <span class="grl-name">${p.name}</span>
-          ${canEdit()?`<button class="gantt-edit-btn" onclick="event.stopPropagation();openEditPhaseModal(${p.id})" title="날짜 편집">✏️</button>`:''}
+          ${canEdit()?`<button class="gantt-edit-btn" onclick="event.stopPropagation();openEditPhaseModal(${p.id})" title="편집">✏️</button>`:''}
         </div>
         <div class="grt" style="min-width:${tw}px;">
-          <div class="gtbg">${bgc}</div>
+          <div class="gtbg">${mkBgc()}</div>
           <div class="gnl" style="left:${NX}px;"></div>
           <div class="gb" style="left:${x1}px;width:${w}px;background:${col};"
             onmouseenter="showTT(event,'${esc(p.name)}','${p.cat}','${p.start}','${p.end}','${st}')"
             onmouseleave="hideTT()">
-            ${w>50?p.name:''}
+            ${w>30?`<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.name}</span>`:''}
+            ${barHasRoom?contentHtml:''}
           </div>
           ${el>0&&el<tot?`<div class="gpf" style="left:${x1}px;width:${Math.min(w,w*pct/100)}px;"></div>`:''}
+          ${!barHasRoom&&content?contentHtml:''}
         </div>
       </div>`;
     });
@@ -1413,9 +1423,48 @@ function delCat(i){if(!confirm(`"${S.cats[i].name}" 삭제?`))return;S.cats.spli
 function addCategory(){const name=document.getElementById('nCatName').value.trim(),color=document.getElementById('nCatColor').value;if(!name)return alert('카테고리명을 입력하세요.');S.cats.push({name,color,label:name});document.getElementById('nCatName').value='';save();renderAll();}
 
 // ═══ PHASE MODALS ═══
-function openAddPhaseModal(){document.getElementById('phaseModalTitle').textContent='일정 단계 추가';document.getElementById('editPhaseId').value='';['pName','pStart','pEnd'].forEach(i=>document.getElementById(i).value='');openModal('phaseModal');}
-function openEditPhaseModal(id){const p=S.phases.find(x=>x.id===id);if(!p)return;document.getElementById('phaseModalTitle').textContent='일정 단계 편집';document.getElementById('editPhaseId').value=id;document.getElementById('pName').value=p.name;document.getElementById('pCat').value=p.cat;document.getElementById('pStart').value=p.start;document.getElementById('pEnd').value=p.end;openModal('phaseModal');}
-function savePhase(){const id=document.getElementById('editPhaseId').value;const obj={name:document.getElementById('pName').value,cat:document.getElementById('pCat').value,start:document.getElementById('pStart').value,end:document.getElementById('pEnd').value};if(!obj.name||!obj.start||!obj.end){alert('모든 필드를 입력하세요.');return;}if(id){const idx=S.phases.findIndex(x=>x.id==id);S.phases[idx]={...S.phases[idx],...obj};}else{obj.id=Date.now();S.phases.push(obj);}closeModal('phaseModal');save();renderAll();}
+function openAddPhaseModal(){
+  document.getElementById('phaseModalTitle').textContent='일정 단계 추가';
+  document.getElementById('editPhaseId').value='';
+  ['pName','pStart','pEnd','pContent'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('phaseDeleteBtn').style.display='none';
+  openModal('phaseModal');
+}
+function openEditPhaseModal(id){
+  const p=S.phases.find(x=>x.id===id);if(!p)return;
+  document.getElementById('phaseModalTitle').textContent='일정 단계 편집';
+  document.getElementById('editPhaseId').value=id;
+  document.getElementById('pName').value=p.name;
+  document.getElementById('pStart').value=p.start;
+  document.getElementById('pEnd').value=p.end;
+  document.getElementById('pContent').value=p.content||'';
+  document.getElementById('phaseDeleteBtn').style.display='inline-block';
+  openModal('phaseModal');
+  const sel=document.getElementById('pCat');
+  if(sel){for(let i=0;i<sel.options.length;i++){if(sel.options[i].value===p.cat){sel.selectedIndex=i;break;}}}
+}
+function savePhase(){
+  const id=document.getElementById('editPhaseId').value;
+  const obj={
+    name:document.getElementById('pName').value,
+    cat:document.getElementById('pCat').value,
+    start:document.getElementById('pStart').value,
+    end:document.getElementById('pEnd').value,
+    content:document.getElementById('pContent').value.trim()||undefined
+  };
+  if(!obj.name||!obj.start||!obj.end){alert('모든 필드를 입력하세요.');return;}
+  if(!obj.content) delete obj.content;
+  if(id){const idx=S.phases.findIndex(x=>x.id==id);S.phases[idx]={...S.phases[idx],...obj};}
+  else{obj.id=Date.now();S.phases.push(obj);}
+  closeModal('phaseModal');save();renderAll();
+}
+function deleteCurrentPhase(){
+  const id=document.getElementById('editPhaseId').value;
+  if(!id)return;
+  if(!confirm('이 단계를 삭제하시겠습니까?'))return;
+  S.phases=S.phases.filter(p=>String(p.id)!==String(id));
+  closeModal('phaseModal');save();renderAll();
+}
 function delPhase(id){if(!confirm('삭제하시겠습니까?'))return;S.phases=S.phases.filter(p=>p.id!==id);save();renderAll();}
 function delMilestone(id){if(!confirm('마일스톤을 삭제하시겠습니까?'))return;S.milestones=S.milestones.filter(m=>m.id!==id);save();renderAll();}
 function openAddMilestoneModal(){
