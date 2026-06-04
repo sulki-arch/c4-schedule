@@ -563,9 +563,12 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 <script>
 // ═══ DEFAULT DATA ═══
 const DC=[
-  {name:'크래프톤',color:'#E8401C'},{name:'한미글로벌',color:'#059669'},
-  {name:'삼우건축',color:'#2563EB'},{name:'F+P',color:'#7C3AED'},
-  {name:'인허가',color:'#D97706'},{name:'기타',color:'#475569'},
+  {name:'크래프톤',color:'#E8401C',label:'크래프톤 (공사)'},
+  {name:'한미글로벌',color:'#059669',label:'한미글로벌 (PM)'},
+  {name:'삼우건축',color:'#2563EB',label:'삼우건축 (국내)'},
+  {name:'F+P',color:'#7C3AED',label:'F+P (해외설계사)'},
+  {name:'인허가',color:'#D97706',label:'인허가·심의'},
+  {name:'기타',color:'#475569',label:'인테리어'},
 ];
 const DA=[
   {id:'admin',pw:'C4Admin2026!',role:'admin',cat:'all',name:'관리자',editPerm:true},
@@ -1015,18 +1018,19 @@ function renderGantt(){
   }
   h+=`</div></div></div>`;
   const NX=nx();
-  const gL={'F+P':'F+P (해외설계사)','삼우건축':'삼우건축 (국내)','기타':'인테리어','인허가':'인허가·심의','한미글로벌':'한미글로벌 (PM)','크래프톤':'크래프톤 (공사)'};
-  const groups=S.cats.filter(c=>canSeeCategory(c)).map(c=>c.name);
+  const visCats=S.cats.filter(c=>canSeeCategory(c));
   if(!window._ganttCollapsed) window._ganttCollapsed={};
-  groups.forEach(grp=>{
-    const col=cc(grp);
+  visCats.forEach((catObj,gi)=>{
+    const grp=catObj.name;
+    const col=catObj.color||cc(grp);
+    const dispLabel=catObj.label||grp;
     const phases=S.phases.filter(p=>p.cat===grp);
     const ms2=S.milestones.filter(m=>m.cat===grp);
-    const gid='gg_'+grp.replace(/[^a-zA-Z0-9]/g,'_');
-    const collapsed=window._ganttCollapsed[grp]===true;
+    const gid='gg_idx_'+gi;  // 인덱스 기반 ID로 버그 수정
+    const collapsed=window._ganttCollapsed[gid]===true;
     const toggleIcon=collapsed?'▶':'▼';
-    h+=`<div class="gantt-group-header" onclick="toggleGanttGroup('${grp}')">
-      <div class="ggl"><div class="gg-dot" style="background:${col}"></div><span style="color:${col}">${gL[grp]||grp}</span><span class="gg-toggle" id="gg-icon-${gid}">${toggleIcon}</span></div>
+    h+=`<div class="gantt-group-header" onclick="toggleGanttGroup('${gid}')">
+      <div class="ggl"><div class="gg-dot" style="background:${col}"></div><span style="color:${col}">${dispLabel}</span><span class="gg-toggle" id="gg-icon-${gid}">${toggleIcon}</span></div>
       <div style="flex:1;min-width:${tw}px;position:relative;"><div class="gnl" style="left:${NX}px;"></div></div>
     </div>`;
     h+=`<div class="gantt-group-body${collapsed?' collapsed':''}" id="${gid}">`;
@@ -1097,14 +1101,13 @@ function renderGantt(){
   h+=`</div>`;
   document.getElementById('ganttChart').innerHTML=h;
 }
-function toggleGanttGroup(grp){
+function toggleGanttGroup(gid){
   if(!window._ganttCollapsed) window._ganttCollapsed={};
-  window._ganttCollapsed[grp]=!window._ganttCollapsed[grp];
-  const gid='gg_'+grp.replace(/[^a-zA-Z0-9]/g,'_');
+  window._ganttCollapsed[gid]=!window._ganttCollapsed[gid];
   const body=document.getElementById(gid);
   const icon=document.getElementById('gg-icon-'+gid);
-  if(body) body.classList.toggle('collapsed',window._ganttCollapsed[grp]);
-  if(icon) icon.textContent=window._ganttCollapsed[grp]?'▶':'▼';
+  if(body) body.classList.toggle('collapsed',window._ganttCollapsed[gid]);
+  if(icon) icon.textContent=window._ganttCollapsed[gid]?'▶':'▼';
 }
 function esc(s){return s.replace(/'/g,"\\'").replace(/"/g,'&quot;');}
 
@@ -1271,11 +1274,18 @@ function renderSettings(){
     </div>`;
   }).join('');
   document.getElementById('catManageList').innerHTML=S.cats.map((c,i)=>`
-    <div class="cat-row"><div class="cat-dot" style="background:${c.color}"></div>
-      <span class="cat-nm">${c.name}</span>
+    <div class="cat-row" style="flex-wrap:wrap;gap:6px;">
+      <div style="display:flex;align-items:center;gap:7px;flex:1;min-width:0;">
+        <div class="cat-dot" style="background:${c.color};flex-shrink:0;"></div>
+        <div style="min-width:0;">
+          <div style="font-size:12px;font-weight:700;color:var(--text2);">${c.name}</div>
+          <div style="font-size:10px;color:var(--text4);">표시명: <span style="color:var(--text2);font-weight:600;">${c.label||c.name}</span></div>
+        </div>
+      </div>
       ${c.restricted?`<span style="font-size:10px;background:rgba(220,38,38,0.08);color:#DC2626;padding:2px 7px;border-radius:10px;font-weight:700;border:1px solid rgba(220,38,38,0.2);white-space:nowrap;">비공개</span>`:''}
       <input type="color" value="${c.color}" onchange="updCatColor(${i},this.value)" style="width:26px;height:22px;border:1px solid var(--border);border-radius:4px;cursor:pointer;padding:1px;">
-      <button class="ab" onclick="editCatName(${i})">이름</button>
+      <button class="ab" onclick="editCatLabel(${i})" title="간트 차트에 표시되는 이름">표시명</button>
+      <button class="ab" onclick="editCatName(${i})" title="카테고리 내부 키값">분류명</button>
       <button class="ab" onclick="toggleCatRestrict(${i})" title="${c.restricted?'공개로 변경':'비공개로 설정'}" style="${c.restricted?'color:#DC2626;border-color:#DC2626;':''}">${c.restricted?'🔒':'🔓'}</button>
       <button class="cat-move-btn" onclick="moveCat(${i},-1)" title="위로" ${i===0?'style="opacity:0.2;pointer-events:none;"':''}>▲</button>
       <button class="cat-move-btn" onclick="moveCat(${i},1)" title="아래로" ${i===S.cats.length-1?'style="opacity:0.2;pointer-events:none;"':''}>▼</button>
@@ -1309,9 +1319,10 @@ function addAccount(){const id=document.getElementById('nId').value.trim(),pw=do
 function editAcc(id){const a=S.accounts.find(x=>x.id===id);if(!a)return;const pw=prompt(`"${id}" 새 비밀번호:`,a.pw);if(pw===null)return;a.pw=pw;save();renderSettings();initLogin();}
 function delAcc(id){if(!confirm(`"${id}" 계정을 삭제하시겠습니까?`))return;S.accounts=S.accounts.filter(a=>a.id!==id);save();renderSettings();initLogin();}
 function updCatColor(i,v){S.cats[i].color=v;save();renderAll();}
-function editCatName(i){const n=prompt('카테고리 이름:',S.cats[i].name);if(!n)return;S.cats[i].name=n;save();renderAll();}
+function editCatName(i){const n=prompt('분류명 (내부 키값, 계정과 연동됨):\n※ 변경 시 해당 분류의 계정·일정 연결이 끊길 수 있습니다.',S.cats[i].name);if(!n||n===S.cats[i].name)return;S.cats[i].name=n;save();renderAll();}
+function editCatLabel(i){const cur=S.cats[i].label||S.cats[i].name;const n=prompt('간트 차트 표시명:\n예: 크래프톤 (공사), 한미글로벌 (PM)',cur);if(n===null)return;S.cats[i].label=n.trim()||S.cats[i].name;save();renderAll();}
 function delCat(i){if(!confirm(`"${S.cats[i].name}" 삭제?`))return;S.cats.splice(i,1);save();renderAll();}
-function addCategory(){const name=document.getElementById('nCatName').value.trim(),color=document.getElementById('nCatColor').value;if(!name)return alert('카테고리명을 입력하세요.');S.cats.push({name,color});document.getElementById('nCatName').value='';save();renderAll();}
+function addCategory(){const name=document.getElementById('nCatName').value.trim(),color=document.getElementById('nCatColor').value;if(!name)return alert('카테고리명을 입력하세요.');S.cats.push({name,color,label:name});document.getElementById('nCatName').value='';save();renderAll();}
 
 // ═══ PHASE MODALS ═══
 function openAddPhaseModal(){document.getElementById('phaseModalTitle').textContent='일정 단계 추가';document.getElementById('editPhaseId').value='';['pName','pStart','pEnd'].forEach(i=>document.getElementById(i).value='');openModal('phaseModal');}
