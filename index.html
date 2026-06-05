@@ -75,22 +75,31 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .cluster-row-lbl{height:28px;display:flex;align-items:center;font-size:11px;font-weight:400;color:#aaa;margin-top:2px;}
 .cluster-row-lbl.active{font-weight:800;color:#111;}
 .cluster-grid-wrap{flex:1;overflow:hidden;}
-.cluster-yr-row{display:flex;height:22px;align-items:center;gap:2px;padding-left:0;}
+.cluster-yr-row{display:flex;height:22px;align-items:center;gap:1px;padding-left:0;}
 .cluster-yr-cell{width:24px;font-size:10px;font-weight:600;color:#888;text-align:left;flex-shrink:0;padding-left:1px;}
-.cluster-yr-cell.spacer{width:2px;}
 .cluster-yr-cell.cur{color:#E8401C;font-weight:800;}
-.cluster-rows{display:flex;flex-direction:column;gap:2px;margin-top:2px;}
-.cluster-data-row{display:flex;gap:2px;height:28px;align-items:center;}
-.cluster-cell-group{display:flex;gap:2px;margin-right:2px;}
-.cluster-cell{width:24px;height:24px;border-radius:2px;background:#D9D9D9;flex-shrink:0;position:relative;overflow:visible;}
-.cluster-cell.colored{background:#AADB00;}
+.cluster-rows{display:flex;flex-direction:column;gap:1px;margin-top:1px;}
+.cluster-data-row{display:flex;gap:1px;height:28px;align-items:center;}
+.cluster-cell{width:24px;height:24px;border-radius:2px;background:#D9D9D9;flex-shrink:0;position:relative;overflow:visible;cursor:default;}
 .cluster-cell.editable{cursor:pointer;}
 .cluster-cell.editable:hover{outline:2px solid #E8401C;outline-offset:-2px;z-index:2;}
-.cluster-cell-input{position:absolute;inset:0;width:100%;height:100%;border:2px solid #E8401C;outline:none;font-size:8px;font-weight:600;padding:0 3px;background:inherit;font-family:inherit;color:inherit;z-index:10;border-radius:2px;}
-.cluster-cell-label{position:absolute;left:2px;top:50%;transform:translateY(-50%);font-size:9px;font-weight:700;color:#111;white-space:nowrap;pointer-events:none;z-index:1;}
-.cluster-color-picker{position:absolute;bottom:calc(100% + 4px);left:0;background:#fff;border:1px solid #111;border-radius:6px;padding:6px;display:flex;flex-wrap:wrap;gap:4px;z-index:200;width:130px;}
-.cluster-color-swatch{width:18px;height:18px;border-radius:2px;cursor:pointer;border:1.5px solid transparent;flex-shrink:0;}
-.cluster-color-swatch:hover,.cluster-color-swatch.sel{border-color:#111;}
+.cluster-cell-label{position:absolute;left:2px;top:50%;transform:translateY(-50%);font-size:9px;font-weight:700;white-space:nowrap;pointer-events:none;z-index:1;}
+/* 클러스터 편집 모달 */
+.cluster-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:500;display:flex;align-items:center;justify-content:center;}
+.cluster-modal{background:#fff;border:1px solid #111;border-radius:6px;padding:20px 24px;width:min(96vw,1100px);max-height:80vh;display:flex;flex-direction:column;gap:14px;}
+.cluster-modal-title{font-size:13px;font-weight:800;letter-spacing:0.5px;display:flex;align-items:center;justify-content:space-between;}
+.cluster-modal-scroll{overflow-x:auto;overflow-y:hidden;padding-bottom:4px;}
+.cluster-modal-grid{display:flex;gap:6px;align-items:flex-start;}
+.cluster-modal-yr{display:flex;flex-direction:column;gap:0;flex-shrink:0;}
+.cluster-modal-yr-label{font-size:10px;font-weight:700;color:#888;text-align:center;margin-bottom:4px;letter-spacing:0.3px;}
+.cluster-modal-yr.cur .cluster-modal-yr-label{color:#E8401C;}
+.cluster-modal-quarters{display:flex;flex-direction:column;gap:4px;}
+.cluster-modal-cell{display:flex;flex-direction:column;gap:2px;}
+.cluster-modal-preview{width:100%;height:20px;border-radius:2px;border:1px solid #ddd;cursor:pointer;}
+.cluster-modal-inputs{display:flex;flex-direction:column;gap:2px;}
+.cluster-modal-inputs input{width:68px;padding:3px 5px;border:1px solid #ddd;border-radius:3px;font-size:9px;font-family:inherit;outline:none;}
+.cluster-modal-inputs input:focus{border-color:#E8401C;}
+.cluster-modal-quarter-lbl{font-size:8px;color:#bbb;font-weight:600;text-align:center;}
 
 /* TABS */
 .tabs{background:var(--bg);padding:0 20px 0;}
@@ -2040,9 +2049,9 @@ function renderCluster(){
       } else {
         yrHtml+=`<div class="cluster-yr-cell" style="color:transparent;">.</div>`;
       }
-      if(q<CELLS_PER_YEAR-1) yrHtml+=`<div style="width:2px;flex-shrink:0;"></div>`;
+      if(q<CELLS_PER_YEAR-1) yrHtml+=`<div style="width:1px;flex-shrink:0;"></div>`;
     }
-    if(y!==YEARS[YEARS.length-1]) yrHtml+=`<div style="width:2px;flex-shrink:0;"></div>`;
+    if(y!==YEARS[YEARS.length-1]) yrHtml+=`<div style="width:1px;flex-shrink:0;"></div>`;
   });
   yrRow.innerHTML=yrHtml;
 
@@ -2053,13 +2062,13 @@ function renderCluster(){
         const key=row+'-'+yr+'-'+q;
         const cell=S.clusterCells[key]||{text:'',color:'#D9D9D9'};
         const bg=cell.color||'#D9D9D9';
-        cells+=`<div class="cluster-cell${bg!=='#D9D9D9'?' colored':''}${isAdmin?' editable':''}"
-          data-key="${key}" style="background:${bg};"
-          ${isAdmin?`onclick="clusterCellClick(event,'${key}')"`:''}
-        >${cell.text?`<div class="cluster-cell-label">${cell.text}</div>`:''}</div>`;
-        if(q<CELLS_PER_YEAR-1) cells+=`<div style="width:2px;flex-shrink:0;"></div>`;
+        const lblColor=getCellTextColor(bg);
+        cells+=`<div class="cluster-cell${isAdmin?' editable':''}" style="background:${bg};"
+          ${isAdmin?`onclick="openClusterModal('${row}')"`:''}
+        >${cell.text?`<div class="cluster-cell-label" style="color:${lblColor}">${cell.text}</div>`:''}</div>`;
+        if(q<CELLS_PER_YEAR-1) cells+=`<div style="width:1px;flex-shrink:0;"></div>`;
       }
-      if(yi<YEARS.length-1) cells+=`<div style="width:2px;flex-shrink:0;"></div>`;
+      if(yi<YEARS.length-1) cells+=`<div style="width:1px;flex-shrink:0;"></div>`;
     });
     return`<div class="cluster-data-row">${cells}</div>`;
   }).join('');
@@ -2073,53 +2082,94 @@ function getCellTextColor(bg){
   return lum>0.55?'#333':'#fff';
 }
 
-function clusterCellClick(e,key){
-  e.stopPropagation();
-  document.querySelectorAll('.cluster-cell-input').forEach(x=>x.remove());
-  document.querySelectorAll('.cluster-color-picker').forEach(x=>x.remove());
+function openClusterModal(row){
+  closeClusterModal();
+  const YEARS=['22','23','24','25','26','27','28','29','30','31','32'];
+  const CY='26';
+  const CELLS_PER_YEAR=4;
+  const QLBL=['Q1','Q2','Q3','Q4'];
 
-  const cell=e.currentTarget;
-  const data=S.clusterCells[key]||{text:'',color:'#D9D9D9'};
+  const overlay=document.createElement('div');
+  overlay.className='cluster-modal-overlay';
+  overlay.id='clusterModalOverlay';
+  overlay.onclick=e=>{if(e.target===overlay)saveClusterModal(row);};
 
-  const picker=document.createElement('div');
-  picker.className='cluster-color-picker';
-  CLUSTER_COLORS.forEach(c=>{
-    const sw=document.createElement('div');
-    sw.className='cluster-color-swatch'+(data.color===c?' sel':'');
-    sw.style.background=c;
-    sw.style.border='1.5px solid '+(c==='#ffffff'||c==='#D9D9D9'?'#ccc':'transparent');
-    sw.onclick=ev=>{
-      ev.stopPropagation();
-      if(!S.clusterCells[key])S.clusterCells[key]={text:'',color:c};
-      else S.clusterCells[key].color=c;
-      document.querySelectorAll('.cluster-color-picker').forEach(x=>x.remove());
-      save();renderCluster();
-    };
-    picker.appendChild(sw);
+  const modal=document.createElement('div');
+  modal.className='cluster-modal';
+  modal.onclick=e=>e.stopPropagation();
+
+  modal.innerHTML=`<div class="cluster-modal-title">
+    <span>${row} 일정 편집</span>
+    <button onclick="saveClusterModal('${row}')" style="padding:4px 14px;background:#111;color:#fff;border:none;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;">저장</button>
+  </div>
+  <div style="font-size:10px;color:#aaa;margin-top:-8px;">텍스트와 색상 코드(#HEX)를 입력하세요. 빈칸은 기본색으로 처리됩니다.</div>
+  <div class="cluster-modal-scroll"><div class="cluster-modal-grid" id="clusterModalGrid"></div></div>`;
+
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+
+  const grid=document.getElementById('clusterModalGrid');
+  YEARS.forEach(yr=>{
+    const yrDiv=document.createElement('div');
+    yrDiv.className='cluster-modal-yr'+(yr===CY?' cur':'');
+    yrDiv.innerHTML=`<div class="cluster-modal-yr-label">'${yr}</div><div class="cluster-modal-quarters" id="cmq-${yr}"></div>`;
+    grid.appendChild(yrDiv);
+
+    const qWrap=document.getElementById('cmq-'+yr);
+    for(let q=0;q<CELLS_PER_YEAR;q++){
+      const key=row+'-'+yr+'-'+q;
+      const cell=S.clusterCells[key]||{text:'',color:'#D9D9D9'};
+      const bg=cell.color||'#D9D9D9';
+
+      const cellDiv=document.createElement('div');
+      cellDiv.className='cluster-modal-cell';
+      cellDiv.innerHTML=`
+        <div class="cluster-modal-quarter-lbl">${QLBL[q]}</div>
+        <div class="cluster-modal-preview" id="prev-${yr}-${q}" style="background:${bg};"></div>
+        <div class="cluster-modal-inputs">
+          <input type="text" placeholder="텍스트" value="${cell.text||''}" id="txt-${yr}-${q}" maxlength="20">
+          <input type="text" placeholder="#D9D9D9" value="${bg}" id="col-${yr}-${q}" maxlength="9"
+            oninput="updateCellPreview('${yr}','${q}')">
+        </div>`;
+      qWrap.appendChild(cellDiv);
+    }
   });
-  cell.style.position='relative';
-  cell.appendChild(picker);
+}
 
-  const inp=document.createElement('input');
-  inp.className='cluster-cell-input';
-  inp.value=data.text||'';
-  inp.style.background=data.color||'#D9D9D9';
-  inp.style.color=getCellTextColor(data.color||'#D9D9D9');
-  inp.onclick=ev=>ev.stopPropagation();
-  inp.onblur=()=>{
-    if(!S.clusterCells[key])S.clusterCells[key]={text:inp.value.trim(),color:'#D9D9D9'};
-    else S.clusterCells[key].text=inp.value.trim();
-    document.querySelectorAll('.cluster-color-picker').forEach(x=>x.remove());
-    inp.remove();
-    save();renderCluster();
-  };
-  inp.onkeydown=ev=>{if(ev.key==='Enter'||ev.key==='Escape')inp.blur();};
-  cell.appendChild(inp);
-  setTimeout(()=>inp.focus(),10);
+function updateCellPreview(yr,q){
+  const colInp=document.getElementById('col-'+yr+'-'+q);
+  const prev=document.getElementById('prev-'+yr+'-'+q);
+  if(!colInp||!prev)return;
+  const v=colInp.value.trim();
+  if(/^#[0-9A-Fa-f]{3,6}$/.test(v)) prev.style.background=v;
+}
 
-  setTimeout(()=>document.addEventListener('click',function h(){
-    picker.remove();document.removeEventListener('click',h);
-  }),10);
+function saveClusterModal(row){
+  const YEARS=['22','23','24','25','26','27','28','29','30','31','32'];
+  const CELLS_PER_YEAR=4;
+  YEARS.forEach(yr=>{
+    for(let q=0;q<CELLS_PER_YEAR;q++){
+      const key=row+'-'+yr+'-'+q;
+      const txtEl=document.getElementById('txt-'+yr+'-'+q);
+      const colEl=document.getElementById('col-'+yr+'-'+q);
+      if(!txtEl||!colEl)continue;
+      const txt=txtEl.value.trim();
+      const col=colEl.value.trim();
+      const validCol=/^#[0-9A-Fa-f]{3,6}$/.test(col)?col:'#D9D9D9';
+      if(txt||validCol!=='#D9D9D9'){
+        S.clusterCells[key]={text:txt,color:validCol};
+      } else {
+        delete S.clusterCells[key];
+      }
+    }
+  });
+  closeClusterModal();
+  save();renderCluster();
+}
+
+function closeClusterModal(){
+  const el=document.getElementById('clusterModalOverlay');
+  if(el)el.remove();
 }
 </script>
 </body>
