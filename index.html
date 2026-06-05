@@ -173,6 +173,23 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .gtbg{position:absolute;inset:0;display:flex;pointer-events:none;}
 /* phase bar 외부 텍스트 (내용이 bar보다 길 때) */
 .gb-ext-text{position:absolute;top:50%;transform:translateY(-50%);font-size:9px;color:#111;font-weight:600;white-space:nowrap;pointer-events:none;z-index:4;}
+/* 연속 일정 토글 스위치 */
+.seg-toggle-wrap{cursor:pointer;display:flex;align-items:center;}
+.seg-toggle-track{display:inline-block;width:36px;height:20px;background:var(--border2);border-radius:10px;position:relative;transition:background 0.2s;flex-shrink:0;}
+.seg-toggle-thumb{position:absolute;left:2px;top:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.2);transition:transform 0.2s;}
+#pSegMode:checked+.seg-toggle-track{background:var(--accent);}
+#pSegMode:checked+.seg-toggle-track .seg-toggle-thumb{transform:translateX(16px);}
+/* 구간 행 */
+.seg-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:6px;align-items:end;margin-bottom:8px;padding:10px 12px;background:var(--bg3);border:1.5px solid var(--border);border-radius:9px;}
+.seg-row .seg-lbl{font-size:10px;color:var(--text4);font-weight:700;text-transform:uppercase;display:block;margin-bottom:3px;}
+.seg-row input{width:100%;padding:6px 8px;background:#fff;border:1.5px solid var(--border);border-radius:7px;font-size:12px;color:var(--text);outline:none;font-family:inherit;}
+.seg-row input:focus{border-color:var(--accent);}
+.seg-row .seg-num{font-size:10px;font-weight:800;color:var(--accent);margin-bottom:3px;}
+.seg-del-btn{padding:6px 8px;background:transparent;border:1px solid rgba(220,38,38,0.3);border-radius:7px;color:#DC2626;cursor:pointer;font-size:12px;height:32px;align-self:end;}
+.seg-del-btn:hover{background:rgba(220,38,38,0.06);}
+/* 연속 바 */
+.gb-seg{position:absolute;top:7px;height:20px;border-radius:4px;display:flex;align-items:center;padding:0 6px;font-size:9px;color:rgba(255,255,255,0.95);font-weight:700;overflow:hidden;white-space:nowrap;cursor:pointer;transition:filter 0.15s;box-shadow:0 1px 3px rgba(0,0,0,0.12);}
+.gb-seg:hover{filter:brightness(1.1);}
 
 /* CALENDAR */
 .cal-nav{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
@@ -528,15 +545,39 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 
 <!-- MODALS -->
 <div class="mo mh" id="phaseModal">
-  <div class="mb">
+  <div class="mb" style="width:520px;max-width:96vw;">
     <h3 id="phaseModalTitle">일정 단계 추가</h3>
     <input type="hidden" id="editPhaseId">
     <div class="fg"><label>단계명</label><input type="text" id="pName"></div>
     <div class="fg"><label>카테고리</label><select id="pCat"></select></div>
-    <div class="fg"><label>시작일</label><input type="date" id="pStart"></div>
-    <div class="fg"><label>종료일</label><input type="date" id="pEnd"></div>
-    <div class="fg"><label>내용 <span style="font-weight:400;color:var(--text3);">(간트 바에 표시, 선택)</span></label><input type="text" id="pContent" placeholder="예: SD 진행중, 설계 완료 등"></div>
-    <div class="ma">
+
+    <!-- 연속 일정 토글 -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px 12px;background:var(--bg3);border-radius:10px;border:1.5px solid var(--border);">
+      <label class="seg-toggle-wrap" title="연속 일정 모드">
+        <input type="checkbox" id="pSegMode" onchange="toggleSegMode()" style="display:none;">
+        <span class="seg-toggle-track"><span class="seg-toggle-thumb"></span></span>
+      </label>
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--text2);">연속 일정</div>
+        <div style="font-size:10px;color:var(--text4);">같은 행에 여러 구간을 표시합니다</div>
+      </div>
+    </div>
+
+    <!-- 단일 일정 필드 -->
+    <div id="pSingleFields">
+      <div class="fg"><label>시작일</label><input type="date" id="pStart"></div>
+      <div class="fg"><label>종료일</label><input type="date" id="pEnd"></div>
+      <div class="fg"><label>내용 <span style="font-weight:400;color:var(--text3);">(간트 바에 표시, 선택)</span></label><input type="text" id="pContent" placeholder="예: SD 진행중, 설계 완료 등"></div>
+    </div>
+
+    <!-- 연속 일정 구간 목록 -->
+    <div id="pSegFields" style="display:none;">
+      <div style="font-size:11px;color:var(--text4);margin-bottom:8px;font-weight:600;">구간 목록 <span id="segCount" style="color:var(--accent);"></span></div>
+      <div id="segmentList"></div>
+      <button onclick="addSegment()" style="width:100%;padding:8px;background:transparent;border:1.5px dashed var(--border2);border-radius:8px;font-size:12px;color:var(--text4);cursor:pointer;margin-top:4px;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text4)'">＋ 구간 추가</button>
+    </div>
+
+    <div class="ma" style="margin-top:16px;">
       <button id="phaseDeleteBtn" class="btn-s" style="color:#DC2626;border-color:#DC2626;margin-right:auto;display:none;" onclick="deleteCurrentPhase()">삭제</button>
       <button class="btn-s" onclick="closeModal('phaseModal')">취소</button>
       <button class="btn-p" onclick="savePhase()">저장</button>
@@ -1125,26 +1166,18 @@ function renderGantt(){
 
     // ── 그룹 바디 (단계 행들 — 접기 가능) ──
     h+=`<div class="gantt-group-body${collapsed?' collapsed':''}" id="${gid}">`;
+    // 연속 바 구간별 투명도 변화 (짝수 구간은 약간 연하게)
+    const segAlpha=['1','0.72','1','0.72','1','0.72','1','0.72'];
     phases.forEach(p=>{
-      const x1=Math.max(0,d2x(p.start)),x2=Math.min(tw,d2x(p.end)),w=Math.max(4,x2-x1);
-      const sd=new Date(p.start+'T00:00:00'),ed=new Date(p.end+'T00:00:00');
+      const segs=p.segments&&p.segments.length?p.segments:null;
+      // 단일 or 연속 공통 시작/종료 (툴팁용)
+      const pStart=segs?segs[0].start:p.start;
+      const pEnd=segs?segs[segs.length-1].end:p.end;
+      const sd=new Date(pStart+'T00:00:00'),ed=new Date(pEnd+'T00:00:00');
       const tot=(ed-sd)/86400000,el=Math.max(0,(TODAY-sd)/86400000);
       const pct=Math.min(100,Math.round(el/tot*100));
       const st=el<=0?'예정':el>=tot?'완료':`진행중 ${pct}%`;
-      // content 텍스트 처리 (바 너비 vs 텍스트 추정 너비)
-      const content=p.content||'';
-      const estTxtW=content.length*6.5+10;
-      const barHasRoom=w>estTxtW+8;
-      let contentHtml='';
-      if(content){
-        if(barHasRoom){
-          // 바 안에 흰색 텍스트로 표시
-          contentHtml=`<span style="margin-left:4px;opacity:0.9;font-weight:400;">${content}</span>`;
-        } else {
-          // 바 오른쪽 끝에서 시작하는 검정 텍스트
-          contentHtml=`<div class="gb-ext-text" style="left:${x1+w+5}px;">${content}</div>`;
-        }
-      }
+
       h+=`<div class="gantt-row">
         <div class="grl">
           <span class="grl-name">${p.name}</span>
@@ -1152,17 +1185,46 @@ function renderGantt(){
         </div>
         <div class="grt" style="min-width:${tw}px;">
           <div class="gtbg">${mkBgc()}</div>
-          <div class="gnl" style="left:${NX}px;"></div>
-          <div class="gb" style="left:${x1}px;width:${w}px;background:${col};"
-            onmouseenter="showTT(event,'${esc(p.name)}','${p.cat}','${p.start}','${p.end}','${st}')"
+          <div class="gnl" style="left:${NX}px;"></div>`;
+
+      if(segs){
+        // ── 연속 일정: 구간별 바 렌더링 ──
+        segs.forEach((seg,si)=>{
+          const sx1=Math.max(0,d2x(seg.start)),sx2=Math.min(tw,d2x(seg.end)),sw=Math.max(4,sx2-sx1);
+          const segContent=seg.content||'';
+          const segEstW=segContent.length*6.5+10;
+          const segFits=sw>segEstW+8;
+          const alpha=segAlpha[si%segAlpha.length];
+          const segCol=si%2===0?col:col+'BB';
+          h+=`<div class="gb-seg" style="left:${sx1}px;width:${sw}px;background:${col};opacity:${alpha};"
+            onmouseenter="showTT(event,'${esc(p.name)} (${si+1}구간)','${p.cat}','${seg.start}','${seg.end}','${st}')"
             onmouseleave="hideTT()">
-            ${w>30?`<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.name}</span>`:''}
-            ${barHasRoom?contentHtml:''}
-          </div>
-          ${el>0&&el<tot?`<div class="gpf" style="left:${x1}px;width:${Math.min(w,w*pct/100)}px;"></div>`:''}
-          ${!barHasRoom&&content?contentHtml:''}
-        </div>
-      </div>`;
+            ${sw>30&&segContent&&segFits?`<span style="overflow:hidden;text-overflow:ellipsis;">${segContent}</span>`:''}
+          </div>`;
+          if(segContent&&!segFits){
+            h+=`<div class="gb-ext-text" style="left:${sx1+sw+4}px;">${segContent}</div>`;
+          }
+        });
+        // 진행률 바 (전체 구간 기준)
+        const fx1=Math.max(0,d2x(pStart)),fxw=Math.max(4,Math.min(tw,d2x(pEnd))-fx1);
+        if(el>0&&el<tot){h+=`<div class="gpf" style="left:${fx1}px;width:${Math.min(fxw,fxw*pct/100)}px;"></div>`;}
+      } else {
+        // ── 단일 일정 ──
+        const x1=Math.max(0,d2x(p.start)),x2=Math.min(tw,d2x(p.end)),w=Math.max(4,x2-x1);
+        const content=p.content||'';
+        const estTxtW=content.length*6.5+10;
+        const barHasRoom=w>estTxtW+8;
+        h+=`<div class="gb" style="left:${x1}px;width:${w}px;background:${col};"
+          onmouseenter="showTT(event,'${esc(p.name)}','${p.cat}','${p.start}','${p.end}','${st}')"
+          onmouseleave="hideTT()">
+          ${w>30?`<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.name}</span>`:''}
+          ${barHasRoom&&content?`<span style="margin-left:4px;opacity:0.9;font-weight:400;">${content}</span>`:''}
+        </div>`;
+        if(el>0&&el<tot){h+=`<div class="gpf" style="left:${x1}px;width:${Math.min(w,w*pct/100)}px;"></div>`;}
+        if(!barHasRoom&&content){h+=`<div class="gb-ext-text" style="left:${x1+w+5}px;">${content}</div>`;}
+      }
+
+      h+=`</div></div>`;
     });
     if(canEdit()){
       h+=`<button class="gantt-add-phase-btn" onclick="openAddPhaseModalForGroup('${esc(grp)}')">＋ ${dispLabel} 단계 추가</button>`;
@@ -1423,41 +1485,139 @@ function delCat(i){if(!confirm(`"${S.cats[i].name}" 삭제?`))return;S.cats.spli
 function addCategory(){const name=document.getElementById('nCatName').value.trim(),color=document.getElementById('nCatColor').value;if(!name)return alert('카테고리명을 입력하세요.');S.cats.push({name,color,label:name});document.getElementById('nCatName').value='';save();renderAll();}
 
 // ═══ PHASE MODALS ═══
+// ── 연속 일정 모달 관련 ──
+let _segments=[];  // 현재 편집 중인 구간 배열
+
+function toggleSegMode(){
+  const on=document.getElementById('pSegMode').checked;
+  document.getElementById('pSingleFields').style.display=on?'none':'block';
+  document.getElementById('pSegFields').style.display=on?'block':'none';
+  if(on&&_segments.length===0){
+    // 단일 필드 값이 있으면 첫 구간으로 이동
+    const s=document.getElementById('pStart').value;
+    const e=document.getElementById('pEnd').value;
+    const c=document.getElementById('pContent').value;
+    _segments=[{start:s,end:e,content:c}];
+    renderSegmentList();
+  }
+}
+
+function renderSegmentList(){
+  const list=document.getElementById('segmentList');
+  document.getElementById('segCount').textContent=`(${_segments.length}개 구간)`;
+  list.innerHTML=_segments.map((seg,i)=>`
+    <div class="seg-row">
+      <div>
+        <span class="seg-num">${i+1}구간</span>
+        <label class="seg-lbl">시작일</label>
+        <input type="date" value="${seg.start||''}" oninput="_segments[${i}].start=this.value">
+      </div>
+      <div>
+        <span class="seg-lbl" style="margin-top:14px;display:block;">종료일</span>
+        <input type="date" value="${seg.end||''}" oninput="_segments[${i}].end=this.value">
+      </div>
+      <div>
+        <span class="seg-lbl" style="margin-top:14px;display:block;">내용</span>
+        <input type="text" value="${seg.content||''}" placeholder="(선택)" oninput="_segments[${i}].content=this.value">
+      </div>
+      <button class="seg-del-btn" onclick="removeSegment(${i})" title="구간 삭제">✕</button>
+    </div>`).join('');
+}
+
+function addSegment(){
+  // 이전 구간 종료일을 다음 시작일 기본값으로
+  const prev=_segments[_segments.length-1];
+  _segments.push({start:prev?prev.end:'',end:'',content:''});
+  renderSegmentList();
+}
+
+function removeSegment(i){
+  if(_segments.length<=1){alert('구간이 최소 1개 이상 있어야 합니다.');return;}
+  _segments.splice(i,1);
+  renderSegmentList();
+}
+
 function openAddPhaseModal(){
   document.getElementById('phaseModalTitle').textContent='일정 단계 추가';
   document.getElementById('editPhaseId').value='';
   ['pName','pStart','pEnd','pContent'].forEach(i=>document.getElementById(i).value='');
   document.getElementById('phaseDeleteBtn').style.display='none';
+  // 연속 일정 초기화
+  _segments=[];
+  document.getElementById('pSegMode').checked=false;
+  document.getElementById('pSingleFields').style.display='block';
+  document.getElementById('pSegFields').style.display='none';
   openModal('phaseModal');
 }
+
 function openEditPhaseModal(id){
   const p=S.phases.find(x=>x.id===id);if(!p)return;
   document.getElementById('phaseModalTitle').textContent='일정 단계 편집';
   document.getElementById('editPhaseId').value=id;
   document.getElementById('pName').value=p.name;
-  document.getElementById('pStart').value=p.start;
-  document.getElementById('pEnd').value=p.end;
-  document.getElementById('pContent').value=p.content||'';
   document.getElementById('phaseDeleteBtn').style.display='inline-block';
   openModal('phaseModal');
   const sel=document.getElementById('pCat');
   if(sel){for(let i=0;i<sel.options.length;i++){if(sel.options[i].value===p.cat){sel.selectedIndex=i;break;}}}
+  // 연속 일정 여부 판단
+  const hasSegs=p.segments&&p.segments.length>0;
+  document.getElementById('pSegMode').checked=hasSegs;
+  if(hasSegs){
+    _segments=JSON.parse(JSON.stringify(p.segments));
+    document.getElementById('pSingleFields').style.display='none';
+    document.getElementById('pSegFields').style.display='block';
+    renderSegmentList();
+  } else {
+    _segments=[];
+    document.getElementById('pStart').value=p.start||'';
+    document.getElementById('pEnd').value=p.end||'';
+    document.getElementById('pContent').value=p.content||'';
+    document.getElementById('pSingleFields').style.display='block';
+    document.getElementById('pSegFields').style.display='none';
+  }
 }
+
 function savePhase(){
   const id=document.getElementById('editPhaseId').value;
-  const obj={
-    name:document.getElementById('pName').value,
-    cat:document.getElementById('pCat').value,
-    start:document.getElementById('pStart').value,
-    end:document.getElementById('pEnd').value,
-    content:document.getElementById('pContent').value.trim()||undefined
-  };
-  if(!obj.name||!obj.start||!obj.end){alert('모든 필드를 입력하세요.');return;}
-  if(!obj.content) delete obj.content;
-  if(id){const idx=S.phases.findIndex(x=>x.id==id);S.phases[idx]={...S.phases[idx],...obj};}
-  else{obj.id=Date.now();S.phases.push(obj);}
+  const segMode=document.getElementById('pSegMode').checked;
+  const name=document.getElementById('pName').value.trim();
+  const cat=document.getElementById('pCat').value;
+  if(!name){alert('단계명을 입력하세요.');return;}
+
+  let obj={name,cat};
+
+  if(segMode){
+    // 유효성 검사
+    const validSegs=_segments.filter(s=>s.start&&s.end);
+    if(validSegs.length===0){alert('최소 1개의 구간에 시작일과 종료일을 입력하세요.');return;}
+    for(let i=0;i<validSegs.length;i++){
+      if(validSegs[i].start>validSegs[i].end){alert(`${i+1}구간의 시작일이 종료일보다 늦습니다.`);return;}
+    }
+    obj.segments=validSegs;
+    // 전체 start/end는 첫/마지막 구간
+    obj.start=validSegs[0].start;
+    obj.end=validSegs[validSegs.length-1].end;
+    delete obj.content;
+  } else {
+    obj.start=document.getElementById('pStart').value;
+    obj.end=document.getElementById('pEnd').value;
+    const c=document.getElementById('pContent').value.trim();
+    if(c) obj.content=c; else delete obj.content;
+    if(!obj.start||!obj.end){alert('시작일과 종료일을 입력하세요.');return;}
+    delete obj.segments;
+  }
+
+  if(id){
+    const idx=S.phases.findIndex(x=>x.id==id);
+    if(idx>=0) S.phases[idx]={...S.phases[idx],...obj};
+    // segments 삭제 시 명시적으로 제거
+    if(!segMode) delete S.phases[idx].segments;
+  } else {
+    obj.id=Date.now();S.phases.push(obj);
+  }
   closeModal('phaseModal');save();renderAll();
 }
+
 function deleteCurrentPhase(){
   const id=document.getElementById('editPhaseId').value;
   if(!id)return;
