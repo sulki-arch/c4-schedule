@@ -301,6 +301,15 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .gantt-edit-mode-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 2px 8px rgba(232,64,28,0.3);}
 /* 편집 모드 활성 시 간트 래퍼 */
 #ganttWrapper.edit-mode{border:2px solid rgba(232,64,28,0.35);border-radius:14px;}
+/* 드래그 핸들 */
+.gantt-drag-handle{display:none;align-items:center;justify-content:center;width:16px;flex-shrink:0;cursor:grab;color:var(--text3);font-size:13px;letter-spacing:-1px;padding:0 2px;opacity:0;transition:opacity 0.15s;user-select:none;}
+#ganttWrapper.edit-mode .gantt-drag-handle{display:flex;}
+.gantt-row:hover .gantt-drag-handle{opacity:1;}
+.gantt-drag-handle:active{cursor:grabbing;}
+/* 드래그 상태 */
+.gantt-row.dragging{opacity:0.35;background:var(--bg3);}
+.gantt-row.drag-over-top{border-top:2px solid var(--accent) !important;background:var(--accent-dim) !important;}
+.gantt-row.drag-over-bot{border-bottom:2px solid var(--accent) !important;background:var(--accent-dim) !important;}
 /* 편집 모드 배너 */
 .gantt-edit-banner{display:none;background:rgba(232,64,28,0.06);border-bottom:1px solid rgba(232,64,28,0.2);padding:7px 16px;font-size:11px;color:var(--accent);font-weight:600;gap:8px;align-items:center;}
 #ganttWrapper.edit-mode .gantt-edit-banner{display:flex;}
@@ -1201,10 +1210,18 @@ function renderGantt(){
       const pct=Math.min(100,Math.round(el/tot*100));
       const st=el<=0?'예정':el>=tot?'완료':`진행중 ${pct}%`;
 
-      h+=`<div class="gantt-row">
+      const pid=p.id;
+      h+=`<div class="gantt-row" data-pid="${pid}" data-cat="${esc(grp)}"
+        draggable="${canEdit()?'true':'false'}"
+        ondragstart="phaseDragStart(event,${pid})"
+        ondragover="phaseDragOver(event,${pid})"
+        ondragleave="phaseDragLeave(event)"
+        ondrop="phaseDrop(event,${pid})"
+        ondragend="phaseDragEnd(event)">
         <div class="grl">
+          <span class="gantt-drag-handle" title="드래그하여 순서 변경">⠿⠿</span>
           <span class="grl-name">${p.name}</span>
-          ${canEdit()?`<button class="gantt-edit-btn" onclick="event.stopPropagation();openEditPhaseModal(${p.id})" title="편집">✏️</button>`:''}
+          ${canEdit()?`<button class="gantt-edit-btn" onclick="event.stopPropagation();openEditPhaseModal(${pid})" title="편집">✏️</button>`:''}
         </div>
         <div class="grt" style="min-width:${tw}px;">
           <div class="gtbg">${mkBgc()}</div>
@@ -1257,6 +1274,66 @@ function renderGantt(){
   h+=`</div>`;
   document.getElementById('ganttChart').innerHTML=h;
 }
+// ═══ 단계 드래그 정렬 ═══
+let _dragPid=null, _dragCat=null;
+
+function phaseDragStart(e, pid){
+  if(!document.getElementById('ganttWrapper').classList.contains('edit-mode')){e.preventDefault();return;}
+  _dragPid=pid;
+  const p=S.phases.find(x=>x.id===pid);
+  _dragCat=p?p.cat:null;
+  e.dataTransfer.effectAllowed='move';
+  e.dataTransfer.setData('text/plain', String(pid));
+  // 드래그 시작 행 흐리게
+  setTimeout(()=>{ const row=document.querySelector(`.gantt-row[data-pid="${pid}"]`); if(row) row.classList.add('dragging'); }, 0);
+}
+
+function phaseDragOver(e, pid){
+  e.preventDefault();
+  if(!_dragPid || _dragPid===pid) return;
+  const tgtP=S.phases.find(x=>x.id===pid);
+  if(!tgtP || tgtP.cat!==_dragCat) return;  // 같은 카테고리만
+  e.dataTransfer.dropEffect='move';
+  // 마우스 위치로 위/아래 판단
+  const row=e.currentTarget;
+  const rect=row.getBoundingClientRect();
+  const mid=rect.top+rect.height/2;
+  document.querySelectorAll('.gantt-row.drag-over-top,.gantt-row.drag-over-bot').forEach(r=>r.classList.remove('drag-over-top','drag-over-bot'));
+  row.classList.add(e.clientY<mid?'drag-over-top':'drag-over-bot');
+}
+
+function phaseDragLeave(e){
+  e.currentTarget.classList.remove('drag-over-top','drag-over-bot');
+}
+
+function phaseDrop(e, targetPid){
+  e.preventDefault();
+  document.querySelectorAll('.gantt-row.drag-over-top,.gantt-row.drag-over-bot,.gantt-row.dragging').forEach(r=>r.classList.remove('drag-over-top','drag-over-bot','dragging'));
+  if(!_dragPid || _dragPid===targetPid) return;
+  const srcP=S.phases.find(x=>x.id===_dragPid);
+  const tgtP=S.phases.find(x=>x.id===targetPid);
+  if(!srcP||!tgtP||srcP.cat!==tgtP.cat) return;
+
+  // 드롭 위치 (위쪽 절반이면 target 위에, 아래쪽이면 아래에 삽입)
+  const row=e.currentTarget;
+  const rect=row.getBoundingClientRect();
+  const insertBefore=e.clientY < rect.top+rect.height/2;
+
+  const srcIdx=S.phases.indexOf(srcP);
+  S.phases.splice(srcIdx, 1);
+  let tgtIdx=S.phases.indexOf(tgtP);
+  if(!insertBefore) tgtIdx+=1;
+  S.phases.splice(tgtIdx, 0, srcP);
+
+  _dragPid=null; _dragCat=null;
+  save(); renderGantt();
+}
+
+function phaseDragEnd(e){
+  document.querySelectorAll('.gantt-row.drag-over-top,.gantt-row.drag-over-bot,.gantt-row.dragging').forEach(r=>r.classList.remove('drag-over-top','drag-over-bot','dragging'));
+  _dragPid=null; _dragCat=null;
+}
+
 // ═══ 편집 모드 ═══
 function toggleGanttEditMode(){
   const wrapper=document.getElementById('ganttWrapper');
