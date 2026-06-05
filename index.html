@@ -9,13 +9,14 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 <style>
 :root {
-  --bg:#F5F6F8; --bg2:#FFFFFF; --bg3:#F0F1F4; --bg4:#E8EAEE;
-  --border:#E0E2E8; --border2:#CBD0DA;
-  --accent:#E8401C; --accent2:#FF5533; --accent-dim:rgba(232,64,28,0.08); --accent-dim2:rgba(232,64,28,0.14);
-  --text:#111827; --text2:#374151; --text3:#9CA3AF; --text4:#6B7280;
-  --success:#16A34A; --shadow:0 1px 3px rgba(0,0,0,0.08); --shadow-md:0 4px 12px rgba(0,0,0,0.1);
-  --cat-krafton:#E8401C; --cat-hanmi:#059669; --cat-samoo:#2563EB; --cat-fp:#7C3AED; --cat-permit:#D97706; --cat-etc:#475569;
+  --bg:#F5F5F0; --bg2:#FFFFFF; --bg3:#EEEEEA; --bg4:#E4E4E0;
+  --border:#E0E0D8; --border2:#C8C8C0;
+  --accent:#E8401C; --accent2:#FF5533; --accent-dim:rgba(232,64,28,0.07); --accent-dim2:rgba(232,64,28,0.13);
+  --text:#111; --text2:#333; --text3:#999; --text4:#666;
+  --success:#3DB06A; --shadow:0 1px 2px rgba(0,0,0,0.06); --shadow-md:0 4px 12px rgba(0,0,0,0.08);
+  --cat-krafton:#E8401C; --cat-hanmi:#3DB06A; --cat-samoo:#2563EB; --cat-fp:#7C3AED; --cat-permit:#D97706; --cat-etc:#475569;
 }
+body{background:var(--bg);}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
@@ -45,26 +46,62 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 
 /* APP */
 #app{display:none;min-height:100vh;}
-.header{background:#fff;border-bottom:1px solid var(--border);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow);}
-.header-left{display:flex;align-items:center;gap:14px;}
-.h-k{width:30px;height:30px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;color:#fff;}
-.h-title{font-size:14px;font-weight:800;} .h-sub{font-size:10px;color:var(--text3);}
-.h-sep{width:1px;height:24px;background:var(--border);}
-.h-proj{font-size:13px;color:var(--text4);font-weight:500;}
-.header-right{display:flex;align-items:center;gap:10px;}
-.now-tag{display:inline-flex;align-items:center;gap:6px;background:var(--accent-dim2);border:1px solid rgba(232,64,28,0.3);padding:5px 12px;border-radius:20px;font-size:11px;color:var(--accent);font-weight:700;}
-.now-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pulse 1.5s infinite;}
+.header{background:#fff;border-bottom:1px solid #E0E0D8;padding:0 32px;height:62px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.header-left{display:flex;align-items:center;gap:28px;}
+.brand-wrap{display:flex;flex-direction:column;gap:1px;}
+.brand-kf{font-size:20px;font-weight:900;letter-spacing:2.5px;color:#E8401C;line-height:1;}
+.brand-spc{font-size:8px;font-weight:700;letter-spacing:2px;color:#aaa;text-transform:uppercase;}
+.proj-nav{display:flex;align-items:center;border:1px solid #E0E0D8;border-radius:20px;overflow:hidden;}
+.pn-item{padding:6px 20px;font-size:12px;font-weight:700;color:#aaa;cursor:pointer;border-right:1px solid #E0E0D8;letter-spacing:0.5px;transition:all 0.15s;text-decoration:none;}
+.pn-item:last-child{border-right:none;}
+.pn-item.pn-active{background:#111;color:#fff;}
+.pn-item:hover:not(.pn-active){background:#F5F5F0;color:#333;}
+.header-right{display:flex;align-items:center;gap:8px;}
+.now-tag{display:inline-flex;align-items:center;gap:6px;border:1px solid #E0E0D8;border-radius:20px;padding:5px 14px;font-size:11px;font-weight:700;color:#444;background:#fff;}
+.now-dot{width:6px;height:6px;border-radius:50%;background:#E8401C;animation:pulse 1.5s infinite;flex-shrink:0;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
-.user-badge{display:flex;align-items:center;gap:7px;background:var(--bg3);border:1px solid var(--border);padding:5px 13px;border-radius:20px;font-size:12px;color:var(--text2);}
-.u-dot{width:7px;height:7px;border-radius:50%;background:var(--success);}
-.logout-btn{padding:6px 14px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text4);font-size:12px;cursor:pointer;transition:all 0.2s;}
-.logout-btn:hover{border-color:var(--accent);color:var(--accent);}
+.user-badge{display:flex;align-items:center;gap:7px;border:1px solid #E0E0D8;padding:5px 13px;border-radius:20px;font-size:12px;color:#444;}
+.u-dot{width:6px;height:6px;border-radius:50%;background:#3DB06A;}
+.logout-btn{padding:5px 14px;background:transparent;border:1px solid #E0E0D8;border-radius:20px;color:#888;font-size:11px;cursor:pointer;font-weight:600;}
+.logout-btn:hover{border-color:#888;color:#333;}
+
+/* CLUSTER */
+.cluster-sec{background:#fff;border-bottom:1px solid #E0E0D8;padding:16px 32px;}
+.cluster-inner{display:flex;align-items:flex-start;gap:0;}
+.cluster-title-col{display:flex;flex-direction:column;padding-right:0;flex-shrink:0;}
+.cluster-head-spacer{height:22px;}
+.cluster-row-lbl{height:32px;display:flex;align-items:center;font-size:10px;font-weight:700;color:#bbb;letter-spacing:0.5px;padding-right:10px;width:32px;justify-content:flex-end;}
+.cluster-row-lbl.active{color:#111;}
+.cluster-grid-wrap{flex:1;overflow:auto;}
+.cluster-yr-row{display:flex;}
+.cluster-yr-cell{min-width:52px;height:22px;text-align:center;font-size:9px;font-weight:700;color:#aaa;letter-spacing:0.5px;border-right:1px solid #E0E0D8;border-bottom:1px solid #E0E0D8;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.cluster-yr-cell.cur{color:#E8401C;font-weight:900;}
+.cluster-yr-cell:first-child{border-left:1px solid #E0E0D8;}
+.cluster-rows{display:flex;flex-direction:column;}
+.cluster-data-row{display:flex;}
+.cluster-cell{min-width:52px;height:32px;border-right:1px solid #E0E0D8;border-bottom:1px solid #E0E0D8;position:relative;flex-shrink:0;overflow:hidden;}
+.cluster-cell:first-child{border-left:1px solid #E0E0D8;}
+.cluster-rows .cluster-data-row:first-child .cluster-cell{border-top:1px solid #E0E0D8;}
+.cluster-cell-inner{width:100%;height:100%;display:flex;align-items:center;padding:0 5px;font-size:9px;font-weight:600;color:#555;white-space:nowrap;overflow:hidden;cursor:default;}
+.cluster-cell.editable .cluster-cell-inner{cursor:pointer;}
+.cluster-cell.editable:hover .cluster-cell-inner{outline:2px solid #E8401C;outline-offset:-2px;}
+.cluster-cell-input{position:absolute;inset:0;width:100%;height:100%;border:2px solid #E8401C;outline:none;font-size:9px;font-weight:600;padding:0 4px;background:inherit;font-family:inherit;color:inherit;z-index:10;}
+.cluster-color-picker{position:absolute;bottom:calc(100% + 4px);left:0;background:#fff;border:1px solid #E0E0D8;border-radius:8px;padding:6px;display:flex;flex-wrap:wrap;gap:4px;z-index:20;box-shadow:0 4px 12px rgba(0,0,0,0.1);width:120px;}
+.cluster-color-swatch{width:18px;height:18px;border-radius:3px;cursor:pointer;border:1.5px solid transparent;flex-shrink:0;}
+.cluster-color-swatch:hover,.cluster-color-swatch.sel{border-color:#111;}
 
 /* TABS */
-.tabs{background:#fff;border-bottom:1px solid var(--border);padding:0 28px;display:flex;gap:2px;}
-.tab{padding:14px 18px;font-size:13px;color:var(--text4);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;font-weight:500;}
-.tab:hover{color:var(--text2);}
-.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:700;}
+.tabs{background:#fff;border-bottom:1px solid #E0E0D8;padding:0 32px;}
+.tabs-inner{display:flex;align-items:center;height:52px;gap:16px;}
+.tabs-label{font-size:11px;font-weight:800;letter-spacing:1.5px;color:#aaa;text-transform:uppercase;flex-shrink:0;}
+.tab-pills{display:flex;gap:6px;}
+.tab-pill{padding:6px 18px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid #E0E0D8;color:#888;background:#fff;transition:all 0.15s;}
+.tab-pill.active{background:#3DB06A;border-color:#3DB06A;color:#fff;}
+.tab-pill:hover:not(.active){border-color:#aaa;color:#444;}
+.tabs-right{display:flex;align-items:center;gap:10px;margin-left:auto;}
+.perm-hint{font-size:11px;color:#aaa;}
+/* legacy tab selector kept for any remaining references */
+.tab{display:none;}
 
 /* CAT FILTER */
 .cat-filter{padding:11px 28px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
@@ -115,7 +152,7 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 #excelFileInput{display:none;}
 
 /* GANTT */
-.gantt-wrapper{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);}
+.gantt-wrapper{background:#fff;border:1px solid var(--border);border-radius:0;overflow:hidden;box-shadow:none;}
 .gantt-scroll{overflow-x:auto;}
 .gantt-header-row{display:flex;background:var(--bg3);border-bottom:1px solid var(--border);}
 .glc{min-width:190px;max-width:190px;border-right:1px solid var(--border);padding:10px 16px;font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;font-weight:700;}
@@ -125,8 +162,8 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .gantt-months{display:flex;}
 .gm{text-align:center;padding:5px 0;font-size:9px;color:var(--text3);border-right:1px solid var(--border);flex-shrink:0;font-weight:600;}
 .gm.cur{color:var(--accent);font-weight:800;background:var(--accent-dim);}
-.gantt-group-header{display:flex;background:#FAFBFC;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;min-height:52px;}
-.gantt-group-header:hover{background:#F3F4F6;}
+.gantt-group-header{display:flex;background:#F5F5F0;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;min-height:52px;}
+.gantt-group-header:hover{background:#EEEEEA;}
 .gantt-group-header .grt-ms{flex:1;position:relative;overflow:visible;min-height:52px;}
 .ggl{min-width:190px;max-width:190px;padding:8px 16px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:7px;border-right:1px solid var(--border);color:var(--text2);}
 .gg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
@@ -403,9 +440,9 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 <!-- LOGIN -->
 <div id="loginScreen" style="display:flex;">
   <div class="login-box">
-    <div class="login-brand">
-      <div class="k-circle">K</div>
-      <div><div class="b1">KRAFTON C4</div><div class="b2">Project Schedule</div></div>
+    <div class="login-brand" style="flex-direction:column;gap:4px;">
+      <div style="font-size:26px;font-weight:900;letter-spacing:3px;color:#E8401C;">KRAFTON</div>
+      <div style="font-size:9px;font-weight:700;letter-spacing:2px;color:#aaa;text-transform:uppercase;margin-top:2px;">Space &amp; Property Center</div>
     </div>
     <div class="login-divider"></div>
     <div class="login-sub">대륭덕성 설계·시공 전체 일정표</div>
@@ -428,25 +465,55 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 <div id="app">
   <div class="header">
     <div class="header-left">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div class="h-k">K</div>
-        <div><div class="h-title">KRAFTON C4</div><div class="h-sub">대륭덕성 프로젝트</div></div>
+      <div class="brand-wrap">
+        <div class="brand-kf">KRAFTON</div>
+        <div class="brand-spc">SPACE &amp; PROPERTY CENTER</div>
       </div>
-      <div class="h-sep"></div>
-      <div class="h-proj">설계·시공 전체 일정표</div>
+      <nav class="proj-nav">
+        <a class="pn-item">HQ</a>
+        <a class="pn-item">C1</a>
+        <a class="pn-item pn-active">C4</a>
+        <a class="pn-item">D1</a>
+      </nav>
     </div>
     <div class="header-right">
-      <div class="now-tag"><div class="now-dot"></div>NOW&nbsp;<span id="nowPhase">DD 40%</span></div>
-      <div style="font-size:11px;color:var(--text3);" id="todayBadge"></div>
+      <div class="now-tag"><div class="now-dot"></div><span id="todayBadge"></span></div>
       <div class="user-badge"><div class="u-dot"></div><span id="userText"></span></div>
       <button class="logout-btn" onclick="doLogout()">로그아웃</button>
     </div>
   </div>
 
-  <div class="tabs">
-    <div class="tab active" onclick="switchTab('overview',this)">📊 전체 일정</div>
-    <div class="tab" onclick="switchTab('calendar',this)">📅 상세 일정</div>
-    <div class="tab admin-only" onclick="switchTab('settings',this)">⚙️ 설정</div>
+  <div class="cluster-sec" id="clusterSec">
+    <div class="cluster-inner">
+      <div class="cluster-title-col">
+        <div class="cluster-head-spacer"></div>
+        <div class="cluster-row-lbl">HQ</div>
+        <div class="cluster-row-lbl">C1</div>
+        <div class="cluster-row-lbl active">C4</div>
+        <div class="cluster-row-lbl">D1</div>
+      </div>
+      <div class="cluster-grid-wrap">
+        <div class="cluster-yr-row" id="clusterYrRow"></div>
+        <div class="cluster-rows" id="clusterRows"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs" id="appTabs">
+    <div class="tabs-inner">
+      <span class="tabs-label">C4 PROJECT</span>
+      <div class="tab-pills">
+        <div class="tab-pill active" onclick="switchTab('overview',this)" data-tab="overview">전체 일정표</div>
+        <div class="tab-pill" onclick="switchTab('calendar',this)" data-tab="calendar">상세 일정</div>
+      </div>
+      <div class="tabs-right">
+        <span class="perm-hint admin-only" id="permHint">관리자 · 한미글로벌 계정에서 직접 편집할 수 있습니다</span>
+        <div id="ganttEditToggleWrap" style="display:none;">
+          <button id="ganttEditToggleBtn" onclick="toggleGanttEditMode()" class="gantt-edit-mode-btn">✏️ 편집 모드</button>
+        </div>
+        <button class="tab-pill admin-only-strict" onclick="switchTab('settings',this)" data-tab="settings" style="background:transparent;border-color:#E0E0D8;color:#888;">⚙️</button>
+      </div>
+    </div>
   </div>
 
   <div class="cat-filter" id="catFilter" style="display:none;">
@@ -455,37 +522,7 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 
   <!-- OVERVIEW -->
   <div id="overviewTab" class="tab-content active">
-    <div class="cw">
-      <!-- PROJECT SWITCHER -->
-      <div class="proj-switcher">
-        <span class="cf-label" style="margin-right:4px;">프로젝트</span>
-        <button class="proj-btn active">C4</button>
-        <button class="proj-btn" disabled>C1</button>
-        <button class="proj-btn" disabled>C3</button>
-        <button class="proj-btn" disabled>HQ</button>
-      </div>
-      <div class="sec-title">진행 현황 요약</div>
-      <div class="progress-summary" id="progressSummary"></div>
-
-      <!-- EXCEL BAR -->
-      <div class="excel-bar">
-        <div class="excel-bar-icon">📊</div>
-        <div class="excel-bar-text">
-          <strong>KRAFTON C4 프로젝트 일정표</strong>
-          <span>전체 일정은 관리자·한미글로벌 계정에서 직접 편집할 수 있습니다</span>
-        </div>
-        <div class="excel-bar-badge" id="lastImportBadge">기준 버전: 2026-06-02</div>
-        <button class="btn-import admin-only" style="background:var(--success);" onclick="exportExcel()">⬇️ 엑셀 내보내기</button>
-        <input type="file" id="excelFileInput" accept=".xlsx,.xls,.csv" onchange="importExcel(this)" style="display:none">
-      </div>
-
-      <div class="sec-title" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-        전체 일정 타임라인 (2025 – 2031)
-        <span style="color:var(--accent);font-size:10px;font-weight:400;">▌ 현재 위치</span>
-        <div id="ganttEditToggleWrap" style="display:none;margin-left:auto;">
-          <button id="ganttEditToggleBtn" onclick="toggleGanttEditMode()" class="gantt-edit-mode-btn">✏️ 편집 모드</button>
-        </div>
-      </div>
+    <div class="cw" style="padding-top:20px;">
       <div class="gantt-wrapper" id="ganttWrapper">
         <div class="gantt-edit-banner" id="ganttEditBanner">
           ✏️ 편집 모드 활성 중 — 항목을 클릭해서 바로 수정하세요
@@ -765,7 +802,7 @@ const DEV=[
 ];
 
 // ═══ STATE ═══
-let S={user:null,cats:[],accounts:[],phases:[],milestones:[],events:[],activeCats:null,calY:2026,calM:3};
+let S={user:null,cats:[],accounts:[],phases:[],milestones:[],events:[],activeCats:null,calY:2026,calM:3,clusterCells:{}};
 let importedPhases=null;
 let saveTimer=null;
 const TODAY=new Date();
@@ -786,7 +823,8 @@ function save(){
     scheduleVersion: SCHEDULE_VERSION,
     cats:S.cats, accounts:S.accounts,
     phases:S.phases, milestones:S.milestones,
-    events:S.events, lastImport:S.lastImport||null
+    events:S.events, lastImport:S.lastImport||null,
+    clusterCells: S.clusterCells
   };
   db.ref(DB_REF).set(data)
     .then(()=>showSaveStatus())
@@ -811,6 +849,7 @@ function applyFirebaseData(data){
     S.accounts  = fa(data.accounts,  DA);
     S.events    = fa(data.events,    DEV);
     S.lastImport= data.lastImport    || null;
+    S.clusterCells = data.clusterCells || {};
 
     // scheduleVersion이 다르면 → 코드 기본값으로 cats/phases/milestones 자동 갱신
     const fbVer = data.scheduleVersion || '';
@@ -837,7 +876,7 @@ function arr(v){
   if(Array.isArray(v))return v.filter(x=>x!=null);
   return Object.values(v).filter(x=>x!=null);
 }
-function reset(){S.cats=jc(DC);S.accounts=jc(DA);S.phases=jc(DP);S.milestones=jc(DM);S.events=jc(DEV);S.lastImport=null;}
+function reset(){S.cats=jc(DC);S.accounts=jc(DA);S.phases=jc(DP);S.milestones=jc(DM);S.events=jc(DEV);S.lastImport=null;S.clusterCells={};}
 
 function startOfflineMode(){
   if(!firstLoad)return;
@@ -940,8 +979,8 @@ function performLogin(acc,animate){
   // 계정·카테고리 관리는 관리자만
   if(acc.role==='admin'){document.querySelectorAll('.admin-only-strict').forEach(el=>el.style.display='block');}
   document.getElementById('userText').textContent=acc.name||acc.id;
-  document.getElementById('todayBadge').textContent=`${TODAY.getFullYear()}.${p2(TODAY.getMonth()+1)}.${p2(TODAY.getDate())}`;
-  document.getElementById('lastImportBadge').textContent=S.lastImport?'마지막 가져오기: '+S.lastImport:'기준 버전: '+SCHEDULE_VERSION;
+  const d=TODAY; const days=['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  document.getElementById('todayBadge').textContent=`Today '${String(d.getFullYear()).slice(2)}.${p2(d.getMonth()+1)}.${p2(d.getDate())} ${days[d.getDay()]}`;
   S.activeCats=null; // 로그인 시 초기화 → renderCatFilter에서 전체 ON으로 세팅
   try{renderAll();}catch(e){console.error('[Login] renderAll 오류:', e);}
 }
@@ -1786,9 +1825,10 @@ function hideTT(){document.getElementById('tooltip').classList.add('mh');}
 // ═══ TAB / FILTER ═══
 function switchTab(id,el){
   document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById(id+'Tab').classList.add('active');
-  el.classList.add('active');
+  document.querySelectorAll('.tab,.tab-pill').forEach(t=>t.classList.remove('active'));
+  const tc=document.getElementById(id+'Tab');
+  if(tc)tc.classList.add('active');
+  if(el)el.classList.add('active');
   document.getElementById('catFilter').style.display=id==='calendar'?'flex':'none';
   if(id==='calendar')renderCalendar();
   if(id==='settings')renderSettings();
@@ -1856,7 +1896,7 @@ function toggleCatRestrict(i){
   save();renderAll();
 }
 
-function renderAll(){renderCatFilter();renderProgress();renderGantt();renderCalendar();if(canEdit())renderSettings();}
+function renderAll(){renderCatFilter();renderGantt();renderCalendar();renderCluster();if(canEdit())renderSettings();}
 
 function resetToDefault(){
   if(!confirm('Firebase 데이터를 엑셀 기준 초기값으로 초기화합니다.\n현재 저장된 모든 일정 변경사항이 사라집니다. 계속하시겠습니까?'))return;
@@ -1970,6 +2010,89 @@ function openAddMilestoneModalForGroup(grp){
   // 카테고리를 해당 그룹으로 미리 선택
   const sel=document.getElementById('mCat');
   if(sel){for(let i=0;i<sel.options.length;i++){if(sel.options[i].value===grp){sel.selectedIndex=i;break;}}}
+}
+
+// ═══ CLUSTER GRID ═══
+const CLUSTER_COLORS=['#F5F5F0','#E0E0D8','#D0D0C8','#aaa','#555','#111','#E8401C','#3DB06A','#2563EB','#7C3AED','#D97706'];
+
+function renderCluster(){
+  const YEARS=['22','23','24','25','26','27','28','29','30','31','32'];
+  const ROWS=['HQ','C1','C4','D1'];
+  const CY='26';
+  const yrRow=document.getElementById('clusterYrRow');
+  const rowsEl=document.getElementById('clusterRows');
+  if(!yrRow||!rowsEl)return;
+
+  yrRow.innerHTML=YEARS.map(y=>`<div class="cluster-yr-cell${y===CY?' cur':''}">'${y}</div>`).join('');
+
+  const isAdmin=S.user&&S.user.role==='admin';
+  rowsEl.innerHTML=ROWS.map(row=>`
+    <div class="cluster-data-row">
+      ${YEARS.map(yr=>{
+        const key=row+'-'+yr;
+        const cell=S.clusterCells[key]||{text:'',color:'#F5F5F0'};
+        return`<div class="cluster-cell${isAdmin?' editable':''}" data-key="${key}" style="background:${cell.color||'#F5F5F0'};"
+          ${isAdmin?`onclick="clusterCellClick(event,'${key}')"`:''}
+        ><div class="cluster-cell-inner" style="color:${getCellTextColor(cell.color||'#F5F5F0')}">${cell.text||''}</div></div>`;
+      }).join('')}
+    </div>`).join('');
+}
+
+function getCellTextColor(bg){
+  const hex=bg.replace('#','');
+  if(hex.length<6)return'#555';
+  const r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);
+  const lum=(0.299*r+0.587*g+0.114*b)/255;
+  return lum>0.55?'#333':'#fff';
+}
+
+function clusterCellClick(e,key){
+  e.stopPropagation();
+  document.querySelectorAll('.cluster-cell-input').forEach(x=>x.remove());
+  document.querySelectorAll('.cluster-color-picker').forEach(x=>x.remove());
+
+  const cell=e.currentTarget;
+  const data=S.clusterCells[key]||{text:'',color:'#F5F5F0'};
+
+  const picker=document.createElement('div');
+  picker.className='cluster-color-picker';
+  CLUSTER_COLORS.forEach(c=>{
+    const sw=document.createElement('div');
+    sw.className='cluster-color-swatch'+(data.color===c?' sel':'');
+    sw.style.background=c;
+    sw.style.border='1.5px solid '+(c==='#F5F5F0'||c==='#fff'?'#ccc':'transparent');
+    sw.onclick=ev=>{
+      ev.stopPropagation();
+      if(!S.clusterCells[key])S.clusterCells[key]={text:'',color:c};
+      else S.clusterCells[key].color=c;
+      document.querySelectorAll('.cluster-color-picker').forEach(x=>x.remove());
+      save();renderCluster();
+    };
+    picker.appendChild(sw);
+  });
+  cell.style.position='relative';
+  cell.appendChild(picker);
+
+  const inp=document.createElement('input');
+  inp.className='cluster-cell-input';
+  inp.value=data.text||'';
+  inp.style.background=data.color||'#F5F5F0';
+  inp.style.color=getCellTextColor(data.color||'#F5F5F0');
+  inp.onclick=ev=>ev.stopPropagation();
+  inp.onblur=()=>{
+    if(!S.clusterCells[key])S.clusterCells[key]={text:inp.value.trim(),color:'#F5F5F0'};
+    else S.clusterCells[key].text=inp.value.trim();
+    document.querySelectorAll('.cluster-color-picker').forEach(x=>x.remove());
+    inp.remove();
+    save();renderCluster();
+  };
+  inp.onkeydown=ev=>{if(ev.key==='Enter'||ev.key==='Escape')inp.blur();};
+  cell.appendChild(inp);
+  setTimeout(()=>inp.focus(),10);
+
+  setTimeout(()=>document.addEventListener('click',function h(){
+    picker.remove();document.removeEventListener('click',h);
+  }),10);
 }
 </script>
 </body>
