@@ -141,12 +141,27 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .gms-name{font-size:8px;font-weight:700;margin-top:3px;white-space:nowrap;max-width:72px;overflow:hidden;text-overflow:ellipsis;text-align:center;line-height:1.2;}
 .gms-date{font-size:7px;color:var(--text3);white-space:nowrap;margin-top:1px;text-align:center;}
 .gms-note{font-size:7px;color:var(--text4);white-space:nowrap;max-width:90px;overflow:hidden;text-overflow:ellipsis;margin-top:1px;text-align:center;font-style:italic;}
+/* 마일스톤 wrap — 완료 클릭 가능 */
+.gms-wrap.can-check .gms-circle{cursor:pointer;}
+/* 완료 상태 */
+.gms-circle.done{position:relative;}
+.gms-circle.done::after{content:'✓';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:8px;font-weight:900;color:#fff;line-height:1;}
+.gms-name.done-txt{text-decoration:line-through;opacity:0.55;}
 /* 편집 모드에서만 보이는 마일스톤 편집 버튼 */
-.gms-edit-btn{display:none;position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;border:none;border-radius:50%;width:13px;height:13px;font-size:9px;line-height:1;cursor:pointer;align-items:center;justify-content:center;z-index:10;padding:0;box-shadow:0 1px 4px rgba(0,0,0,0.25);}
+.gms-edit-btn{display:none;position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;border:none;border-radius:50%;width:14px;height:14px;font-size:9px;line-height:1;cursor:pointer;align-items:center;justify-content:center;z-index:10;padding:0;box-shadow:0 1px 4px rgba(0,0,0,0.3);white-space:nowrap;}
 #ganttWrapper.edit-mode .gms-edit-btn{display:flex;}
 /* 편집 모드에서 + 마일스톤 추가 버튼 */
 .gms-add-new-btn{display:none;}
-#ganttWrapper.edit-mode .gms-add-new-btn{display:inline-block;}
+#ganttWrapper.edit-mode .gms-add-new-btn{display:inline-flex !important;align-items:center;gap:4px;}
+/* 헤더 라벨 영역 추가 버튼 */
+.ggl-add-ms{display:none;margin-left:4px;background:transparent;border:1px solid var(--border2);border-radius:10px;padding:2px 6px;font-size:10px;color:var(--text3);cursor:pointer;line-height:1.4;}
+#ganttWrapper.edit-mode .ggl-add-ms{display:inline-flex;align-items:center;gap:2px;}
+.ggl-add-ms:hover{border-color:var(--accent);color:var(--accent);}
+/* 팝오버 완료 체크 행 */
+.ms-done-row{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg3);border-radius:8px;margin-bottom:8px;cursor:pointer;}
+.ms-done-box{width:16px;height:16px;border-radius:4px;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s;}
+.ms-done-box.checked{background:var(--success);border-color:var(--success);}
+.ms-done-box.checked::after{content:'✓';color:#fff;font-size:10px;font-weight:900;}
 /* 마일스톤 인라인 편집 팝오버 */
 .ms-popover{position:fixed;background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;box-shadow:0 8px 28px rgba(0,0,0,0.15);z-index:300;width:240px;}
 .ms-popover h4{font-size:12px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
@@ -1138,8 +1153,10 @@ function renderGantt(){
 
     // ── 그룹 헤더 + 마일스톤 통합 ──
     h+=`<div class="gantt-group-header" onclick="toggleGanttGroup('${gid}')">
-      <div class="ggl"><div class="gg-dot" style="background:${col}"></div>
+      <div class="ggl">
+        <div class="gg-dot" style="background:${col}"></div>
         <span class="gg-label-editable" style="color:${col}" onclick="event.stopPropagation();editCatLabelInline(${catIdx})" title="표시명 편집">${dispLabel}</span>
+        ${canEdit()?`<button class="ggl-add-ms" onclick="event.stopPropagation();openAddMilestoneModalForGroup('${esc(grp)}')" title="마일스톤 추가">＋</button>`:''}
         <span class="gg-toggle" id="gg-icon-${gid}">${toggleIcon}</span>
       </div>
       <div class="grt-ms" style="min-width:${tw}px;">
@@ -1147,20 +1164,26 @@ function renderGantt(){
         <div class="gnl" style="left:${NX}px;"></div>`;
     // 마일스톤을 헤더 행 안에 원형 버튼으로 표시
     ms2.forEach(m=>{
-      const mx=d2x(m.date);const past=new Date(m.date+'T00:00:00')<TODAY;
+      const mx=d2x(m.date);
+      const done=m.done===true;
+      const past=new Date(m.date+'T00:00:00')<TODAY;
+      // 완료: 진한 채움 + ✓ / 미완료+과거: 연한 채움 / 미완료+미래: 빈 원
+      const circleBg=done?col:(past?col+'88':'#fff');
       const nameEsc=esc(m.name);const noteEsc=m.note?esc(m.note):'';
+      const statusLabel=done?'✅ 완료':(past?'기한 지남':'예정');
       const noteExtra=noteEsc?`'<div style=\\'margin-top:4px;font-size:10px;opacity:0.75;\\'>'+'${noteEsc}'+'</div>'`:`''`;
-      h+=`<div class="gms-wrap" style="left:${mx}px;">
-        ${canEdit()?`<button class="gms-edit-btn" onclick="event.stopPropagation();openMsPopover(event,${m.id})" title="마일스톤 편집">✏</button>`:''}
-        <div class="gms-circle" style="background:${past?col:'#fff'};border-color:${col};"
-          onmouseenter="showMTT(event,'${nameEsc}','${m.date}',${noteExtra})" onmouseleave="hideTT()"></div>
-        <div class="gms-name" style="color:${col};">${m.name}</div>
+      const checkClick=canEdit()?`onclick="event.stopPropagation();toggleMsDone(${m.id})"`:``;
+      h+=`<div class="gms-wrap${canEdit()?' can-check':''}" style="left:${mx}px;">
+        ${canEdit()?`<button class="gms-edit-btn" onclick="event.stopPropagation();openMsPopover(event,${m.id})" title="편집">✏</button>`:''}
+        <div class="gms-circle${done?' done':''}" style="background:${circleBg};border-color:${col};" ${checkClick}
+          onmouseenter="showMTT(event,'${nameEsc}','${m.date}',${noteExtra}+'<div style=\\'margin-top:3px;font-size:9px;font-weight:700;opacity:0.8;\\'>${statusLabel}</div>')" onmouseleave="hideTT()"></div>
+        <div class="gms-name${done?' done-txt':''}" style="color:${col};">${m.name}</div>
         <div class="gms-date">${m.date.slice(5).replace('-','/')}</div>
         ${m.note?`<div class="gms-note">${m.note}</div>`:''}
       </div>`;
     });
     if(canEdit()){
-      h+=`<button class="gms-add-new-btn" onclick="event.stopPropagation();openAddMilestoneModalForGroup('${esc(grp)}')" style="position:absolute;top:4px;right:8px;background:transparent;border:1px dashed var(--border2);border-radius:20px;padding:2px 8px;font-size:10px;color:var(--text3);cursor:pointer;z-index:5;">+ 마일스톤</button>`;
+      h+=`<button class="gms-add-new-btn" onclick="event.stopPropagation();openAddMilestoneModalForGroup('${esc(grp)}')" style="position:absolute;top:6px;right:8px;background:transparent;border:1px dashed var(--border2);border-radius:20px;padding:3px 10px;font-size:10px;color:var(--text3);cursor:pointer;z-index:5;">＋ 마일스톤</button>`;
     }
     h+=`</div></div>`;
 
@@ -1776,6 +1799,12 @@ try{ if(!checkAutoLogin()){ document.getElementById('loginScreen').style.display
 initFirebase();
 // ═══ 마일스톤 팝오버 ═══
 let _msPopoverMsId=null;
+function toggleMsDone(msId){
+  const m=S.milestones.find(x=>x.id===msId);
+  if(!m)return;
+  m.done=!m.done;
+  save(); renderGantt();
+}
 function openMsPopover(e,msId){
   e.stopPropagation();
   closeMsPopover();
@@ -1785,7 +1814,17 @@ function openMsPopover(e,msId){
   const pop=document.createElement('div');
   pop.className='ms-popover';
   pop.id='msPopover';
-  pop.innerHTML=`<h4>◆ 마일스톤 편집 <button onclick="closeMsPopover()" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:0;">✕</button></h4>
+  const isDone=m.done===true;
+  pop.innerHTML=`
+    <h4 style="display:flex;align-items:center;justify-content:space-between;">
+      <span>● 마일스톤 편집</span>
+      <button onclick="closeMsPopover()" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px;padding:0;line-height:1;">✕</button>
+    </h4>
+    <div class="ms-done-row" onclick="toggleMsDoneInPopover()" id="mspDoneRow">
+      <div class="ms-done-box${isDone?' checked':''}" id="mspDoneBox"></div>
+      <span style="font-size:12px;font-weight:600;color:var(--text2);">완료</span>
+      <span style="font-size:10px;color:var(--text3);margin-left:auto;">${isDone?'✅ 완료 처리됨':'미완료'}</span>
+    </div>
     <div class="pof"><label>이름</label><input id="mspName" type="text" value="${m.name.replace(/"/g,'&quot;')}"></div>
     <div class="pof"><label>날짜</label><input id="mspDate" type="date" value="${m.date}"></div>
     <div class="pof"><label>요약 메모</label><textarea id="mspNote" placeholder="간략한 설명을 입력하세요...">${m.note||''}</textarea></div>
@@ -1797,14 +1836,21 @@ function openMsPopover(e,msId){
   document.body.appendChild(pop);
   // 위치 계산
   const rect=e.target.getBoundingClientRect();
-  let left=rect.left-pop.offsetWidth/2+7;
-  let top=rect.top+24;
+  let left=rect.left-120;
+  let top=rect.top+20;
   if(left+260>innerWidth) left=innerWidth-264;
   if(left<4) left=4;
-  if(top+220>innerHeight) top=rect.top-230;
+  if(top+280>innerHeight) top=rect.top-290;
   pop.style.left=left+'px';
   pop.style.top=top+'px';
   setTimeout(()=>document.addEventListener('click',_msPopoverOutside),10);
+}
+function toggleMsDoneInPopover(){
+  const box=document.getElementById('mspDoneBox');
+  const row=document.getElementById('mspDoneRow');
+  if(!box)return;
+  const nowDone=box.classList.toggle('checked');
+  row.querySelector('span:last-child').textContent=nowDone?'✅ 완료 처리됨':'미완료';
 }
 function _msPopoverOutside(e){
   const pop=document.getElementById('msPopover');
@@ -1823,9 +1869,11 @@ function saveMsPopover(){
   const name=document.getElementById('mspName').value.trim();
   const date=document.getElementById('mspDate').value;
   const note=document.getElementById('mspNote').value.trim();
+  const doneBox=document.getElementById('mspDoneBox');
   if(!name||!date){alert('이름과 날짜를 입력하세요.');return;}
-  m.name=name; m.date=date; m.note=note||undefined;
-  if(!m.note) delete m.note;
+  m.name=name; m.date=date;
+  m.note=note||undefined; if(!m.note) delete m.note;
+  m.done=doneBox?doneBox.classList.contains('checked'):!!m.done;
   closeMsPopover();
   save(); renderGantt();
 }
