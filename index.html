@@ -1257,11 +1257,10 @@ function renderGantt(){
         h+=`<div class="gb" style="left:${x1}px;width:${w}px;background:${col};"
           onmouseenter="showTT(event,'${esc(p.name)}','${p.cat}','${p.start}','${p.end}','${st}')"
           onmouseleave="hideTT()">
-          ${w>30?`<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.name}</span>`:''}
-          ${barHasRoom&&content?`<span style="margin-left:4px;opacity:0.9;font-weight:400;">${content}</span>`:''}
+          ${content&&w>content.length*6.5+8?`<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${content}</span>`:''}
         </div>`;
         if(el>0&&el<tot){h+=`<div class="gpf" style="left:${x1}px;width:${Math.min(w,w*pct/100)}px;"></div>`;}
-        if(!barHasRoom&&content){h+=`<div class="gb-ext-text" style="left:${x1+w+5}px;">${content}</div>`;}
+        if(content&&w<=content.length*6.5+8){h+=`<div class="gb-ext-text" style="left:${x1+w+5}px;">${content}</div>`;}
       }
 
       h+=`</div></div>`;
