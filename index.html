@@ -1220,7 +1220,13 @@ function renderGantt(){
   h+=`</div></div></div>`;
   const NX=nx();
   const visCats=S.cats.filter(c=>canSeeCategory(c));
-  if(!window._ganttCollapsed) window._ganttCollapsed={};
+  // 최초 초기화: 크래프톤 외 모든 그룹을 기본 접힘 상태로
+  if(!window._ganttCollapsed){
+    window._ganttCollapsed={};
+    visCats.forEach((c,i)=>{
+      if(c.name!=='크래프톤') window._ganttCollapsed['gg_idx_'+i]=true;
+    });
+  }
   visCats.forEach((catObj,gi)=>{
     const grp=catObj.name;
     const col=catObj.color||cc(grp);
