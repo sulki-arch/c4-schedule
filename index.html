@@ -525,7 +525,7 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
       <span class="tabs-label">C4 PROJECT</span>
       <div class="tab-pills">
         <button class="tab-pill active" onclick="switchTab('overview',this)" data-tab="overview">전체 일정표</button>
-        <button class="tab-pill" onclick="switchTab('calendar',this)" data-tab="calendar">상세 일정</button>
+        <button class="tab-pill" onclick="switchTab('calendar',this)" data-tab="calendar">월간 일정</button>
       </div>
       <div class="tabs-right">
         <span class="perm-hint admin-only" id="permHint">관리자 · 한미글로벌 계정에서 직접 편집할 수 있습니다</span>
@@ -552,7 +552,7 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
       </div>
     </div>
 
-    <!-- 상세 일정 (캘린더) -->
+    <!-- 월간 일정 (캘린더) -->
     <div id="calendarTab" class="tab-content">
       <div class="cw">
         <div class="cal-nav">
@@ -605,7 +605,7 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
         <div class="sc admin-only-strict" style="grid-column:1/-1">
           <h3>⚠️ 데이터 관리</h3>
           <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(220,38,38,0.05);border:1px solid rgba(220,38,38,0.2);border-radius:10px;">
-            <div style="flex:1;font-size:12px;color:var(--text4);">일정 단계·마일스톤·카테고리를 코드 기본값으로 복원합니다. 상세 일정(캘린더)과 클러스터 데이터는 보존됩니다.</div>
+            <div style="flex:1;font-size:12px;color:var(--text4);">일정 단계·마일스톤·카테고리를 코드 기본값으로 복원합니다. 월간 일정(캘린더)과 클러스터 데이터는 보존됩니다.</div>
             <button class="btn-s" style="flex-shrink:0;color:#DC2626;border-color:#DC2626;white-space:nowrap;" onclick="resetToDefault()">🔄 기본 데이터로 초기화</button>
           </div>
         </div>
@@ -1065,8 +1065,8 @@ function exportExcel(){
 
   // ── 시트 3: 상세일정 ──
   const evRows = [
-    ['KRAFTON C4 프로젝트 — 상세 일정 (월간 캘린더 이벤트)'],
-    ['※ 상세 일정은 웹 앱 [상세 일정] 탭에서 직접 추가/편집/삭제하세요. Firebase에 실시간 저장됩니다.'],
+    ['KRAFTON C4 프로젝트 — 월간 일정 (월간 캘린더 이벤트)'],
+    ['※ 월간 일정은 웹 앱 [월간 일정] 탭에서 직접 추가/편집/삭제하세요. Firebase에 실시간 저장됩니다.'],
     ['ID','일정명','카테고리','시작일(YYYY-MM-DD)','종료일(YYYY-MM-DD)','설명','비고'],
     ...S.events.map((e,i)=>[i+1,e.name,e.cat,e.date,e.endDate||'',e.desc||'',''])
   ];
@@ -1927,7 +1927,7 @@ function toggleCatRestrict(i){
 function renderAll(){renderCatFilter();renderGantt();renderCalendar();renderCluster();if(canEdit())renderSettings();}
 
 function resetToDefault(){
-  if(!confirm('일정 단계·마일스톤·카테고리를 기본값으로 초기화합니다.\n※ 상세 일정(캘린더)과 클러스터 데이터는 보존됩니다.\n계속하시겠습니까?'))return;
+  if(!confirm('일정 단계·마일스톤·카테고리를 기본값으로 초기화합니다.\n※ 월간 일정(캘린더)과 클러스터 데이터는 보존됩니다.\n계속하시겠습니까?'))return;
   // 사용자 직접 입력 데이터 보존
   const savedEvents=jc(S.events);
   const savedCluster=jc(S.clusterCells);
@@ -1936,7 +1936,7 @@ function resetToDefault(){
   S.events=savedEvents;
   S.clusterCells=savedCluster;
   save();renderAll();
-  alert('✅ 초기화 완료! 상세 일정과 클러스터 데이터는 유지됩니다.');
+  alert('✅ 초기화 완료! 월간 일정과 클러스터 데이터는 유지됩니다.');
 }
 
 // ═══ INIT ═══
