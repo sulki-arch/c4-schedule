@@ -71,6 +71,7 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .c4-project-box .tabs-inner{border:none;border-bottom:1px solid #E0E0DC;border-radius:0;}
 .c4-project-box #overviewTab .gantt-wrapper{border:none;border-radius:0;box-shadow:none;}
 .c4-project-box .cw{padding:16px 20px;}
+.c4-cat-filter{border-bottom:1px solid #E0E0DC;padding:8px 20px;background:#fff;}
 .cluster-box{border:1px solid #111;border-radius:4px;background:#fff;padding:16px 20px;}
 .cluster-inner{display:flex;align-items:flex-start;gap:0;}
 .cluster-title-col{width:130px;flex-shrink:0;padding-top:22px;}
@@ -517,11 +518,9 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
     </div>
   </div>
 
-  <div class="cat-filter" id="catFilter" style="display:none;"></div>
-
   <!-- C4 PROJECT BOX -->
   <div class="c4-project-box">
-    <!-- 탭 헤더 -->
+    <!-- 1행: 탭 헤더 -->
     <div class="tabs-inner">
       <span class="tabs-label">C4 PROJECT</span>
       <div class="tab-pills">
@@ -537,7 +536,12 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
       </div>
     </div>
 
-    <!-- OVERVIEW -->
+    <!-- 2행: 카테고리 필터 (상세일정 탭에서만) -->
+    <div class="cat-filter c4-cat-filter" id="catFilter" style="display:none;">
+      <span class="cf-label">카테고리</span>
+    </div>
+
+    <!-- 전체 일정표 -->
     <div id="overviewTab" class="tab-content active">
       <div class="gantt-wrapper" id="ganttWrapper">
         <div class="gantt-edit-banner" id="ganttEditBanner">
@@ -547,27 +551,27 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
         <div class="gantt-scroll" id="ganttChart"></div>
       </div>
     </div>
-  </div>
 
-  <!-- CALENDAR -->
-  <!-- 캘린더/설정은 c4-project-box 바깥에서 오버레이처럼 -->
-  <div id="calendarTab" class="tab-content">
-    <div class="cw">
-      <div class="cal-nav">
-        <button class="cn-btn" onclick="changeMonth(-1)">‹</button>
-        <h3 id="calTitle"></h3>
-        <button class="cn-btn" onclick="changeMonth(1)">›</button>
-        <button class="ct-btn" onclick="goToday()">오늘</button>
-        <div class="save-status"><div class="save-dot"></div><span id="saveStatus">자동 저장됨</span></div>
-      </div>
-      <div class="cal-grid">
-        <div class="cal-weekdays">
-          <div class="cal-wd" style="color:#DC2626;">일</div>
-          <div class="cal-wd">월</div><div class="cal-wd">화</div><div class="cal-wd">수</div>
-          <div class="cal-wd">목</div><div class="cal-wd">금</div>
-          <div class="cal-wd" style="color:#2563EB;">토</div>
+    <!-- 상세 일정 (캘린더) -->
+    <div id="calendarTab" class="tab-content">
+      <div class="cw">
+        <div class="cal-nav">
+          <button class="cn-btn" onclick="changeMonth(-1)">‹</button>
+          <h3 id="calTitle"></h3>
+          <button class="cn-btn" onclick="changeMonth(1)">›</button>
+          <button class="ct-btn" onclick="goToday()">오늘</button>
+          <div class="save-status"><div class="save-dot"></div><span id="saveStatus">자동 저장됨</span></div>
         </div>
-        <div class="cal-days" id="calDays"></div>
+        <div class="cal-grid">
+          <div class="cal-weekdays">
+            <div class="cal-wd">월</div>
+            <div class="cal-wd">화</div><div class="cal-wd">수</div><div class="cal-wd">목</div>
+            <div class="cal-wd">금</div>
+            <div class="cal-wd" style="color:#2563EB;">토</div>
+            <div class="cal-wd" style="color:#DC2626;">일</div>
+          </div>
+          <div class="cal-days" id="calDays"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -737,7 +741,7 @@ const DA=[
   {id:'guest_permit',pw:'IH2026!',role:'guest',cat:'인허가',name:'인허가 게스트',editPerm:false},
   {id:'guest_etc',pw:'ET2026!',role:'guest',cat:'기타',name:'기타 게스트',editPerm:false},
 ];
-const SCHEDULE_VERSION = '2026-06-04';
+const SCHEDULE_VERSION = '2026-06-05';
 const DP=[
   {id:1,name:'설계 단계',cat:'크래프톤',start:'2026-02-01',end:'2027-04-30'},
   {id:2,name:'시공 단계',cat:'크래프톤',start:'2027-05-01',end:'2031-06-30'},
@@ -815,6 +819,10 @@ const DM=[
 const DEV=[
   {id:1,name:'SD 40% Workshop (Seoul)',cat:'F+P',date:'2026-03-23',desc:'F+P 설계팀 서울 방문',endDate:'2026-03-26'},
   {id:2,name:'Workspace Team Workshop (Seoul)',cat:'F+P',date:'2026-04-20',desc:'F+P 워크스페이스팀 서울 방문',endDate:'2026-04-24'},
+  {id:4,name:'SD 완료 내부 보고',cat:'크래프톤',date:'2026-05-25',desc:'SD 단계 완료 및 DD 착수 보고'},
+  {id:5,name:'DD 40% Submission 검토',cat:'한미글로벌',date:'2026-05-26',desc:'DD 40% 도서 제출 후 PM 검토'},
+  {id:6,name:'DD 40% 설계 조율',cat:'삼우건축',date:'2026-05-28',desc:'F+P-삼우 DD 40% 설계 조율 회의'},
+  {id:7,name:'6월 착수 준비 회의',cat:'한미글로벌',date:'2026-05-29',desc:'DD KOM London 사전 준비'},
   {id:3,name:'DD KOM Workshop (London)',cat:'기타',date:'2026-06-25',desc:'F+P 외 전체팀 런던 방문',endDate:'2026-07-02'},
 ];
 
@@ -1454,7 +1462,10 @@ function renderCalendar(){
   const yr=S.calY,mo=S.calM;
   const mN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
   document.getElementById('calTitle').textContent=`${yr}년 ${mN[mo]}`;
-  const fd=new Date(yr,mo,1).getDay(),ld=new Date(yr,mo+1,0).getDate(),pl=new Date(yr,mo,0).getDate();
+  // 월요일 시작: (일=0 → 6, 월=1 → 0, ..., 토=6 → 5)
+  const rawFd=new Date(yr,mo,1).getDay();
+  const fd=(rawFd+6)%7;
+  const ld=new Date(yr,mo+1,0).getDate(),pl=new Date(yr,mo,0).getDate();
   const cells=[];
   for(let i=fd-1;i>=0;i--)cells.push({d:pl-i,m:mo-1,y:yr+(mo===0?-1:0),o:true});
   for(let d=1;d<=ld;d++)cells.push({d,m:mo,y:yr,o:false});
@@ -1463,7 +1474,8 @@ function renderCalendar(){
   cells.forEach((cell,idx)=>{
     const isT=!cell.o&&cell.d===TODAY.getDate()&&cell.m===TODAY.getMonth()&&cell.y===TODAY.getFullYear();
     const ds=`${cell.y}-${p2(cell.m+1)}-${p2(cell.d)}`;
-    const isSun=idx%7===0,isSat=idx%7===6;
+    // 월요일 기준: 5=토요일, 6=일요일
+    const isSat=idx%7===5,isSun=idx%7===6;
     const singleEvts=[...S.milestones.filter(m=>m.date===ds&&showCats.includes(m.cat)),
                       ...S.events.filter(e=>e.date===ds&&!e.endDate&&showCats.includes(e.cat))];
     const spanEvts=S.events.filter(e=>e.endDate&&e.date<=ds&&e.endDate>=ds&&showCats.includes(e.cat));
