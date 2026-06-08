@@ -879,10 +879,11 @@ function applyFirebaseData(data){
     // scheduleVersion이 다르면 → 코드 기본값으로 cats/phases/milestones 자동 갱신
     const fbVer = data.scheduleVersion || '';
     if(fbVer !== SCHEDULE_VERSION){
-      console.log(`[버전 업데이트] Firebase(${fbVer}) → 코드(${SCHEDULE_VERSION}): 기본 데이터 적용`);
+      console.log(`[버전 업데이트] Firebase(${fbVer}) → 코드(${SCHEDULE_VERSION}): 기본 데이터 적용 (events 보존)`);
       S.cats       = jc(DC);
       S.phases     = jc(DP);
       S.milestones = jc(DM);
+      // ※ events(캘린더 일정)는 사용자 데이터이므로 버전 업데이트 시 보존
       // 백그라운드 저장 (버전 포함)
       setTimeout(()=>save(), 500);
     } else {
@@ -1931,9 +1932,13 @@ function toggleCatRestrict(i){
 function renderAll(){renderCatFilter();renderGantt();renderCalendar();renderCluster();if(canEdit())renderSettings();}
 
 function resetToDefault(){
-  if(!confirm('Firebase 데이터를 엑셀 기준 초기값으로 초기화합니다.\n현재 저장된 모든 일정 변경사항이 사라집니다. 계속하시겠습니까?'))return;
-  reset();save();renderAll();
-  alert('✅ 초기화 완료! 엑셀 기준 데이터로 업데이트됐습니다.');
+  if(!confirm('일정 단계·마일스톤·카테고리를 기본값으로 초기화합니다.\n※ 상세 일정(캘린더)은 보존됩니다.\n계속하시겠습니까?'))return;
+  // events(캘린더 일정)는 사용자 데이터 — 보존
+  const savedEvents=jc(S.events);
+  reset();
+  S.events=savedEvents;
+  save();renderAll();
+  alert('✅ 초기화 완료! 상세 일정은 그대로 유지됩니다.');
 }
 
 // ═══ INIT ═══
