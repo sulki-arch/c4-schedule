@@ -66,7 +66,11 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .logout-btn:hover{background:#f5f5f5;}
 
 /* CLUSTER */
-.cluster-sec{padding:0 20px 16px;background:var(--bg);}
+.cluster-sec{padding:0 20px 12px;background:var(--bg);}
+.c4-project-box{margin:0 20px 20px;border:1px solid #111;border-radius:4px;background:#fff;overflow:hidden;}
+.c4-project-box .tabs-inner{border:none;border-bottom:1px solid #E0E0DC;border-radius:0;}
+.c4-project-box #overviewTab .gantt-wrapper{border:none;border-radius:0;box-shadow:none;}
+.c4-project-box .cw{padding:16px 20px;}
 .cluster-box{border:1px solid #111;border-radius:4px;background:#fff;padding:16px 20px;}
 .cluster-inner{display:flex;align-items:flex-start;gap:0;}
 .cluster-title-col{width:130px;flex-shrink:0;padding-top:22px;}
@@ -513,7 +517,11 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
     </div>
   </div>
 
-  <div style="padding:12px 20px;background:var(--bg);">
+  <div class="cat-filter" id="catFilter" style="display:none;"></div>
+
+  <!-- C4 PROJECT BOX -->
+  <div class="c4-project-box">
+    <!-- 탭 헤더 -->
     <div class="tabs-inner">
       <span class="tabs-label">C4 PROJECT</span>
       <div class="tab-pills">
@@ -528,15 +536,9 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
         <button class="tab-pill admin-only-strict" onclick="switchTab('settings',this)" data-tab="settings" style="background:transparent;padding:4px 10px;">⚙</button>
       </div>
     </div>
-  </div>
 
-  <div class="cat-filter" id="catFilter" style="display:none;">
-    <span class="cf-label">카테고리</span>
-  </div>
-
-  <!-- OVERVIEW -->
-  <div id="overviewTab" class="tab-content active">
-    <div class="cw">
+    <!-- OVERVIEW -->
+    <div id="overviewTab" class="tab-content active">
       <div class="gantt-wrapper" id="ganttWrapper">
         <div class="gantt-edit-banner" id="ganttEditBanner">
           ✏️ 편집 모드 활성 중 — 항목을 클릭해서 바로 수정하세요
@@ -548,6 +550,7 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
   </div>
 
   <!-- CALENDAR -->
+  <!-- 캘린더/설정은 c4-project-box 바깥에서 오버레이처럼 -->
   <div id="calendarTab" class="tab-content">
     <div class="cw">
       <div class="cal-nav">
@@ -1206,20 +1209,21 @@ function renderGantt(){
     const dispLabel=catObj.label||grp;
     const phases=S.phases.filter(p=>p.cat===grp);
     const ms2=S.milestones.filter(m=>m.cat===grp);
-    const gid='gg_idx_'+gi;  // 인덱스 기반 ID로 버그 수정
-    const collapsed=window._ganttCollapsed[gid]===true;
-    const toggleIcon=collapsed?'▶':'▼';
+    const gid='gg_idx_'+gi;
+    // 크래프톤은 항상 펼침 (토글 불가), 나머지만 접기 가능
+    const isAlwaysOpen=grp==='크래프톤';
+    const collapsed=!isAlwaysOpen&&window._ganttCollapsed[gid]===true;
     const catIdx=S.cats.indexOf(catObj);
     // ── 배경 그리드 공통 생성 ──
     const mkBgc=()=>{let b='';for(let i=0;i<total;i++){const d=new Date(GS.getFullYear(),GS.getMonth()+i,1);const ic=d.getFullYear()===TODAY.getFullYear()&&d.getMonth()===TODAY.getMonth();b+=`<div class="gmbg${ic?' cc':''}" style="width:${MW}px;"></div>`;}return b;};
 
     // ── 그룹 헤더 + 마일스톤 통합 ──
-    h+=`<div class="gantt-group-header" onclick="toggleGanttGroup('${gid}')">
+    h+=`<div class="gantt-group-header"${isAlwaysOpen?'':` onclick="toggleGanttGroup('${gid}')"`} style="${isAlwaysOpen?'cursor:default;':''}">
       <div class="ggl">
         <div class="gg-dot" style="background:${col}"></div>
         <span class="gg-label-editable" style="color:${col}" onclick="event.stopPropagation();editCatLabelInline(${catIdx})" title="표시명 편집">${dispLabel}</span>
         ${canEdit()?`<button class="ggl-add-ms" onclick="event.stopPropagation();openAddMilestoneModalForGroup('${esc(grp)}')" title="마일스톤 추가">＋</button>`:''}
-        <span class="gg-toggle" id="gg-icon-${gid}">${toggleIcon}</span>
+        ${isAlwaysOpen?'':(`<span class="gg-toggle" id="gg-icon-${gid}">${collapsed?'▶':'▼'}</span>`)}
       </div>
       <div class="grt-ms" style="min-width:${tw}px;">
         <div class="gtbg">${mkBgc()}</div>
@@ -1421,6 +1425,7 @@ function toggleGanttGroup(gid){
   if(body) body.classList.toggle('collapsed',window._ganttCollapsed[gid]);
   if(icon) icon.textContent=window._ganttCollapsed[gid]?'▶':'▼';
 }
+
 function esc(s){return s.replace(/'/g,"\\'").replace(/"/g,'&quot;');}
 
 // ═══ PROGRESS ═══
