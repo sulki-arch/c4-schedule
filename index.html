@@ -929,9 +929,9 @@ function save(){
     clusterCells: S.clusterCells,
     weeklyEvents: S.weeklyEvents||[]
   };
-  db.ref(DB_REF).set(data)
-    .then(()=>showSaveStatus())
-    .catch(e=>console.warn('Firebase save error:',e));
+  return db.ref(DB_REF).set(data)
+    .then(()=>{ showSaveStatus(); })
+    .catch(e=>{ console.warn('Firebase save error:',e); throw e; });
 }
 function autoSave(){
   clearTimeout(saveTimer);
@@ -953,7 +953,10 @@ function applyFirebaseData(data){
     S.events    = fa(data.events,    DEV);
     S.lastImport= data.lastImport    || null;
     S.clusterCells = data.clusterCells || {};
-    S.weeklyEvents = arr(data.weeklyEvents)||[];
+    // weeklyEvents: Firebase 값을 우선하되, Firebase에 없으면 기존 로컬값 유지
+    const fbWeekly = arr(data.weeklyEvents);
+    if(fbWeekly!==null) S.weeklyEvents = fbWeekly;
+    else if(!S.weeklyEvents) S.weeklyEvents=[];
 
     // scheduleVersion이 다르면 → 코드 기본값으로 cats/phases/milestones 갱신
     // 사용자 직접 입력 데이터(events, clusterCells, accounts)는 항상 보존
@@ -1725,12 +1728,31 @@ function saveWeeklyEvent(){
     const idx=S.weeklyEvents.findIndex(e=>String(e.id)===String(editId));
     if(idx>=0)S.weeklyEvents[idx]={...S.weeklyEvents[idx],...obj};
   } else {obj.id=Date.now();S.weeklyEvents.push(obj);}
-  closeWeeklyPopover();autoSave();renderWeekly();
+  closeWeeklyPopover();
+  renderWeekly();
+  save().then(()=>showWeeklySaveToast('저장됨 ✓')).catch(()=>showWeeklySaveToast('저장 실패 ✗',true));
 }
 function deleteWeeklyEvent(id){
   if(!confirm('이 일정을 삭제하시겠습니까?'))return;
   S.weeklyEvents=(S.weeklyEvents||[]).filter(e=>String(e.id)!==String(id));
-  closeWeeklyPopover();autoSave();renderWeekly();
+  closeWeeklyPopover();
+  renderWeekly();
+  save().then(()=>showWeeklySaveToast('삭제됨 ✓')).catch(()=>showWeeklySaveToast('저장 실패 ✗',true));
+}
+function showWeeklySaveToast(msg,isErr){
+  let t=document.getElementById('weeklySaveToast');
+  if(!t){
+    t=document.createElement('div');
+    t.id='weeklySaveToast';
+    t.style.cssText='position:fixed;bottom:20px;right:24px;background:#111827;color:#fff;padding:8px 16px;border-radius:20px;font-size:11px;font-weight:600;z-index:999;transition:opacity 0.4s;display:flex;align-items:center;gap:6px;';
+    document.body.appendChild(t);
+  }
+  t.style.background=isErr?'#DC2626':'#111827';
+  const now=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+  t.textContent=msg+(isErr?'':' '+now);
+  t.style.opacity='1';
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.style.opacity='0',2500);
 }
 function renderWeekly(){
   if(!S.user)return;
