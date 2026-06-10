@@ -471,7 +471,7 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .wkly-allday-cell:hover .wkly-allday-add{color:var(--text3);}
 .wkly-allday-add:hover{background:var(--accent-dim);color:var(--accent) !important;}
 /* Time grid */
-.wkly-body{display:flex;overflow-y:auto;max-height:480px;background:#fff;}
+.wkly-body{display:flex;background:#fff;}
 .wkly-time-col{width:44px;flex-shrink:0;border-right:1px solid var(--border);}
 .wkly-hour-lbl{height:48px;display:flex;align-items:flex-start;padding:3px 5px 0 0;font-size:9px;color:var(--text3);font-weight:600;justify-content:flex-end;box-sizing:border-box;}
 .wkly-cols-wrap{flex:1;display:flex;}
@@ -1868,13 +1868,6 @@ function renderWeekly(){
   });
   html+=`</div></div>`;
   container.innerHTML=html;
-  const body=document.getElementById('wklyBody');
-  if(body){
-    const nowH2=TODAY.getHours();
-    if(dayStrs.includes(todayStr)&&nowH2>=START_H&&nowH2<END_H){
-      body.scrollTop=Math.max(0,((nowH2-START_H)*60+TODAY.getMinutes())/30*SLOT_H-120);
-    } else {body.scrollTop=(8-START_H)*2*SLOT_H;}
-  }
 }
 
 function toggleEvType(){
