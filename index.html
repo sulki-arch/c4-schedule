@@ -482,9 +482,11 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .wkly-slot.s-half{border-bottom-color:rgba(0,0,0,0.05);}
 .wkly-slot.s-full{border-bottom-color:rgba(0,0,0,0.1);}
 .wkly-slot:hover{background:rgba(232,64,28,0.05) !important;}
-.wkly-timed-evt{position:absolute;left:1px;right:1px;border-radius:4px;padding:3px 5px;font-size:10px;font-weight:600;cursor:pointer;z-index:3;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.15);transition:filter 0.12s;box-sizing:border-box;color:#fff;line-height:1.3;}
-.wkly-timed-evt:hover{filter:brightness(0.9);z-index:4;}
-.wkly-timed-time{font-size:8px;opacity:0.82;display:block;}
+.wkly-timed-evt{position:absolute;left:1px;right:1px;border-radius:4px;padding:3px 5px;font-size:10px;font-weight:600;cursor:default;z-index:3;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1);transition:filter 0.12s;box-sizing:border-box;line-height:1.3;display:flex;flex-direction:column;}
+.wkly-timed-evt:hover{filter:brightness(0.96);z-index:4;}
+.wkly-timed-time{font-size:8px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.wkly-timed-name{font-size:10px;font-weight:700;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.wkly-timed-desc{font-size:9px;font-weight:400;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0.72;margin-top:1px;}
 .wkly-now-line{position:absolute;left:0;right:0;height:2px;background:var(--accent);z-index:5;pointer-events:none;}
 .wkly-now-dot{position:absolute;left:-4px;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--accent);}
 /* Weekly edit mode */
@@ -1658,20 +1660,21 @@ function openAddTimedEvent(ds,timeStr){
   openWeeklyEventModal(null,ds,timeStr,`${p2(eh)}:${p2(em)}`);
 }
 // ── Color presets for weekly events ──
-const WEV_COLORS=['#E8401C','#059669','#2563EB','#7C3AED','#D97706','#475569','#AADB00','#0891B2','#DB2777','#F59E0B','#374151','#6366F1'];
-let _wevPickerColor='#2563EB';
+const WEV_COLORS=['#F9A8A8','#FBC8A0','#FDE68A','#A7F3D0','#BAE6FD','#C4B5FD','#FBCFE8','#BBF7D0','#FED7AA','#DDD6FE','#A5F3FC','#E9D5FF'];
+let _wevPickerColor='#BAE6FD';
 function openWeeklyEventModal(evId,ds,startTime,endTime){
   closeWeeklyPopover();
   const ev=evId?S.weeklyEvents.find(e=>String(e.id)===String(evId)):null;
-  _wevPickerColor=ev?ev.color:'#2563EB';
+  _wevPickerColor=ev?ev.color:'#BAE6FD';
   const colorSwatches=WEV_COLORS.map(c=>`<div class="wev-swatch${c===_wevPickerColor?' selected':''}" style="background:${c};" onclick="selectWevColor('${c}',this)" title="${c}"></div>`).join('');
   const pop=document.createElement('div');
   pop.className='wev-popover';pop.id='wevPopover';
+  const safeDesc=(ev?.desc||'').replace(/"/g,'&quot;');
   pop.innerHTML=`
     <h4>${ev?'일정 편집':'일정 추가'}
       <button onclick="closeWeeklyPopover()" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px;padding:0;line-height:1;">✕</button>
     </h4>
-    <div class="wev-pf"><label>일정명</label><input type="text" id="wevName" value="${ev?ev.name:''}" placeholder="일정 이름"></div>
+    <div class="wev-pf"><label>일정명</label><input type="text" id="wevName" value="${ev?ev.name.replace(/"/g,'&quot;'):''}" placeholder="일정 이름"></div>
     <div class="wev-pf"><label>날짜</label><input type="date" id="wevDate" value="${ev?ev.date:ds}"></div>
     <div class="wev-pf"><label>시간</label>
       <div class="time-row">
@@ -1680,6 +1683,7 @@ function openWeeklyEventModal(evId,ds,startTime,endTime){
         <input type="time" id="wevEnd" step="1800" value="${ev?ev.endTime:(endTime||'')}">
       </div>
     </div>
+    <div class="wev-pf"><label>내용 <span style="font-weight:400;color:var(--text3);">(선택)</span></label><input type="text" id="wevDesc" value="${safeDesc}" placeholder="세부 내용 한 줄"></div>
     <div class="wev-pf"><label>색상</label>
       <div class="wev-colors" id="wevColors">
         ${colorSwatches}
@@ -1719,11 +1723,12 @@ function saveWeeklyEvent(){
   const date=document.getElementById('wevDate')?.value;
   const startTime=document.getElementById('wevStart')?.value;
   const endTime=document.getElementById('wevEnd')?.value;
+  const desc=document.getElementById('wevDesc')?.value.trim()||'';
   const editId=document.getElementById('wevEditId')?.value;
   if(!name){alert('일정 이름을 입력하세요.');return;}
   if(!date){alert('날짜를 선택하세요.');return;}
   if(!S.weeklyEvents)S.weeklyEvents=[];
-  const obj={name,date,startTime:startTime||'09:00',endTime:endTime||'10:00',color:_wevPickerColor};
+  const obj={name,date,startTime:startTime||'09:00',endTime:endTime||'10:00',color:_wevPickerColor,desc};
   if(editId){
     const idx=S.weeklyEvents.findIndex(e=>String(e.id)===String(editId));
     if(idx>=0)S.weeklyEvents[idx]={...S.weeklyEvents[idx],...obj};
@@ -1830,7 +1835,9 @@ function renderWeekly(){
       const col=ev.color||'#2563EB';
       const editDot=editMode?`<div class="wev-edit-dot" onclick="event.stopPropagation();openWeeklyEventModal('${ev.id}','${ds}')">✎</div>`:'';
       const clickFn=editMode?`onclick="event.stopPropagation();openWeeklyEventModal('${ev.id}','${ds}')"`:``;
-      evtOvl+=`<div class="wkly-timed-evt" style="top:${topPx}px;height:${htPx}px;background:${col};" ${clickFn} title="${ev.name}"><span class="wkly-timed-time">${ev.startTime}${ev.endTime?' ~ '+ev.endTime:''}</span>${ev.name}${editDot}</div>`;
+      const txtCol=getPastelTextColor(col);
+      const descLine=ev.desc?`<span class="wkly-timed-desc">${ev.desc}</span>`:'';
+      evtOvl+=`<div class="wkly-timed-evt" style="top:${topPx}px;height:${htPx}px;background:${col};color:${txtCol};" ${clickFn} title="${ev.name}${ev.desc?'\n'+ev.desc:''}"><span class="wkly-timed-time" style="color:${txtCol};opacity:0.7;">${ev.startTime}${ev.endTime?' ~ '+ev.endTime:''}</span><span class="wkly-timed-name">${ev.name}</span>${descLine}${editDot}</div>`;
     });
     let nowLine='';
     if(isT){
@@ -2453,6 +2460,14 @@ function getCellTextColor(bg){
   const r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);
   const lum=(0.299*r+0.587*g+0.114*b)/255;
   return lum>0.55?'#333':'#fff';
+}
+// 파스텔 배경용: 밝은 색에는 어두운 텍스트 반환
+function getPastelTextColor(bg){
+  const hex=(bg||'').replace('#','');
+  if(hex.length<6)return'#333';
+  const r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);
+  const lum=(0.299*r+0.587*g+0.114*b)/255;
+  return lum>0.45?'#2D2D2D':'#fff';
 }
 
 function openClusterModal(row){
