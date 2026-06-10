@@ -487,6 +487,35 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .wkly-timed-time{font-size:8px;opacity:0.82;display:block;}
 .wkly-now-line{position:absolute;left:0;right:0;height:2px;background:var(--accent);z-index:5;pointer-events:none;}
 .wkly-now-dot{position:absolute;left:-4px;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--accent);}
+/* Weekly edit mode */
+.weekly-edit-btn{padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid #111;color:#111;background:#fff;font-family:inherit;transition:all 0.15s;}
+.weekly-edit-btn.active{background:#AADB00;border-color:#AADB00;color:#111;}
+.weekly-edit-mode .wkly-slot{cursor:crosshair !important;}
+.weekly-edit-mode .wkly-timed-evt{cursor:pointer;}
+.wkly-timed-evt .wev-edit-dot{display:none;position:absolute;top:3px;right:3px;width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,0.85);border:1px solid rgba(0,0,0,0.15);cursor:pointer;z-index:5;}
+.weekly-edit-mode .wkly-timed-evt:hover .wev-edit-dot{display:flex;align-items:center;justify-content:center;font-size:8px;color:#333;}
+/* Weekly event popover */
+.wev-popover{position:fixed;background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;box-shadow:0 8px 28px rgba(0,0,0,0.15);z-index:600;width:260px;}
+.wev-popover h4{font-size:12px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+.wev-pf{margin-bottom:9px;}
+.wev-pf label{font-size:10px;color:var(--text4);display:block;margin-bottom:3px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;}
+.wev-pf input{width:100%;padding:7px 10px;background:var(--bg3);border:1.5px solid var(--border);border-radius:7px;color:var(--text);font-size:12px;outline:none;font-family:inherit;}
+.wev-pf input:focus{border-color:var(--accent);background:#fff;}
+.wev-pf .time-row{display:flex;gap:6px;align-items:center;}
+.wev-pf .time-row input{flex:1;}
+.wev-pf .time-row span{color:var(--text3);font-weight:600;flex-shrink:0;}
+/* Color swatches */
+.wev-colors{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px;}
+.wev-swatch{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform 0.12s,border-color 0.12s;flex-shrink:0;}
+.wev-swatch:hover{transform:scale(1.2);}
+.wev-swatch.selected{border-color:#111;transform:scale(1.15);}
+.wev-custom-color{width:22px;height:22px;border-radius:50%;border:1.5px dashed var(--border2);cursor:pointer;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.wev-custom-color input[type=color]{width:30px;height:30px;border:none;padding:0;cursor:pointer;opacity:0;position:absolute;}
+.wev-btns{display:flex;gap:6px;margin-top:10px;}
+.wev-btns button{flex:1;padding:7px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--border);font-family:inherit;}
+.wev-btn-save{background:var(--accent);color:#fff;border-color:var(--accent) !important;}
+.wev-btn-del{background:transparent;color:#DC2626;border-color:rgba(220,38,38,0.3) !important;}
+.wev-btn-cancel{background:var(--bg3);color:var(--text4);}
 </style>
 </head>
 <body>
@@ -617,6 +646,9 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
           <h3 id="weeklyTitle"></h3>
           <button class="cn-btn" onclick="changeWeek(1)">›</button>
           <button class="ct-btn" onclick="goThisWeek()">이번 주</button>
+          <div id="weeklyEditToggleWrap" style="display:none;margin-left:auto;">
+            <button id="weeklyEditBtn" class="weekly-edit-btn" onclick="toggleWeeklyEditMode()">편집 모드</button>
+          </div>
         </div>
         <div class="weekly-grid" id="weeklyTabContent"></div>
       </div>
@@ -871,7 +903,8 @@ const DEV=[
 ];
 
 // ═══ STATE ═══
-let S={user:null,cats:[],accounts:[],phases:[],milestones:[],events:[],activeCats:null,calY:2026,calM:3,clusterCells:{},weekDate:null};
+let S={user:null,cats:[],accounts:[],phases:[],milestones:[],events:[],activeCats:null,calY:2026,calM:3,clusterCells:{},weekDate:null,weeklyEvents:[]};
+let _weeklyEditMode=false;
 let importedPhases=null;
 let saveTimer=null;
 const TODAY=new Date();
@@ -893,7 +926,8 @@ function save(){
     cats:S.cats, accounts:S.accounts,
     phases:S.phases, milestones:S.milestones,
     events:S.events, lastImport:S.lastImport||null,
-    clusterCells: S.clusterCells
+    clusterCells: S.clusterCells,
+    weeklyEvents: S.weeklyEvents||[]
   };
   db.ref(DB_REF).set(data)
     .then(()=>showSaveStatus())
@@ -919,6 +953,7 @@ function applyFirebaseData(data){
     S.events    = fa(data.events,    DEV);
     S.lastImport= data.lastImport    || null;
     S.clusterCells = data.clusterCells || {};
+    S.weeklyEvents = arr(data.weeklyEvents)||[];
 
     // scheduleVersion이 다르면 → 코드 기본값으로 cats/phases/milestones 갱신
     // 사용자 직접 입력 데이터(events, clusterCells, accounts)는 항상 보존
@@ -947,7 +982,7 @@ function arr(v){
   return Object.values(v).filter(x=>x!=null);
 }
 // 전체 초기화 (최초 앱 시작 또는 Firebase 데이터 없을 때만 사용)
-function reset(){S.cats=jc(DC);S.accounts=jc(DA);S.phases=jc(DP);S.milestones=jc(DM);S.events=jc(DEV);S.lastImport=null;S.clusterCells={};}
+function reset(){S.cats=jc(DC);S.accounts=jc(DA);S.phases=jc(DP);S.milestones=jc(DM);S.events=jc(DEV);S.lastImport=null;S.clusterCells={};S.weeklyEvents=[];}
 
 // 일정 스케줄만 초기화 — 사용자 직접 입력 데이터(events, clusterCells)는 보존
 function resetScheduleOnly(){
@@ -959,9 +994,11 @@ function resetScheduleOnly(){
 function safeResetOnError(){
   const savedEvents=S.events&&S.events.length?jc(S.events):jc(DEV);
   const savedCluster=S.clusterCells?jc(S.clusterCells):{};
+  const savedWeeklyEvts=S.weeklyEvents?jc(S.weeklyEvents):[];
   reset();
   S.events=savedEvents;
   S.clusterCells=savedCluster;
+  S.weeklyEvents=savedWeeklyEvts;
 }
 
 function startOfflineMode(){
@@ -1065,6 +1102,7 @@ function performLogin(acc,animate){
   if(acc.role==='admin'||acc.editPerm===true){
     document.querySelectorAll('.admin-only').forEach(el=>el.style.display='block');
     document.getElementById('ganttEditToggleWrap').style.display='flex';
+    // weeklyEdit button shown only when on weekly tab (managed by switchTab)
   }
   // 계정·카테고리 관리는 관리자만
   if(acc.role==='admin'){document.querySelectorAll('.admin-only-strict').forEach(el=>el.style.display='block');}
@@ -1604,12 +1642,95 @@ function goThisWeek(){
   S.weekDate=`${TODAY.getFullYear()}-${p2(TODAY.getMonth()+1)}-${p2(TODAY.getDate())}`;
   renderWeekly();
 }
+function toggleWeeklyEditMode(){
+  _weeklyEditMode=!_weeklyEditMode;
+  const btn=document.getElementById('weeklyEditBtn');
+  if(btn){btn.textContent=_weeklyEditMode?'✓ 편집 완료':'편집 모드';btn.classList.toggle('active',_weeklyEditMode);}
+  renderWeekly();
+}
 function openAddTimedEvent(ds,timeStr){
+  if(!_weeklyEditMode)return;
   const [h,m]=timeStr.split(':').map(Number);
-  let eh=h,em=m+30;
-  if(em>=60){eh++;em=0;}
-  const endStr=`${p2(eh)}:${p2(em)}`;
-  openAddEventOnDate(ds,timeStr,endStr);
+  let eh=h,em=m+30;if(em>=60){eh++;em=0;}
+  openWeeklyEventModal(null,ds,timeStr,`${p2(eh)}:${p2(em)}`);
+}
+// ── Color presets for weekly events ──
+const WEV_COLORS=['#E8401C','#059669','#2563EB','#7C3AED','#D97706','#475569','#AADB00','#0891B2','#DB2777','#F59E0B','#374151','#6366F1'];
+let _wevPickerColor='#2563EB';
+function openWeeklyEventModal(evId,ds,startTime,endTime){
+  closeWeeklyPopover();
+  const ev=evId?S.weeklyEvents.find(e=>String(e.id)===String(evId)):null;
+  _wevPickerColor=ev?ev.color:'#2563EB';
+  const colorSwatches=WEV_COLORS.map(c=>`<div class="wev-swatch${c===_wevPickerColor?' selected':''}" style="background:${c};" onclick="selectWevColor('${c}',this)" title="${c}"></div>`).join('');
+  const pop=document.createElement('div');
+  pop.className='wev-popover';pop.id='wevPopover';
+  pop.innerHTML=`
+    <h4>${ev?'일정 편집':'일정 추가'}
+      <button onclick="closeWeeklyPopover()" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px;padding:0;line-height:1;">✕</button>
+    </h4>
+    <div class="wev-pf"><label>일정명</label><input type="text" id="wevName" value="${ev?ev.name:''}" placeholder="일정 이름"></div>
+    <div class="wev-pf"><label>날짜</label><input type="date" id="wevDate" value="${ev?ev.date:ds}"></div>
+    <div class="wev-pf"><label>시간</label>
+      <div class="time-row">
+        <input type="time" id="wevStart" step="1800" value="${ev?ev.startTime:(startTime||'')}">
+        <span>~</span>
+        <input type="time" id="wevEnd" step="1800" value="${ev?ev.endTime:(endTime||'')}">
+      </div>
+    </div>
+    <div class="wev-pf"><label>색상</label>
+      <div class="wev-colors" id="wevColors">
+        ${colorSwatches}
+        <div class="wev-custom-color" title="직접 입력" style="position:relative;">
+          <span style="font-size:11px;color:var(--text3);z-index:1;pointer-events:none;">+</span>
+          <input type="color" id="wevCustomColor" value="${_wevPickerColor}" oninput="selectWevColorCustom(this.value)">
+        </div>
+      </div>
+    </div>
+    <input type="hidden" id="wevEditId" value="${ev?ev.id:''}">
+    <div class="wev-btns">
+      ${ev?`<button class="wev-btn-del" onclick="deleteWeeklyEvent('${ev.id}')">삭제</button>`:''}
+      <button class="wev-btn-cancel" onclick="closeWeeklyPopover()">취소</button>
+      <button class="wev-btn-save" onclick="saveWeeklyEvent()">저장</button>
+    </div>`;
+  document.body.appendChild(pop);
+  // Position: center of screen
+  pop.style.left='50%';pop.style.top='50%';pop.style.transform='translate(-50%,-50%)';
+  setTimeout(()=>document.getElementById('wevName')?.focus(),80);
+}
+function selectWevColor(c,el){
+  _wevPickerColor=c;
+  document.querySelectorAll('.wev-swatch').forEach(s=>s.classList.remove('selected'));
+  if(el)el.classList.add('selected');
+  const cc2=document.getElementById('wevCustomColor');
+  if(cc2)cc2.value=c;
+}
+function selectWevColorCustom(c){
+  _wevPickerColor=c;
+  document.querySelectorAll('.wev-swatch').forEach(s=>s.classList.remove('selected'));
+}
+function closeWeeklyPopover(){
+  const p=document.getElementById('wevPopover');if(p)p.remove();
+}
+function saveWeeklyEvent(){
+  const name=document.getElementById('wevName')?.value.trim();
+  const date=document.getElementById('wevDate')?.value;
+  const startTime=document.getElementById('wevStart')?.value;
+  const endTime=document.getElementById('wevEnd')?.value;
+  const editId=document.getElementById('wevEditId')?.value;
+  if(!name){alert('일정 이름을 입력하세요.');return;}
+  if(!date){alert('날짜를 선택하세요.');return;}
+  if(!S.weeklyEvents)S.weeklyEvents=[];
+  const obj={name,date,startTime:startTime||'09:00',endTime:endTime||'10:00',color:_wevPickerColor};
+  if(editId){
+    const idx=S.weeklyEvents.findIndex(e=>String(e.id)===String(editId));
+    if(idx>=0)S.weeklyEvents[idx]={...S.weeklyEvents[idx],...obj};
+  } else {obj.id=Date.now();S.weeklyEvents.push(obj);}
+  closeWeeklyPopover();autoSave();renderWeekly();
+}
+function deleteWeeklyEvent(id){
+  if(!confirm('이 일정을 삭제하시겠습니까?'))return;
+  S.weeklyEvents=(S.weeklyEvents||[]).filter(e=>String(e.id)!==String(id));
+  closeWeeklyPopover();autoSave();renderWeekly();
 }
 function renderWeekly(){
   if(!S.user)return;
@@ -1621,15 +1742,14 @@ function renderWeekly(){
   for(let i=0;i<7;i++){const d=new Date(mon);d.setDate(mon.getDate()+i);days.push(d);}
   const todayStr=`${TODAY.getFullYear()}-${p2(TODAY.getMonth()+1)}-${p2(TODAY.getDate())}`;
   const dayStrs=days.map(d=>`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`);
-  const weekStartStr=dayStrs[0],weekEndStr=dayStrs[6];
   const DAY_NAMES=['월','화','수','목','금','토','일'];
   const fmtD=d=>`${d.getMonth()+1}/${d.getDate()}`;
-  // Update title
   const titleEl=document.getElementById('weeklyTitle');
   if(titleEl)titleEl.textContent=`${mon.getFullYear()}년  ${fmtD(mon)} (월) — ${fmtD(days[6])} (일)`;
   const START_H=7,END_H=21,SLOT_H=30;
+  const editMode=_weeklyEditMode&&canEdit();
   // ── 1. Header row ──
-  let html=`<div class="wkly-head-row"><div class="wkly-gutter"></div>`;
+  let html=`<div class="wkly-head-row${editMode?' weekly-edit-mode':''}"><div class="wkly-gutter"></div>`;
   days.forEach((d,i)=>{
     const ds=dayStrs[i];
     const isT=ds===todayStr,isSat=i===5,isSun=i===6;
@@ -1637,11 +1757,10 @@ function renderWeekly(){
     html+=`<div class="wkly-day-hd"><div class="wkly-dn">${DAY_NAMES[i]}</div><div class="${ddCls}">${d.getDate()}</div></div>`;
   });
   html+=`</div>`;
-  // ── 2. All-day row ──
+  // ── 2. All-day row (monthly calendar events, read-only in weekly) ──
   html+=`<div class="wkly-allday-row"><div class="wkly-allday-lbl">종일</div>`;
   days.forEach((d,i)=>{
     const ds=dayStrs[i];
-    // All-day: events without startTime (single day on ds OR span includes ds)
     const evts=S.events.filter(e=>{
       if(e.startTime)return false;
       if(e.endDate)return e.date<=ds&&e.endDate>=ds;
@@ -1652,39 +1771,32 @@ function renderWeekly(){
       const col=cc(ev.cat);
       const isSpan=!!ev.endDate;
       const isFirst=isSpan&&ev.date===ds,isLast=isSpan&&ev.endDate===ds;
-      let spanCls='';
-      if(isSpan){spanCls=isFirst?'span-first':isLast?'span-last':'span-mid';}
+      let spanCls='';if(isSpan){spanCls=isFirst?'span-first':isLast?'span-last':'span-mid';}
       const label=(!isSpan||isFirst)?`<span>${ev.name}</span>`:'';
-      cellH+=`<div class="wkly-allday-evt ${spanCls}" style="background:${col}${isSpan?'':'22'};${isSpan?'color:#fff;':'border-left:2px solid '+col+';color:'+col+';'}" onclick="openEditEventModal('${ev.id}','ev','${ds}')" title="${ev.name}">${label}</div>`;
+      cellH+=`<div class="wkly-allday-evt ${spanCls}" style="background:${col}${isSpan?'':'22'};${isSpan?'color:#fff;':'border-left:2px solid '+col+';color:'+col+';'}" title="${ev.name}">${label}</div>`;
     });
     if(evts.length>3)cellH+=`<div style="font-size:9px;color:var(--text3);padding:1px 3px;">+${evts.length-3}</div>`;
-    if(canEdit())cellH+=`<button class="wkly-allday-add" onclick="openAddEventOnDate('${ds}')">＋</button>`;
     html+=`<div class="wkly-allday-cell">${cellH}</div>`;
   });
   html+=`</div>`;
-  // ── 3. Time grid body ──
-  html+=`<div class="wkly-body" id="wklyBody">`;
-  // Time labels
+  // ── 3. Time grid ──
+  html+=`<div class="wkly-body${editMode?' weekly-edit-mode':''}" id="wklyBody">`;
   html+=`<div class="wkly-time-col">`;
-  for(let h=START_H;h<=END_H;h++){
-    html+=`<div class="wkly-hour-lbl">${h}:00</div>`;
-  }
-  html+=`</div>`;
-  // Day columns
-  html+=`<div class="wkly-cols-wrap">`;
+  for(let h=START_H;h<=END_H;h++)html+=`<div class="wkly-hour-lbl">${h}:00</div>`;
+  html+=`</div><div class="wkly-cols-wrap">`;
   days.forEach((d,i)=>{
     const ds=dayStrs[i];
     const isT=ds===todayStr;
-    // Timed events for this day
-    const timedEvts=S.events.filter(e=>e.startTime&&e.date===ds);
-    // Build slots
+    // Weekly-specific timed events
+    const timedEvts=(S.weeklyEvents||[]).filter(e=>e.startTime&&e.date===ds);
     let slotsH='';
     for(let h=START_H;h<END_H;h++){
       const t0=`${p2(h)}:00`,t1=`${p2(h)}:30`;
-      slotsH+=`<div class="wkly-slot s-half" onclick="openAddTimedEvent('${ds}','${t0}')"></div>`;
-      slotsH+=`<div class="wkly-slot s-full" onclick="openAddTimedEvent('${ds}','${t1}')"></div>`;
+      const slotClick=editMode?`onclick="openAddTimedEvent('${ds}','${t0}')"`:'' ;
+      const slotClick2=editMode?`onclick="openAddTimedEvent('${ds}','${t1}')"`:'' ;
+      slotsH+=`<div class="wkly-slot s-half" ${slotClick}></div>`;
+      slotsH+=`<div class="wkly-slot s-full" ${slotClick2}></div>`;
     }
-    // Overlay timed events
     let evtOvl='';
     timedEvts.forEach(ev=>{
       const [sh,sm]=ev.startTime.split(':').map(Number);
@@ -1693,10 +1805,11 @@ function renderWeekly(){
       const topPx=((sh-START_H)*60+sm)/30*SLOT_H;
       const endMin=(eh-START_H)*60+em,startMin=(sh-START_H)*60+sm;
       const htPx=Math.max(SLOT_H,(endMin-startMin)/30*SLOT_H);
-      const col=cc(ev.cat);
-      evtOvl+=`<div class="wkly-timed-evt" style="top:${topPx}px;height:${htPx}px;background:${col};" onclick="event.stopPropagation();openEditEventModal('${ev.id}','ev','${ds}')" title="${ev.name}"><span class="wkly-timed-time">${ev.startTime}${ev.endTime?' ~ '+ev.endTime:''}</span>${ev.name}</div>`;
+      const col=ev.color||'#2563EB';
+      const editDot=editMode?`<div class="wev-edit-dot" onclick="event.stopPropagation();openWeeklyEventModal('${ev.id}','${ds}')">✎</div>`:'';
+      const clickFn=editMode?`onclick="event.stopPropagation();openWeeklyEventModal('${ev.id}','${ds}')"`:``;
+      evtOvl+=`<div class="wkly-timed-evt" style="top:${topPx}px;height:${htPx}px;background:${col};" ${clickFn} title="${ev.name}"><span class="wkly-timed-time">${ev.startTime}${ev.endTime?' ~ '+ev.endTime:''}</span>${ev.name}${editDot}</div>`;
     });
-    // Current time line (today only)
     let nowLine='';
     if(isT){
       const nowH2=TODAY.getHours(),nowM2=TODAY.getMinutes();
@@ -1709,16 +1822,12 @@ function renderWeekly(){
   });
   html+=`</div></div>`;
   container.innerHTML=html;
-  // Auto-scroll to current time (or 8:00 if not today's week)
   const body=document.getElementById('wklyBody');
   if(body){
     const nowH2=TODAY.getHours();
     if(dayStrs.includes(todayStr)&&nowH2>=START_H&&nowH2<END_H){
-      const scrollTop=Math.max(0,((nowH2-START_H)*60+TODAY.getMinutes())/30*SLOT_H-120);
-      body.scrollTop=scrollTop;
-    } else {
-      body.scrollTop=(8-START_H)*2*SLOT_H; // 기본: 8:00 위치
-    }
+      body.scrollTop=Math.max(0,((nowH2-START_H)*60+TODAY.getMinutes())/30*SLOT_H-120);
+    } else {body.scrollTop=(8-START_H)*2*SLOT_H;}
   }
 }
 
@@ -2070,9 +2179,11 @@ function switchTab(id,el){
   if(el)el.classList.add('active');
   const cf=document.getElementById('catFilter');
   if(cf)cf.style.display=id==='calendar'?'flex':'none';
-  // show/hide gantt edit toggle
+  // show/hide edit toggles per tab
   const gew=document.getElementById('ganttEditToggleWrap');
   if(gew&&canEdit())gew.style.display=id==='overview'?'flex':'none';
+  const wew=document.getElementById('weeklyEditToggleWrap');
+  if(wew&&canEdit())wew.style.display=id==='weekly'?'block':'none';
   if(id==='calendar')renderCalendar();
   if(id==='weekly')renderWeekly();
   if(id==='settings')renderSettings();
@@ -2147,10 +2258,11 @@ function resetToDefault(){
   // 사용자 직접 입력 데이터 보존
   const savedEvents=jc(S.events);
   const savedCluster=jc(S.clusterCells);
-  resetScheduleOnly(); // events, clusterCells 건드리지 않는 버전
-  // 혹시 reset()이 이미 호출된 경우를 위해 명시적으로 복원
+  const savedWeeklyEvts=jc(S.weeklyEvents||[]);
+  resetScheduleOnly();
   S.events=savedEvents;
   S.clusterCells=savedCluster;
+  S.weeklyEvents=savedWeeklyEvts;
   save();renderAll();
   alert('✅ 초기화 완료! 월간 일정과 클러스터 데이터는 유지됩니다.');
 }
