@@ -684,6 +684,15 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
           </div>
         </div>
         <div class="sc admin-only-strict" style="grid-column:1/-1">
+          <h3>🎨 주간 일정 색상 팔레트</h3>
+          <div style="font-size:11px;color:var(--text4);margin-bottom:12px;">주간 일정 편집 시 색상 선택 칩을 설정합니다. 비워두면 기본 파스텔 팔레트가 사용됩니다.</div>
+          <div id="wevPaletteEditor" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px;"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn-s" onclick="addPaletteColor()" style="font-size:11px;">＋ 색상 추가</button>
+            <button class="btn-s" onclick="resetPalette()" style="font-size:11px;color:var(--text3);">기본값으로 초기화</button>
+          </div>
+        </div>
+        <div class="sc admin-only-strict" style="grid-column:1/-1">
           <h3>⚠️ 데이터 관리</h3>
           <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(220,38,38,0.05);border:1px solid rgba(220,38,38,0.2);border-radius:10px;">
             <div style="flex:1;font-size:12px;color:var(--text4);">일정 단계·마일스톤·카테고리를 코드 기본값으로 복원합니다. 월간 일정(캘린더)과 클러스터 데이터는 보존됩니다.</div>
@@ -905,7 +914,7 @@ const DEV=[
 ];
 
 // ═══ STATE ═══
-let S={user:null,cats:[],accounts:[],phases:[],milestones:[],events:[],activeCats:null,calY:2026,calM:3,clusterCells:{},weekDate:null,weeklyEvents:[]};
+let S={user:null,cats:[],accounts:[],phases:[],milestones:[],events:[],activeCats:null,calY:2026,calM:3,clusterCells:{},weekDate:null,weeklyEvents:[],wevPalette:[]};
 let _weeklyEditMode=false;
 let importedPhases=null;
 let saveTimer=null;
@@ -929,7 +938,8 @@ function save(){
     phases:S.phases, milestones:S.milestones,
     events:S.events, lastImport:S.lastImport||null,
     clusterCells: S.clusterCells,
-    weeklyEvents: S.weeklyEvents||[]
+    weeklyEvents: S.weeklyEvents||[],
+    wevPalette: S.wevPalette||[]
   };
   return db.ref(DB_REF).set(data)
     .then(()=>{ showSaveStatus(); })
@@ -959,6 +969,9 @@ function applyFirebaseData(data){
     const fbWeekly = arr(data.weeklyEvents);
     if(fbWeekly!==null) S.weeklyEvents = fbWeekly;
     else if(!S.weeklyEvents) S.weeklyEvents=[];
+    // wevPalette: Firebase 값 우선, 없으면 빈 배열 (기본 팔레트 fallback)
+    const fbPalette = arr(data.wevPalette);
+    S.wevPalette = (fbPalette && fbPalette.length) ? fbPalette : [];
 
     // scheduleVersion이 다르면 → 코드 기본값으로 cats/phases/milestones 갱신
     // 사용자 직접 입력 데이터(events, clusterCells, accounts)는 항상 보존
@@ -987,7 +1000,7 @@ function arr(v){
   return Object.values(v).filter(x=>x!=null);
 }
 // 전체 초기화 (최초 앱 시작 또는 Firebase 데이터 없을 때만 사용)
-function reset(){S.cats=jc(DC);S.accounts=jc(DA);S.phases=jc(DP);S.milestones=jc(DM);S.events=jc(DEV);S.lastImport=null;S.clusterCells={};S.weeklyEvents=[];}
+function reset(){S.cats=jc(DC);S.accounts=jc(DA);S.phases=jc(DP);S.milestones=jc(DM);S.events=jc(DEV);S.lastImport=null;S.clusterCells={};S.weeklyEvents=[];S.wevPalette=[];}
 
 // 일정 스케줄만 초기화 — 사용자 직접 입력 데이터(events, clusterCells)는 보존
 function resetScheduleOnly(){
@@ -1000,10 +1013,12 @@ function safeResetOnError(){
   const savedEvents=S.events&&S.events.length?jc(S.events):jc(DEV);
   const savedCluster=S.clusterCells?jc(S.clusterCells):{};
   const savedWeeklyEvts=S.weeklyEvents?jc(S.weeklyEvents):[];
+  const savedPalette=S.wevPalette?jc(S.wevPalette):[];
   reset();
   S.events=savedEvents;
   S.clusterCells=savedCluster;
   S.weeklyEvents=savedWeeklyEvts;
+  S.wevPalette=savedPalette;
 }
 
 function startOfflineMode(){
@@ -1661,12 +1676,14 @@ function openAddTimedEvent(ds,timeStr){
 }
 // ── Color presets for weekly events ──
 const WEV_COLORS=['#F9A8A8','#FBC8A0','#FDE68A','#A7F3D0','#BAE6FD','#C4B5FD','#FBCFE8','#BBF7D0','#FED7AA','#DDD6FE','#A5F3FC','#E9D5FF'];
+// 관리자 설정 팔레트 우선, 없으면 기본 팔레트 사용
+function getWevPalette(){return(S.wevPalette&&S.wevPalette.length)?S.wevPalette:WEV_COLORS;}
 let _wevPickerColor='#BAE6FD';
 function openWeeklyEventModal(evId,ds,startTime,endTime){
   closeWeeklyPopover();
   const ev=evId?S.weeklyEvents.find(e=>String(e.id)===String(evId)):null;
   _wevPickerColor=ev?ev.color:'#BAE6FD';
-  const colorSwatches=WEV_COLORS.map(c=>`<div class="wev-swatch${c===_wevPickerColor?' selected':''}" style="background:${c};" onclick="selectWevColor('${c}',this)" title="${c}"></div>`).join('');
+  const colorSwatches=getWevPalette().map(c=>`<div class="wev-swatch${c===_wevPickerColor?' selected':''}" style="background:${c};" onclick="selectWevColor('${c}',this)" title="${c}"></div>`).join('');
   const pop=document.createElement('div');
   pop.className='wev-popover';pop.id='wevPopover';
   const safeDesc=(ev?.desc||'').replace(/"/g,'&quot;');
@@ -1983,6 +2000,54 @@ function renderSettings(){
   // 일정 항목 관리는 전체 일정표 편집 모드에서 직접 편집
   // nCat: 관리자용 새 계정 추가 드롭다운 (모든 카테고리 표시)
   const nCatEl=document.getElementById('nCat');if(nCatEl)nCatEl.innerHTML=S.cats.map(c=>`<option value="${c.name}">${c.name}${c.restricted?' 🔒':''}</option>`).join('');
+  // 팔레트 에디터
+  renderPaletteEditor();
+}
+function renderPaletteEditor(){
+  const el=document.getElementById('wevPaletteEditor');
+  if(!el)return;
+  const palette=S.wevPalette&&S.wevPalette.length?S.wevPalette:[];
+  const displayPalette=palette.length?palette:WEV_COLORS;
+  const isCustom=!!palette.length;
+  el.innerHTML=displayPalette.map((c,i)=>`
+    <div style="display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;">
+      <div style="position:relative;width:32px;height:32px;border-radius:8px;border:2px solid ${isCustom?'var(--border2)':'rgba(0,0,0,0.08)'};overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1);cursor:pointer;" title="${c}">
+        <div style="width:100%;height:100%;background:${c};"></div>
+        <input type="color" value="${c}" onchange="updatePaletteColor(${i},this.value)"
+          style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:none;padding:0;">
+      </div>
+      ${isCustom?`<button onclick="removePaletteColor(${i})" title="삭제"
+        style="width:14px;height:14px;border-radius:50%;background:rgba(220,38,38,0.12);border:none;color:#DC2626;font-size:9px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">✕</button>`:''}
+    </div>`).join('');
+  if(!isCustom){
+    el.insertAdjacentHTML('beforeend',`<span style="font-size:10px;color:var(--text4);align-self:center;margin-left:4px;">기본 팔레트 사용 중</span>`);
+  }
+}
+function updatePaletteColor(idx,hex){
+  // 기본 팔레트에서 커스텀으로 전환 or 기존 커스텀 수정
+  if(!S.wevPalette||!S.wevPalette.length) S.wevPalette=[...WEV_COLORS];
+  S.wevPalette[idx]=hex;
+  renderPaletteEditor();
+  save();
+}
+function addPaletteColor(){
+  if(!S.wevPalette||!S.wevPalette.length) S.wevPalette=[...WEV_COLORS];
+  // 기본값으로 연한 하늘색 추가
+  S.wevPalette.push('#BAE6FD');
+  renderPaletteEditor();
+  save();
+}
+function removePaletteColor(idx){
+  if(!S.wevPalette||S.wevPalette.length<=1)return;
+  S.wevPalette.splice(idx,1);
+  renderPaletteEditor();
+  save();
+}
+function resetPalette(){
+  if(!confirm('기본 파스텔 팔레트로 초기화할까요?'))return;
+  S.wevPalette=[];
+  renderPaletteEditor();
+  save();
 }
 function toggleEditPerm(id){
   const a=S.accounts.find(x=>x.id===id);
