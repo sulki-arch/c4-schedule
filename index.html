@@ -72,19 +72,16 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .c4-project-box #overviewTab .gantt-wrapper{border:none;border-radius:0;box-shadow:none;}
 .c4-project-box .cw{padding:16px 20px;}
 .c4-cat-filter{border-bottom:1px solid #E0E0DC;padding:8px 20px;background:#fff;}
-.cluster-box{border:1px solid #111;border-radius:4px;background:#fff;padding:16px 20px;}
-.cluster-inner{display:flex;align-items:flex-start;gap:0;}
-.cluster-title-col{width:130px;flex-shrink:0;padding-top:22px;}
-.cluster-title-kf{font-size:11px;font-weight:800;color:#111;line-height:1.1;letter-spacing:0.5px;}
-.cluster-head-spacer{height:22px;}
-.cluster-row-lbl{height:28px;display:flex;align-items:center;font-size:11px;font-weight:400;color:#aaa;margin-top:2px;}
-.cluster-row-lbl.active{font-weight:800;color:#111;}
-.cluster-grid-wrap{flex:1;overflow:hidden;}
-.cluster-yr-row{display:flex;height:22px;align-items:center;gap:1px;padding-left:0;}
-.cluster-yr-cell{width:24px;font-size:10px;font-weight:600;color:#888;text-align:left;flex-shrink:0;padding-left:1px;}
+.cluster-box{border:1px solid #111;border-radius:4px;background:#fff;padding:12px 20px;}
+.cluster-grid-wrap{overflow-x:auto;overflow-y:hidden;}
+.cluster-yr-row{display:flex;height:20px;align-items:center;gap:1px;margin-bottom:2px;}
+.cluster-yr-lbl{flex-shrink:0;width:48px;font-size:9px;font-weight:700;color:#888;letter-spacing:0.3px;line-height:1.25;white-space:nowrap;}
+.cluster-yr-cell{width:24px;font-size:9px;font-weight:600;color:#888;text-align:left;flex-shrink:0;padding-left:1px;}
 .cluster-yr-cell.cur{color:#E8401C;font-weight:800;}
-.cluster-rows{display:flex;flex-direction:column;gap:1px;margin-top:1px;}
-.cluster-data-row{display:flex;gap:1px;height:28px;align-items:center;}
+.cluster-rows{display:flex;flex-direction:column;gap:1px;}
+.cluster-data-row{display:flex;gap:1px;height:26px;align-items:center;}
+.cluster-row-lbl{flex-shrink:0;width:48px;font-size:10px;font-weight:500;color:#bbb;display:flex;align-items:center;letter-spacing:0.3px;}
+.cluster-row-lbl.active{font-weight:800;color:#111;}
 .cluster-cell{width:24px;height:24px;border-radius:2px;background:#D9D9D9;flex-shrink:0;position:relative;overflow:visible;cursor:default;}
 .cluster-cell.editable{cursor:pointer;}
 .cluster-cell.editable:hover{outline:2px solid #E8401C;outline-offset:-2px;z-index:2;}
@@ -547,19 +544,9 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 
   <div class="cluster-sec" id="clusterSec">
     <div class="cluster-box">
-      <div class="cluster-inner">
-        <div class="cluster-title-col">
-          <div class="cluster-title-kf">KRAFTON<br>CLUSTER</div>
-          <div class="cluster-head-spacer"></div>
-          <div class="cluster-row-lbl">HQ</div>
-          <div class="cluster-row-lbl">C1</div>
-          <div class="cluster-row-lbl active">C4</div>
-          <div class="cluster-row-lbl">D1</div>
-        </div>
-        <div class="cluster-grid-wrap">
-          <div class="cluster-yr-row" id="clusterYrRow"></div>
-          <div class="cluster-rows" id="clusterRows"></div>
-        </div>
+      <div class="cluster-grid-wrap">
+        <div class="cluster-yr-row" id="clusterYrRow"></div>
+        <div class="cluster-rows" id="clusterRows"></div>
       </div>
     </div>
   </div>
@@ -2290,14 +2277,14 @@ function renderCluster(){
   if(!yrRow||!rowsEl)return;
   const isAdmin=S.user&&S.user.role==='admin';
 
-  // Year header: one label per 4 cells, label above first cell
-  let yrHtml='';
+  // Year header row: KRAFTON CLUSTER label + year cells
+  let yrHtml=`<div class="cluster-yr-lbl">KRAFTON<br>CLUSTER</div>`;
   YEARS.forEach(y=>{
     for(let q=0;q<CELLS_PER_YEAR;q++){
       if(q===0){
         yrHtml+=`<div class="cluster-yr-cell${y===CY?' cur':''}">'${y}</div>`;
       } else {
-        yrHtml+=`<div class="cluster-yr-cell" style="color:transparent;">.</div>`;
+        yrHtml+=`<div class="cluster-yr-cell" style="color:transparent;user-select:none;">·</div>`;
       }
       if(q<CELLS_PER_YEAR-1) yrHtml+=`<div style="width:1px;flex-shrink:0;"></div>`;
     }
@@ -2305,15 +2292,17 @@ function renderCluster(){
   });
   yrRow.innerHTML=yrHtml;
 
+  // Data rows: project label + cells
   rowsEl.innerHTML=ROWS.map(row=>{
-    let cells='';
+    const isActive=row==='C4';
+    let cells=`<div class="cluster-row-lbl${isActive?' active':''}">${row}</div>`;
     YEARS.forEach((yr,yi)=>{
       for(let q=0;q<CELLS_PER_YEAR;q++){
         const key=row+'-'+yr+'-'+q;
         const cell=S.clusterCells[key]||{text:'',color:'#D9D9D9'};
         const bg=cell.color||'#D9D9D9';
         const lblColor=getCellTextColor(bg);
-        cells+=`<div class="cluster-cell${isAdmin?' editable':''}" style="background:${bg};"
+        cells+=`<div class="cluster-cell${isAdmin?' editable':''}" style="background:${bg};height:22px;"
           ${isAdmin?`onclick="openClusterModal('${row}')"`:''}
         >${cell.text?`<div class="cluster-cell-label" style="color:${lblColor}">${cell.text}</div>`:''}</div>`;
         if(q<CELLS_PER_YEAR-1) cells+=`<div style="width:1px;flex-shrink:0;"></div>`;
