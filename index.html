@@ -2585,15 +2585,17 @@ function canSeeTrip(){
   if(S.user.cat==='크래프톤')return true;
   return false;
 }
+// 톤온톤 팔레트: #9FC93C(진) ~ #E4F7BA(연), 7단계 균등 분배
+const TRIP_PALETTE=['#9FC93C','#ABD151','#B6D966','#C2E17B','#CDE890','#D9F0A5','#E4F7BA'];
 const TRIP_BUDGET=[
-  {id:'air',  name:'항공 운임', budget:34543500, color:'#378ADD', tc:'#185FA5'},
-  {id:'stay', name:'숙박비',    budget:21367760, color:'#1D9E75', tc:'#0F6E56'},
-  {id:'food', name:'식비',      budget:5000000,  color:'#EF9F27', tc:'#854F0B'},
-  {id:'move', name:'교통비',    budget:3500000,  color:'#D85A30', tc:'#993C1D'},
-  {id:'roam', name:'로밍비',    budget:1000000,  color:'#7F77DD', tc:'#3C3489'},
-  {id:'wash', name:'세탁비',    budget:500000,   color:'#D4537E', tc:'#993556'},
-  {id:'misc', name:'예비비',    budget:6816730,  color:'#888780', tc:'#5F5E5A'},
-];
+  {id:'air',  name:'항공 운임', budget:34543500},
+  {id:'stay', name:'숙박비',    budget:21367760},
+  {id:'food', name:'식비',      budget:5000000 },
+  {id:'move', name:'교통비',    budget:3500000 },
+  {id:'roam', name:'로밍비',    budget:1000000 },
+  {id:'wash', name:'세탁비',    budget:500000  },
+  {id:'misc', name:'예비비',    budget:6816730 },
+].map((c,i)=>({...c, color:TRIP_PALETTE[i]}));
 const TRIP_TOTAL=72727990;
 function tripRows(id){return Array.isArray(S.tripData[id])?S.tripData[id].filter(x=>x!=null):[];}
 function tripSpent(id){return tripRows(id).reduce((s,r)=>s+(r.amt||0),0);}
@@ -2607,12 +2609,14 @@ function renderTrip(){
   const rem=TRIP_TOTAL-sp;
   const pct=sp/TRIP_TOTAL*100;
 
+  const remPctTotal=Math.max(0,100-pct);
+
   // ── 1. KPI 카드 4개
   let html=`<div class="trip-summary">
     <div class="trip-kpi"><div class="trip-kpi-lbl">총 예산</div><div class="trip-kpi-val">${tripFmt(TRIP_TOTAL)}</div><div class="trip-kpi-sub">원</div></div>
-    <div class="trip-kpi"><div class="trip-kpi-lbl">집행 금액</div><div class="trip-kpi-val" style="color:#2563EB;">${tripFmt(sp)}</div><div class="trip-kpi-sub">원</div></div>
-    <div class="trip-kpi"><div class="trip-kpi-lbl">잔여 예산</div><div class="trip-kpi-val" style="color:${rem<0?'var(--accent)':'#0F6E56'};">${tripFmt(rem)}</div><div class="trip-kpi-sub">원</div></div>
-    <div class="trip-kpi"><div class="trip-kpi-lbl">소진율</div><div class="trip-kpi-val">${pct.toFixed(1)}%</div><div class="trip-kpi-sub">예비비 포함</div></div>
+    <div class="trip-kpi"><div class="trip-kpi-lbl">집행 금액</div><div class="trip-kpi-val" style="color:var(--text3);">${tripFmt(sp)}</div><div class="trip-kpi-sub">원</div></div>
+    <div class="trip-kpi" style="border:1px solid #C2E17B;"><div class="trip-kpi-lbl">잔여 예산</div><div class="trip-kpi-val" style="color:${rem<0?'var(--accent)':'#5a7a00'};">${tripFmt(rem)}</div><div class="trip-kpi-sub">원</div></div>
+    <div class="trip-kpi"><div class="trip-kpi-lbl">소진율</div><div class="trip-kpi-val">${pct.toFixed(1)}%</div><div class="trip-kpi-sub" style="margin-top:4px;"><div style="height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;"><div style="width:${remPctTotal}%;height:100%;background:#9FC93C;border-radius:2px;"></div></div></div></div>
   </div>`;
 
   // ── 2. 항목별 소진 현황
@@ -2666,16 +2670,22 @@ function renderTrip(){
           </tr>`;
         }).join('')
       : `<tr><td colspan="5" style="color:var(--text4);padding:8px 4px;font-size:11px;">내역 없음</td></tr>`;
+    const remPct=c.budget>0?Math.max(0,(rem2/c.budget)*100):0;
+    const remColor=rem2<=0?'var(--accent)':rem2/c.budget<0.15?'#D97706':'var(--text)';
     html+=`<div class="trip-cat-card">
-      <div class="trip-cat-head">
-        <span class="trip-cat-name" style="color:${c.tc};">${c.name}</span>
-        <span class="trip-badge ${bc}">${Math.round(p)}%</span>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
+        <span class="trip-cat-name" style="color:var(--text2);">${c.name}</span>
+        <div style="text-align:right;">
+          <div style="font-size:9px;color:var(--text4);margin-bottom:1px;">잔여 예산</div>
+          <div style="font-size:17px;font-weight:800;line-height:1;color:${remColor};">${tripFmt(rem2)}<span style="font-size:10px;font-weight:400;margin-left:2px;">원</span></div>
+        </div>
       </div>
-      <div class="trip-mini-bar"><div style="width:${p}%;height:100%;border-radius:2px;background:${c.color};"></div></div>
-      <div class="trip-cat-stats">
-        <div class="trip-stat"><span class="trip-stat-lbl">예산</span><span class="trip-stat-val">${tripFmt(c.budget)}원</span></div>
-        <div class="trip-stat"><span class="trip-stat-lbl">집행</span><span class="trip-stat-val">${tripFmt(s)}원</span></div>
-        <div class="trip-stat"><span class="trip-stat-lbl">잔여</span><span class="trip-stat-val" style="color:${rem2<0?'var(--accent)':'inherit'}">${tripFmt(rem2)}원</span></div>
+      <div style="height:6px;background:var(--bg3);border-radius:3px;margin-bottom:8px;overflow:hidden;">
+        <div style="width:${remPct}%;height:100%;background:${c.color};border-radius:3px;transition:width 0.4s;"></div>
+      </div>
+      <div style="display:flex;gap:12px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border);">
+        <div><span style="font-size:9px;color:var(--text4);display:block;">예산</span><span style="font-size:11px;color:var(--text3);">${tripFmt(c.budget)}원</span></div>
+        <div><span style="font-size:9px;color:var(--text4);display:block;">집행</span><span style="font-size:11px;color:var(--text3);">${tripFmt(s)}원 <span class="trip-badge ${bc}">${Math.round(p)}%</span></span></div>
       </div>
       <table class="trip-tbl">
         <thead><tr><th>날짜</th><th>내용</th><th>결제자</th><th style="text-align:right">금액</th><th></th></tr></thead>
