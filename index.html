@@ -2645,9 +2645,11 @@ function renderTrip(){
           if(_tripEditKey===ekey){
             const safeDate=(r.date||'').replace(/"/g,'&quot;');
             const safeDesc=(r.desc||'').replace(/"/g,'&quot;');
+            const safePayer=(r.payer||'').replace(/"/g,'&quot;');
             return`<tr class="editing">
               <td><input type="text" id="te-d-${ekey}" value="${safeDate}" placeholder="날짜"></td>
               <td><input type="text" id="te-t-${ekey}" value="${safeDesc}" placeholder="내용"></td>
+              <td><input type="text" id="te-p-${ekey}" value="${safePayer}" placeholder="결제자"></td>
               <td><input type="number" id="te-a-${ekey}" value="${r.amt||0}" step="1000"></td>
               <td style="white-space:nowrap;"><button class="trip-save" onclick="tripSaveEdit('${c.id}',${i})">저장</button><button class="trip-cancel" onclick="tripCancelEdit()">취소</button></td>
             </tr>`;
@@ -2655,6 +2657,7 @@ function renderTrip(){
           return`<tr>
             <td style="color:var(--text3);white-space:nowrap;">${r.date||'—'}</td>
             <td>${r.desc||''}</td>
+            <td style="color:var(--text3);">${r.payer||''}</td>
             <td class="trip-td-num">${tripFmt(r.amt||0)}원</td>
             <td><div class="trip-row-btns">
               <button class="trip-edit" onclick="tripEditRow('${c.id}',${i})">수정</button>
@@ -2662,7 +2665,7 @@ function renderTrip(){
             </div></td>
           </tr>`;
         }).join('')
-      : `<tr><td colspan="4" style="color:var(--text4);padding:8px 4px;font-size:11px;">내역 없음</td></tr>`;
+      : `<tr><td colspan="5" style="color:var(--text4);padding:8px 4px;font-size:11px;">내역 없음</td></tr>`;
     html+=`<div class="trip-cat-card">
       <div class="trip-cat-head">
         <span class="trip-cat-name" style="color:${c.tc};">${c.name}</span>
@@ -2675,12 +2678,13 @@ function renderTrip(){
         <div class="trip-stat"><span class="trip-stat-lbl">잔여</span><span class="trip-stat-val" style="color:${rem2<0?'var(--accent)':'inherit'}">${tripFmt(rem2)}원</span></div>
       </div>
       <table class="trip-tbl">
-        <thead><tr><th>날짜</th><th>내용</th><th style="text-align:right">금액</th><th></th></tr></thead>
+        <thead><tr><th>날짜</th><th>내용</th><th>결제자</th><th style="text-align:right">금액</th><th></th></tr></thead>
         <tbody>${rowsHtml}</tbody>
       </table>
       <div class="trip-add-wrap">
         <input type="text" id="td-${c.id}" placeholder="날짜">
         <input type="text" id="tt-${c.id}" placeholder="내용">
+        <input type="text" id="tp-${c.id}" placeholder="결제자" style="flex:0.7;">
         <input type="number" id="ta-${c.id}" placeholder="금액" step="1000">
         <button class="trip-add-btn" onclick="tripAddRow('${c.id}')">+ 추가</button>
       </div>
@@ -2692,10 +2696,11 @@ function renderTrip(){
 function tripAddRow(id){
   const date=(document.getElementById('td-'+id)||{}).value||'';
   const desc=(document.getElementById('tt-'+id)||{}).value||'';
+  const payer=(document.getElementById('tp-'+id)||{}).value||'';
   const amt=parseInt((document.getElementById('ta-'+id)||{}).value||0)||0;
   if(!desc||amt<=0){alert('내용과 금액을 입력하세요.');return;}
   if(!S.tripData[id])S.tripData[id]=[];
-  S.tripData[id].push({date:date.trim()||'—',desc:desc.trim(),amt});
+  S.tripData[id].push({date:date.trim()||'—',desc:desc.trim(),payer:payer.trim(),amt});
   save().then(()=>showWeeklySaveToast('저장됨 ✓')).catch(()=>showWeeklySaveToast('저장 실패 ✗',true));
   renderTrip();
 }
@@ -2721,9 +2726,10 @@ function tripSaveEdit(id,i){
   const ekey=`${id}-${i}`;
   const date=(document.getElementById('te-d-'+ekey)||{}).value||'';
   const desc=(document.getElementById('te-t-'+ekey)||{}).value||'';
+  const payer=(document.getElementById('te-p-'+ekey)||{}).value||'';
   const amt=parseInt((document.getElementById('te-a-'+ekey)||{}).value||0)||0;
   if(!desc||amt<=0){alert('내용과 금액을 입력하세요.');return;}
-  S.tripData[id][i]={date:date.trim()||'—',desc:desc.trim(),amt};
+  S.tripData[id][i]={date:date.trim()||'—',desc:desc.trim(),payer:payer.trim(),amt};
   _tripEditKey=null;
   save().then(()=>showWeeklySaveToast('수정됨 ✓')).catch(()=>showWeeklySaveToast('저장 실패 ✗',true));
   renderTrip();
