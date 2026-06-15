@@ -442,6 +442,44 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
 
+/* ── TRIP EXPENSES ── */
+.trip-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:16px;}
+.trip-mc{background:var(--bg3);border-radius:10px;padding:12px 14px;}
+.trip-mc-lbl{font-size:11px;color:var(--text3);margin-bottom:5px;}
+.trip-mc-val{font-size:20px;font-weight:700;color:var(--text1);}
+.trip-mc-sub{font-size:10px;color:var(--text4);margin-top:2px;}
+.trip-bar-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:16px;box-shadow:var(--shadow);}
+.trip-sec-title{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:10px;}
+.trip-brow{display:grid;grid-template-columns:82px 1fr 100px;align-items:center;gap:8px;margin-bottom:8px;}
+.trip-brow:last-child{margin-bottom:0;}
+.trip-brow-lbl{font-size:11px;color:var(--text3);}
+.trip-track{height:7px;background:var(--bg3);border-radius:4px;overflow:hidden;}
+.trip-fill{height:100%;border-radius:4px;transition:width 0.5s;}
+.trip-brow-num{font-size:10px;color:var(--text3);text-align:right;white-space:nowrap;}
+.trip-badge{font-size:9px;padding:1px 5px;border-radius:8px;margin-left:4px;font-weight:600;display:inline-block;}
+.trip-ok{background:#E1F5EE;color:#0F6E56;}.trip-warn{background:#FAEEDA;color:#854F0B;}.trip-over{background:#FCEBEB;color:#A32D2D;}
+.trip-cat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+.trip-cat-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);}
+.trip-cat-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;}
+.trip-cat-name{font-size:12px;font-weight:700;}
+.trip-mini-bar{height:4px;background:var(--bg3);border-radius:2px;margin-bottom:8px;overflow:hidden;}
+.trip-cat-stats{display:flex;gap:10px;margin-bottom:8px;}
+.trip-stat{flex:1;font-size:10px;}
+.trip-stat-lbl{color:var(--text3);display:block;}
+.trip-stat-val{font-size:11px;font-weight:700;color:var(--text1);display:block;margin-top:1px;}
+.trip-tbl{width:100%;border-collapse:collapse;font-size:11px;}
+.trip-tbl th{color:var(--text4);font-weight:400;padding:3px 4px;border-bottom:1px solid var(--border);text-align:left;}
+.trip-tbl td{padding:4px 4px;border-bottom:1px solid var(--border);color:var(--text1);}
+.trip-tbl tr:last-child td{border-bottom:none;}
+.trip-td-num{text-align:right;font-variant-numeric:tabular-nums;}
+.trip-del{background:none;border:none;cursor:pointer;color:var(--text4);font-size:11px;padding:0 2px;}
+.trip-del:hover{color:#DC2626;}
+.trip-add-row{display:flex;gap:5px;margin-top:8px;}
+.trip-add-row input{font-size:11px;padding:4px 7px;border:1px solid var(--border2);border-radius:6px;background:var(--bg3);color:var(--text1);min-width:0;flex:1;}
+.trip-add-row input[type=number]{flex:0.9;}
+.trip-add-row input:first-child{flex:0.6;}
+.trip-add-row button{font-size:13px;padding:3px 12px;border-radius:6px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;font-weight:700;}
+.trip-add-row button:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
 /* ── WEEKLY SCHEDULE ── */
 .weekly-container{padding:16px 20px;}
 .weekly-nav{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
@@ -591,6 +629,7 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
         <button class="tab-pill active" onclick="switchTab('overview',this)" data-tab="overview">전체 일정표</button>
         <button class="tab-pill" onclick="switchTab('calendar',this)" data-tab="calendar">월간 일정</button>
         <button class="tab-pill" onclick="switchTab('weekly',this)" data-tab="weekly">주간 일정</button>
+        <button class="tab-pill trip-tab-pill" onclick="switchTab('trip',this)" data-tab="trip" style="display:none;">출장 비용</button>
       </div>
       <div class="tabs-right">
         <span class="perm-hint admin-only" id="permHint">관리자 · 한미글로벌 계정에서 직접 편집할 수 있습니다</span>
@@ -654,6 +693,13 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
         </div>
         <div class="weekly-grid" id="weeklyTabContent"></div>
       </div>
+    </div>
+  </div>
+
+  <!-- TRIP EXPENSES -->
+  <div id="tripTab" class="tab-content">
+    <div class="cw" style="padding:20px 0;">
+      <div id="tripContent"></div>
     </div>
   </div>
 
@@ -914,7 +960,7 @@ const DEV=[
 ];
 
 // ═══ STATE ═══
-let S={user:null,cats:[],accounts:[],phases:[],milestones:[],events:[],activeCats:null,calY:2026,calM:3,clusterCells:{},weekDate:null,weeklyEvents:[],wevPalette:[]};
+let S={user:null,cats:[],accounts:[],phases:[],milestones:[],events:[],activeCats:null,calY:2026,calM:3,clusterCells:{},weekDate:null,weeklyEvents:[],wevPalette:[],tripData:{}};
 let _weeklyEditMode=false;
 let importedPhases=null;
 let saveTimer=null;
@@ -939,7 +985,8 @@ function save(){
     events:S.events, lastImport:S.lastImport||null,
     clusterCells: S.clusterCells,
     weeklyEvents: S.weeklyEvents||[],
-    wevPalette: S.wevPalette||[]
+    wevPalette: S.wevPalette||[],
+    tripData: S.tripData||{}
   };
   return db.ref(DB_REF).set(data)
     .then(()=>{ showSaveStatus(); })
@@ -972,6 +1019,8 @@ function applyFirebaseData(data){
     // wevPalette: Firebase 값 우선, 없으면 빈 배열 (기본 팔레트 fallback)
     const fbPalette = arr(data.wevPalette);
     S.wevPalette = (fbPalette && fbPalette.length) ? fbPalette : [];
+    // tripData: Firebase 우선, 없으면 빈 객체
+    S.tripData = (data.tripData && typeof data.tripData==='object') ? data.tripData : {};
 
     // scheduleVersion이 다르면 → 코드 기본값으로 cats/phases/milestones 갱신
     // 사용자 직접 입력 데이터(events, clusterCells, accounts)는 항상 보존
@@ -1000,7 +1049,7 @@ function arr(v){
   return Object.values(v).filter(x=>x!=null);
 }
 // 전체 초기화 (최초 앱 시작 또는 Firebase 데이터 없을 때만 사용)
-function reset(){S.cats=jc(DC);S.accounts=jc(DA);S.phases=jc(DP);S.milestones=jc(DM);S.events=jc(DEV);S.lastImport=null;S.clusterCells={};S.weeklyEvents=[];S.wevPalette=[];}
+function reset(){S.cats=jc(DC);S.accounts=jc(DA);S.phases=jc(DP);S.milestones=jc(DM);S.events=jc(DEV);S.lastImport=null;S.clusterCells={};S.weeklyEvents=[];S.wevPalette=[];S.tripData={};}
 
 // 일정 스케줄만 초기화 — 사용자 직접 입력 데이터(events, clusterCells)는 보존
 function resetScheduleOnly(){
@@ -1014,11 +1063,13 @@ function safeResetOnError(){
   const savedCluster=S.clusterCells?jc(S.clusterCells):{};
   const savedWeeklyEvts=S.weeklyEvents?jc(S.weeklyEvents):[];
   const savedPalette=S.wevPalette?jc(S.wevPalette):[];
+  const savedTrip=S.tripData?jc(S.tripData):{};
   reset();
   S.events=savedEvents;
   S.clusterCells=savedCluster;
   S.weeklyEvents=savedWeeklyEvts;
   S.wevPalette=savedPalette;
+  S.tripData=savedTrip;
 }
 
 function startOfflineMode(){
@@ -1126,6 +1177,8 @@ function performLogin(acc,animate){
   }
   // 계정·카테고리 관리는 관리자만
   if(acc.role==='admin'){document.querySelectorAll('.admin-only-strict').forEach(el=>el.style.display='block');}
+  // 출장 비용 탭: 관리자 또는 크래프톤 계정만 표시
+  document.querySelectorAll('.trip-tab-pill').forEach(el=>el.style.display=canSeeTrip()?'':'none');
   document.getElementById('userText').textContent=acc.name||acc.id;
   const d=TODAY;const days=['SUN','MON','TUE','WED','THU','FRI','SAT'];
   document.getElementById('todayBadge').textContent=`Today '${String(d.getFullYear()).slice(2)}.${p2(d.getMonth()+1)}.${p2(d.getDate())} ${days[d.getDay()]}`;
@@ -2273,6 +2326,7 @@ function switchTab(id,el){
   if(wew&&canEdit())wew.style.display=id==='weekly'?'block':'none';
   if(id==='calendar')renderCalendar();
   if(id==='weekly')renderWeekly();
+  if(id==='trip')renderTrip();
   if(id==='settings')renderSettings();
 }
 
@@ -2519,6 +2573,117 @@ function getCellTextColor(bg){
   const lum=(0.299*r+0.587*g+0.114*b)/255;
   return lum>0.55?'#333':'#fff';
 }
+// ═══ TRIP EXPENSES ═══
+function canSeeTrip(){
+  if(!S.user)return false;
+  if(S.user.role==='admin')return true;
+  if(S.user.cat==='크래프톤')return true;
+  return false;
+}
+const TRIP_BUDGET=[
+  {id:'air',  name:'항공 운임', budget:34543500, color:'#378ADD', tc:'#185FA5'},
+  {id:'stay', name:'숙박비',    budget:21367760, color:'#1D9E75', tc:'#0F6E56'},
+  {id:'food', name:'식비',      budget:5000000,  color:'#EF9F27', tc:'#854F0B'},
+  {id:'move', name:'교통비',    budget:3500000,  color:'#D85A30', tc:'#993C1D'},
+  {id:'roam', name:'로밍비',    budget:1000000,  color:'#7F77DD', tc:'#3C3489'},
+  {id:'wash', name:'세탁비',    budget:500000,   color:'#D4537E', tc:'#993556'},
+  {id:'misc', name:'예비비',    budget:6816730,  color:'#888780', tc:'#5F5E5A'},
+];
+const TRIP_TOTAL=72727990;
+function tripRows(id){return Array.isArray(S.tripData[id])?S.tripData[id].filter(x=>x!=null):[];}
+function tripSpent(id){return tripRows(id).reduce((s,r)=>s+(r.amt||0),0);}
+function tripTotalSpent(){return TRIP_BUDGET.reduce((s,c)=>s+tripSpent(c.id),0);}
+function tripFmt(v){return Math.round(v).toLocaleString('ko-KR');}
+
+function renderTrip(){
+  const el=document.getElementById('tripContent');
+  if(!el||!canSeeTrip())return;
+  const sp=tripTotalSpent();
+  const rem=TRIP_TOTAL-sp;
+  const pct=(sp/TRIP_TOTAL*100);
+  const pctCls=pct>=100?'trip-over':pct>=85?'trip-warn':'trip-ok';
+
+  // summary cards
+  let html=`<div class="trip-cards">
+    <div class="trip-mc"><div class="trip-mc-lbl">총 예산</div><div class="trip-mc-val">${tripFmt(TRIP_TOTAL)}</div><div class="trip-mc-sub">원</div></div>
+    <div class="trip-mc"><div class="trip-mc-lbl">집행 금액</div><div class="trip-mc-val" style="color:#185FA5;">${tripFmt(sp)}</div><div class="trip-mc-sub">원</div></div>
+    <div class="trip-mc"><div class="trip-mc-lbl">잔여 예산</div><div class="trip-mc-val" style="color:${rem<0?'#A32D2D':'#0F6E56'};">${tripFmt(rem)}</div><div class="trip-mc-sub">원</div></div>
+    <div class="trip-mc"><div class="trip-mc-lbl">소진율</div><div class="trip-mc-val">${pct.toFixed(1)}%</div><div class="trip-mc-sub">예비비 포함</div></div>
+  </div>`;
+
+  // progress bars
+  html+=`<div class="trip-bar-card"><div class="trip-sec-title">항목별 소진 현황</div>`;
+  TRIP_BUDGET.forEach(c=>{
+    const s=tripSpent(c.id);
+    const p=c.budget>0?Math.min(100,s/c.budget*100):0;
+    const bc=p>=100?'trip-over':p>=85?'trip-warn':'trip-ok';
+    html+=`<div class="trip-brow">
+      <span class="trip-brow-lbl">${c.name}</span>
+      <div class="trip-track"><div class="trip-fill" style="width:${p}%;background:${c.color}"></div></div>
+      <div class="trip-brow-num">${tripFmt(s)}<span class="trip-badge ${bc}">${Math.round(p)}%</span></div>
+    </div>`;
+  });
+  html+=`</div>`;
+
+  // category tables grid
+  html+=`<div class="trip-sec-title" style="margin:16px 0 10px;">항목별 지출 내역</div><div class="trip-cat-grid">`;
+  TRIP_BUDGET.forEach(c=>{
+    const rows=tripRows(c.id);
+    const s=tripSpent(c.id);
+    const rem2=c.budget-s;
+    const p=c.budget>0?Math.min(100,s/c.budget*100):0;
+    const bc=p>=100?'trip-over':p>=85?'trip-warn':'trip-ok';
+    const rowsHtml=rows.length
+      ? rows.map((r,i)=>`<tr>
+          <td style="color:var(--text3)">${r.date||'—'}</td>
+          <td>${r.desc||''}</td>
+          <td class="trip-td-num">${tripFmt(r.amt||0)}원</td>
+          <td><button class="trip-del" onclick="tripDelRow('${c.id}',${i})">✕</button></td>
+        </tr>`).join('')
+      : `<tr><td colspan="4" style="color:var(--text4);padding:8px 4px;font-size:11px;">내역 없음</td></tr>`;
+    html+=`<div class="trip-cat-card">
+      <div class="trip-cat-head">
+        <span class="trip-cat-name" style="color:${c.tc}">${c.name}</span>
+        <span class="trip-badge ${bc}">${Math.round(p)}%</span>
+      </div>
+      <div class="trip-mini-bar"><div style="width:${p}%;height:100%;border-radius:2px;background:${c.color};"></div></div>
+      <div class="trip-cat-stats">
+        <div class="trip-stat"><span class="trip-stat-lbl">예산</span><span class="trip-stat-val">${tripFmt(c.budget)}원</span></div>
+        <div class="trip-stat"><span class="trip-stat-lbl">집행</span><span class="trip-stat-val">${tripFmt(s)}원</span></div>
+        <div class="trip-stat"><span class="trip-stat-lbl">잔여</span><span class="trip-stat-val" style="color:${rem2<0?'#A32D2D':'var(--text1)'}">${tripFmt(rem2)}원</span></div>
+      </div>
+      <table class="trip-tbl">
+        <thead><tr><th>날짜</th><th>내용</th><th style="text-align:right">금액</th><th></th></tr></thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+      <div class="trip-add-row">
+        <input type="text" id="td-${c.id}" placeholder="날짜">
+        <input type="text" id="tt-${c.id}" placeholder="내용">
+        <input type="number" id="ta-${c.id}" placeholder="금액" step="1000">
+        <button onclick="tripAddRow('${c.id}')">＋</button>
+      </div>
+    </div>`;
+  });
+  html+=`</div>`;
+  el.innerHTML=html;
+}
+function tripAddRow(id){
+  const date=(document.getElementById('td-'+id)||{}).value||'';
+  const desc=(document.getElementById('tt-'+id)||{}).value||'';
+  const amt=parseInt((document.getElementById('ta-'+id)||{}).value||0)||0;
+  if(!desc||amt<=0){alert('내용과 금액을 입력하세요.');return;}
+  if(!S.tripData[id])S.tripData[id]=[];
+  S.tripData[id].push({date:date.trim()||'—',desc:desc.trim(),amt});
+  save().then(()=>showWeeklySaveToast('저장됨 ✓')).catch(()=>showWeeklySaveToast('저장 실패 ✗',true));
+  renderTrip();
+}
+function tripDelRow(id,i){
+  if(!S.tripData[id])return;
+  S.tripData[id].splice(i,1);
+  save().then(()=>showWeeklySaveToast('저장됨 ✓')).catch(()=>showWeeklySaveToast('저장 실패 ✗',true));
+  renderTrip();
+}
+
 // 파스텔 배경용: 밝은 색에는 어두운 텍스트 반환
 function getPastelTextColor(bg){
   const hex=(bg||'').replace('#','');
