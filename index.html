@@ -1790,7 +1790,7 @@ function renderWeekly(){
   const fmtD=d=>`${d.getMonth()+1}/${d.getDate()}`;
   const titleEl=document.getElementById('weeklyTitle');
   if(titleEl)titleEl.textContent=`${mon.getFullYear()}년  ${fmtD(mon)} (월) — ${fmtD(days[6])} (일)`;
-  const START_H=8,END_H=21,SLOT_H=24;
+  const START_H=9,END_H=21,SLOT_H=24;
   const editMode=_weeklyEditMode&&canEdit();
   // ── 1. Header row ──
   let html=`<div class="wkly-head-row${editMode?' weekly-edit-mode':''}"><div class="wkly-gutter"></div>`;
