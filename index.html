@@ -630,7 +630,8 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
     <div class="tabs-inner">
       <span class="tabs-label">C4 PROJECT</span>
       <div class="tab-pills">
-        <button class="tab-pill active" onclick="switchTab('overview',this)" data-tab="overview">전체 일정표</button>
+        <button class="tab-pill active" onclick="switchTab('projoverview',this)" data-tab="projoverview">프로젝트 개요</button>
+        <button class="tab-pill" onclick="switchTab('overview',this)" data-tab="overview">전체 일정표</button>
         <button class="tab-pill" onclick="switchTab('calendar',this)" data-tab="calendar">월간 일정</button>
         <button class="tab-pill" onclick="switchTab('weekly',this)" data-tab="weekly">주간 일정</button>
         <button class="tab-pill trip-tab-pill" onclick="switchTab('trip',this)" data-tab="trip" style="display:none;">출장 비용</button>
@@ -649,8 +650,13 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
       <span class="cf-label">카테고리</span>
     </div>
 
+    <!-- 프로젝트 개요 -->
+    <div id="projoverviewTab" class="tab-content active">
+      <div id="projoverviewContent"></div>
+    </div>
+
     <!-- 전체 일정표 -->
-    <div id="overviewTab" class="tab-content active">
+    <div id="overviewTab" class="tab-content">
       <div class="gantt-wrapper" id="ganttWrapper">
         <div class="gantt-edit-banner" id="ganttEditBanner">
           ✏️ 편집 모드 활성 중 — 항목을 클릭해서 바로 수정하세요
@@ -730,6 +736,15 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
             <div class="fg"><label>카테고리명</label><input type="text" id="nCatName" placeholder="예: 구조설계사"></div>
             <div class="fg"><label>색상</label><input type="color" id="nCatColor" value="#0EA5E9" style="width:60px;height:36px;border-radius:8px;border:1.5px solid var(--border);cursor:pointer;padding:2px;"></div>
             <button class="btn-p" onclick="addCategory()">추가</button>
+          </div>
+        </div>
+        <div class="sc admin-only-strict" style="grid-column:1/-1">
+          <h3>🔗 최근 업데이트 OneDrive 링크</h3>
+          <div style="font-size:11px;color:var(--text4);margin-bottom:10px;">프로젝트 개요 탭에 표시될 '최근 업데이트' OneDrive 파일의 공유 링크를 입력하세요.</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="url" id="recentUpdatesUrlInput" placeholder="https://..." style="flex:1;font-size:12px;"
+              oninput="autoSave()">
+            <button class="btn-s" onclick="saveRecentUpdatesUrl()" style="font-size:11px;white-space:nowrap;">저장</button>
           </div>
         </div>
         <div class="sc admin-only-strict" style="grid-column:1/-1">
@@ -957,7 +972,7 @@ const DEV=[
 ];
 
 // ═══ STATE ═══
-let S={user:null,cats:[],accounts:[],phases:[],milestones:[],events:[],activeCats:null,calY:2026,calM:3,clusterCells:{},weekDate:null,weeklyEvents:[],wevPalette:[],tripData:{}};
+let S={user:null,cats:[],accounts:[],phases:[],milestones:[],events:[],activeCats:null,calY:2026,calM:3,clusterCells:{},weekDate:null,weeklyEvents:[],wevPalette:[],tripData:{},overview:{}};
 let _weeklyEditMode=false;
 let importedPhases=null;
 let saveTimer=null;
@@ -983,7 +998,8 @@ function save(){
     clusterCells: S.clusterCells,
     weeklyEvents: S.weeklyEvents||[],
     wevPalette: S.wevPalette||[],
-    tripData: S.tripData||{}
+    tripData: S.tripData||{},
+    overview: S.overview||{}
   };
   return db.ref(DB_REF).set(data)
     .then(()=>{ showSaveStatus(); })
@@ -1018,6 +1034,8 @@ function applyFirebaseData(data){
     S.wevPalette = (fbPalette && fbPalette.length) ? fbPalette : [];
     // tripData: Firebase 우선, 없으면 빈 객체
     S.tripData = (data.tripData && typeof data.tripData==='object') ? data.tripData : {};
+    // overview: Power Automate가 OneDrive→Firebase로 자동 업데이트
+    S.overview = (data.overview && typeof data.overview==='object') ? data.overview : {};
 
     // scheduleVersion이 다르면 → 코드 기본값으로 cats/phases/milestones 갱신
     // 사용자 직접 입력 데이터(events, clusterCells, accounts)는 항상 보존
@@ -1061,12 +1079,14 @@ function safeResetOnError(){
   const savedWeeklyEvts=S.weeklyEvents?jc(S.weeklyEvents):[];
   const savedPalette=S.wevPalette?jc(S.wevPalette):[];
   const savedTrip=S.tripData?jc(S.tripData):{};
+  const savedOverview=S.overview?jc(S.overview):{};
   reset();
   S.events=savedEvents;
   S.clusterCells=savedCluster;
   S.weeklyEvents=savedWeeklyEvts;
   S.wevPalette=savedPalette;
   S.tripData=savedTrip;
+  S.overview=savedOverview;
 }
 
 function startOfflineMode(){
@@ -1180,6 +1200,9 @@ function performLogin(acc,animate){
   const d=TODAY;const days=['SUN','MON','TUE','WED','THU','FRI','SAT'];
   document.getElementById('todayBadge').textContent=`Today '${String(d.getFullYear()).slice(2)}.${p2(d.getMonth()+1)}.${p2(d.getDate())} ${days[d.getDay()]}`;
   S.activeCats=null; // 로그인 시 초기화 → renderCatFilter에서 전체 ON으로 세팅
+  // 로그인 시 첫 탭(프로젝트 개요)로 이동
+  const firstTabBtn=document.querySelector('.tab-pill[data-tab="projoverview"]');
+  if(firstTabBtn)switchTab('projoverview',firstTabBtn);
   try{renderAll();}catch(e){console.error('[Login] renderAll 오류:', e);}
 }
 function doLogout(){
@@ -2045,6 +2068,9 @@ function renderSettings(){
   const nCatEl=document.getElementById('nCat');if(nCatEl)nCatEl.innerHTML=S.cats.map(c=>`<option value="${c.name}">${c.name}${c.restricted?' 🔒':''}</option>`).join('');
   // 팔레트 에디터
   renderPaletteEditor();
+  // 최근 업데이트 URL
+  const ruInput=document.getElementById('recentUpdatesUrlInput');
+  if(ruInput) ruInput.value=(S.overview&&S.overview.recentUpdatesUrl)||'';
 }
 function renderPaletteEditor(){
   const el=document.getElementById('wevPaletteEditor');
@@ -2085,6 +2111,12 @@ function removePaletteColor(idx){
   S.wevPalette.splice(idx,1);
   renderPaletteEditor();
   save();
+}
+function saveRecentUpdatesUrl(){
+  const val=(document.getElementById('recentUpdatesUrlInput')||{}).value||'';
+  if(!S.overview)S.overview={};
+  S.overview.recentUpdatesUrl=val.trim();
+  save().then(()=>showWeeklySaveToast('링크 저장됨 ✓')).catch(()=>showWeeklySaveToast('저장 실패 ✗',true));
 }
 function resetPalette(){
   if(!confirm('기본 파스텔 팔레트로 초기화할까요?'))return;
@@ -2321,10 +2353,169 @@ function switchTab(id,el){
   if(gew&&canEdit())gew.style.display=id==='overview'?'flex':'none';
   const wew=document.getElementById('weeklyEditToggleWrap');
   if(wew&&canEdit())wew.style.display=id==='weekly'?'block':'none';
+  if(id==='projoverview')renderProjectOverview();
   if(id==='calendar')renderCalendar();
   if(id==='weekly')renderWeekly();
   if(id==='trip')renderTrip();
   if(id==='settings')renderSettings();
+}
+
+// ═══ PROJECT OVERVIEW TAB ═══
+function renderProjectOverview(){
+  const el=document.getElementById('projoverviewContent');
+  if(!el)return;
+  const ov=S.overview||{};
+  const info=ov.basicInfo||{};
+  const collabData=ov.collaborators||{};
+  const prog=ov.progress||{};
+
+  // D-day: 마지막 단계 종료일까지
+  let lastDate=null;
+  if(S.phases&&S.phases.length){
+    S.phases.forEach(p=>{
+      const segs=p.segments||[];
+      segs.forEach(seg=>{const d=new Date(seg.end||'');if(!isNaN(d)&&(!lastDate||d>lastDate))lastDate=d;});
+      if(p.end){const d=new Date(p.end);if(!isNaN(d)&&(!lastDate||d>lastDate))lastDate=d;}
+    });
+  }
+  const dday=lastDate?Math.ceil((lastDate-TODAY)/(1000*60*60*24)):null;
+
+  // 투시도
+  const imgUrl=ov.perspectiveUrl;
+  const imgHtml=imgUrl
+    ?`<img src="${imgUrl}" style="width:100%;border-radius:8px;object-fit:cover;max-height:220px;display:block;">`
+    :`<div style="width:100%;height:180px;background:#eee;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#bbb;font-size:13px;letter-spacing:1px;">예상 투시도</div>`;
+
+  // 기본정보
+  const infoFields=[
+    ['위치',       info['위치']||'—'],
+    ['대지 면적',  info['대지면적']?(info['대지면적']+' '+info['면적단위'||'㎡']):'—'],
+    ['건축 규모',  info['건축규모']||'—'],
+    ['건축면적',   info['건축면적']?(info['건축면적']+' ㎡'):'—'],
+    ['연면적',     info['연면적']?(info['연면적']+' ㎡'):'—'],
+  ];
+  const infoHtml=infoFields.map(([k,v])=>`
+    <div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid #f5f5f3;font-size:12px;">
+      <span style="color:#aaa;width:68px;flex-shrink:0;">${k}</span>
+      <span style="color:#333;font-weight:500;">${v}</span>
+    </div>`).join('');
+
+  // 협업자
+  const collabList=collabData['협업사']||[];
+  const collabHtml=collabList.length
+    ?collabList.map(c=>`
+      <div style="display:flex;gap:8px;padding:4px 0;font-size:12px;border-bottom:1px solid #f5f5f3;">
+        <span style="color:#aaa;flex:1;">${c['분야']||''}</span>
+        <span style="color:#333;font-weight:600;">${c['회사']||''}</span>
+      </div>`).join('')
+    :`<div style="color:#bbb;font-size:12px;padding:8px 0;">OneDrive C4_자동연동/협업사/collaborators.json 을 업데이트하세요</div>`;
+
+  // 공사 공정률
+  const cpPhases=[{name:'설계',key:'설계',c:'#9FC93C'},{name:'시공',key:'시공',c:'#ABD151'},{name:'준공',key:'준공',c:'#C2E17B'}];
+  const cpObj=prog['공사공정률']||{};
+  const cpTotal=cpPhases.reduce((s,p)=>s+(cpObj[p.key]||0),0)/cpPhases.length;
+  const cpBars=cpPhases.map(p=>{const pct=Math.min(100,cpObj[p.key]||0);return`
+    <div style="margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#aaa;margin-bottom:3px;"><span>${p.name}</span><span>${pct}%</span></div>
+      <div style="height:5px;background:#E0E0DC;border-radius:3px;overflow:hidden;">
+        <div style="width:${pct}%;height:100%;background:${p.c};border-radius:3px;transition:width 0.4s;"></div>
+      </div>
+    </div>`;}).join('');
+
+  // 예산 집행률
+  const totalSpent=TRIP_BUDGET.reduce((s,c)=>s+tripSpent(c.id),0);
+  const totalBudgetPct=TRIP_TOTAL>0?Math.min(100,(totalSpent/TRIP_TOTAL)*100):0;
+  const budgetBars=TRIP_BUDGET.map(c=>{const pct=c.budget>0?Math.min(100,(tripSpent(c.id)/c.budget)*100):0;return`
+    <div style="margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#aaa;margin-bottom:3px;"><span>${c.name}</span><span>${Math.round(pct)}%</span></div>
+      <div style="height:5px;background:#E0E0DC;border-radius:3px;overflow:hidden;">
+        <div style="width:${pct}%;height:100%;background:${c.color};border-radius:3px;transition:width 0.4s;"></div>
+      </div>
+    </div>`;}).join('');
+
+  // 주요 일정 (단계 요약)
+  const phaseHtml=S.phases&&S.phases.length
+    ?S.phases.map(p=>{
+        const cats=p.cats||[];
+        const dotColor=cats[0]?cc(cats[0]):'#ccc';
+        const segs=p.segments||[];
+        const start=p.start||(segs[0]&&segs[0].start)||'';
+        const end=p.end||(segs[segs.length-1]&&segs[segs.length-1].end)||'';
+        return`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f5f5f3;">
+          <div style="width:8px;height:8px;border-radius:2px;background:${dotColor};flex-shrink:0;"></div>
+          <span style="font-weight:600;font-size:12px;color:#333;flex:1;">${p.name}</span>
+          <span style="font-size:11px;color:#aaa;">${start?start.slice(0,7):''}${end?' ~ '+end.slice(0,7):''}</span>
+        </div>`;}).join('')
+    :`<div style="color:#bbb;font-size:12px;padding:8px 0;">전체 일정표에서 단계를 추가하세요</div>`;
+
+  // 최근 업데이트
+  const ruUrl=ov.recentUpdatesUrl||'';
+  const ruHtml=ruUrl
+    ?`<a href="${ruUrl}" target="_blank" rel="noopener"
+        style="display:inline-flex;align-items:center;gap:6px;background:#EEFAD4;color:#5a8a00;
+               border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;text-decoration:none;">
+        📄 최근 업데이트 파일 열기 ↗
+      </a>
+      <div style="font-size:11px;color:#bbb;margin-top:8px;">OneDrive에 저장된 업데이트 내역 파일로 연결됩니다</div>`
+    :`<div style="color:#bbb;font-size:12px;">설정에서 최근 업데이트 파일의 OneDrive 공유 링크를 등록하세요</div>`;
+
+  el.innerHTML=`
+  <div style="padding:20px 20px 24px;">
+    <div style="display:grid;grid-template-columns:280px 1fr;gap:20px;align-items:start;">
+
+      <!-- LEFT -->
+      <div>
+        <div style="margin-bottom:14px;">${imgHtml}</div>
+
+        <div style="background:#fafafa;border:1px solid #ebebeb;border-radius:10px;padding:14px 16px;margin-bottom:12px;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#bbb;text-transform:uppercase;margin-bottom:10px;">기본정보</div>
+          ${infoHtml}
+        </div>
+
+        <div style="background:#fafafa;border:1px solid #ebebeb;border-radius:10px;padding:14px 16px;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#bbb;text-transform:uppercase;margin-bottom:10px;">협업자</div>
+          ${collabHtml}
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+          <div style="background:#111;color:#fff;border-radius:20px;padding:5px 16px;font-size:13px;font-weight:700;letter-spacing:-0.3px;">
+            D-day&ensp;<span style="color:#9FC93C;font-size:15px;">${dday!==null?dday.toLocaleString()+' 일':'—'}</span>
+          </div>
+        </div>
+
+        <div style="background:#fafafa;border:1px solid #ebebeb;border-radius:10px;padding:14px 16px;margin-bottom:12px;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#bbb;text-transform:uppercase;margin-bottom:10px;">주요 일정</div>
+          ${phaseHtml}
+        </div>
+
+        <div style="background:#fafafa;border:1px solid #ebebeb;border-radius:10px;padding:14px 16px;margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#bbb;text-transform:uppercase;">공사 공정률</div>
+            <div style="font-size:12px;font-weight:700;color:#333;">전체 공정의 ${Math.round(cpTotal)}% 진행</div>
+          </div>
+          ${cpBars}
+        </div>
+
+        <div style="background:#fafafa;border:1px solid #ebebeb;border-radius:10px;padding:14px 16px;margin-bottom:12px;"
+             style="${canSeeTrip()?'':'display:none;'}">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#bbb;text-transform:uppercase;">예산 집행률</div>
+            <div style="font-size:12px;font-weight:700;color:#333;">전체 예산의 ${Math.round(totalBudgetPct)}% 집행</div>
+          </div>
+          ${canSeeTrip()?budgetBars:''}
+        </div>
+
+        <div style="background:#fafafa;border:1px solid #ebebeb;border-radius:10px;padding:14px 16px;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#bbb;text-transform:uppercase;margin-bottom:10px;">최근 업데이트</div>
+          ${ruHtml}
+        </div>
+      </div>
+
+    </div>
+  </div>`;
 }
 
 function renderCatFilter(){
@@ -2389,7 +2580,7 @@ function toggleCatRestrict(i){
   save();renderAll();
 }
 
-function renderAll(){renderCatFilter();renderGantt();renderCalendar();renderCluster();if(canEdit())renderSettings();if(document.getElementById('weeklyTab')?.classList.contains('active'))renderWeekly();}
+function renderAll(){renderCatFilter();renderGantt();renderCalendar();renderCluster();if(canEdit())renderSettings();if(document.getElementById('weeklyTab')?.classList.contains('active'))renderWeekly();if(document.getElementById('projoverviewTab')?.classList.contains('active'))renderProjectOverview();}
 
 function resetToDefault(){
   if(!confirm('일정 단계·마일스톤·카테고리를 기본값으로 초기화합니다.\n※ 월간 일정(캘린더)과 클러스터 데이터는 보존됩니다.\n계속하시겠습니까?'))return;
