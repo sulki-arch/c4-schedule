@@ -2386,19 +2386,16 @@ function renderProjectOverview(){
     ?`<img src="${imgUrl}" style="width:100%;border-radius:8px;object-fit:cover;max-height:220px;display:block;">`
     :`<div style="width:100%;height:180px;background:#eee;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#bbb;font-size:13px;letter-spacing:1px;">예상 투시도</div>`;
 
-  // 기본정보
-  const infoFields=[
-    ['위치',       info['위치']||'—'],
-    ['대지 면적',  info['대지면적']?(info['대지면적']+' '+info['면적단위'||'㎡']):'—'],
-    ['건축 규모',  info['건축규모']||'—'],
-    ['건축면적',   info['건축면적']?(info['건축면적']+' ㎡'):'—'],
-    ['연면적',     info['연면적']?(info['연면적']+' ㎡'):'—'],
-  ];
-  const infoHtml=infoFields.map(([k,v])=>`
+  // 기본정보 — Excel basicInfo의 모든 키를 동적 표시 (메타 키 제외)
+  const META_KEYS=['마지막수정','수정자','_설명'];
+  const infoEntries=Object.entries(info).filter(([k])=>!META_KEYS.includes(k)&&k&&String(k).trim());
+  const infoHtml=infoEntries.length
+    ?infoEntries.map(([k,v])=>`
     <div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid #f5f5f3;font-size:12px;">
-      <span style="color:#aaa;width:68px;flex-shrink:0;">${k}</span>
-      <span style="color:#333;font-weight:500;">${v}</span>
-    </div>`).join('');
+      <span style="color:#aaa;width:80px;flex-shrink:0;">${k}</span>
+      <span style="color:#333;font-weight:500;">${v||'—'}</span>
+    </div>`).join('')
+    :`<div style="color:#bbb;font-size:12px;padding:8px 0;">Excel 기본정보 시트를 채우고 스크립트를 실행하세요</div>`;
 
   // 협업자
   const collabList=collabData['협업사']||[];
@@ -2408,7 +2405,7 @@ function renderProjectOverview(){
         <span style="color:#aaa;flex:1;">${c['분야']||''}</span>
         <span style="color:#333;font-weight:600;">${c['회사']||''}</span>
       </div>`).join('')
-    :`<div style="color:#bbb;font-size:12px;padding:8px 0;">OneDrive C4_자동연동/협업사/collaborators.json 을 업데이트하세요</div>`;
+    :`<div style="color:#bbb;font-size:12px;padding:8px 0;">Excel 협업사 시트를 채우고 스크립트를 실행하세요</div>`;
 
   // 공사 공정률
   const cpPhases=[{name:'설계',key:'설계',c:'#9FC93C'},{name:'시공',key:'시공',c:'#ABD151'},{name:'준공',key:'준공',c:'#C2E17B'}];
