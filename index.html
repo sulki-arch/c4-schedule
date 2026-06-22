@@ -2923,92 +2923,48 @@ function tripRows(id){return Array.isArray(S.tripData[id])?S.tripData[id].filter
 function tripListItems(){return Array.isArray(S.tripData.tripList)?S.tripData.tripList.filter(x=>x!=null):[];}
 let _tripListForm=null;
 
-// ── Google Maps 지도 ──
-// ▼▼▼ Google Maps API 키를 아래에 입력하세요 ▼▼▼
-// Google Cloud Console(https://console.cloud.google.com) → Maps JavaScript API 활성화 후 키 발급
-const GOOGLE_MAPS_KEY='';
-// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
-
-let _tripGMap=null;
-let _tripGMapMarkers=[];
-let _tripGMapInfoWin=null;
-let _gmapsLoading=false;
-let _gmapsCbs=[];
-
-function ensureGoogleMaps(cb){
-  if(window.google&&window.google.maps){cb();return;}
-  _gmapsCbs.push(cb);
-  if(_gmapsLoading)return;
-  _gmapsLoading=true;
-  window._gmapsReady=()=>{_gmapsLoading=false;_gmapsCbs.forEach(f=>f());_gmapsCbs=[];};
+// ── Leaflet 지도 (CARTO Voyager 타일) ──
+let _tripLeafMap=null;
+function ensureLeaflet(cb){
+  if(window.L){cb();return;}
+  const lnk=document.createElement('link');lnk.rel='stylesheet';
+  lnk.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
+  document.head.appendChild(lnk);
   const s=document.createElement('script');
-  s.src=`https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_KEY}&callback=_gmapsReady`;
-  s.async=true;s.defer=true;
-  document.head.appendChild(s);
+  s.src='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+  s.onload=cb;document.head.appendChild(s);
 }
-
 function initLeafletMap(items){
-  const el=document.getElementById('tripMapDiv');
-  if(!el)return;
-  if(!GOOGLE_MAPS_KEY){
-    el.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:8px;color:#aaa;font-size:12px;padding:24px;text-align:center;">
-      <div style="font-size:24px;">🗺️</div>
-      <div style="font-weight:600;color:#888;">Google Maps API 키가 필요합니다</div>
-      <div>index.html 상단의 <code style="background:#f5f5f5;padding:2px 6px;border-radius:4px;">GOOGLE_MAPS_KEY</code> 에 키를 입력하세요</div>
-    </div>`;
-    return;
-  }
-  ensureGoogleMaps(()=>{
-    // 기존 마커 제거
-    _tripGMapMarkers.forEach(m=>m.setMap(null));
-    _tripGMapMarkers=[];
-    if(_tripGMapInfoWin)_tripGMapInfoWin.close();
-    _tripGMapInfoWin=new google.maps.InfoWindow();
-    // 지도 초기화
-    if(!_tripGMap||!el.contains(_tripGMap.getDiv())){
-      _tripGMap=new google.maps.Map(el,{
-        center:{lat:36.5,lng:127.5},zoom:6,
-        mapTypeControl:false,streetViewControl:false,fullscreenControl:false,
-        styles:[{featureType:'poi',elementType:'labels',stylers:[{visibility:'off'}]}]
-      });
-    }
-    const bounds=new google.maps.LatLngBounds();
-    let hasMarkers=false;
+  ensureLeaflet(()=>{
+    const el=document.getElementById('tripMapDiv');if(!el)return;
+    if(_tripLeafMap){_tripLeafMap.remove();_tripLeafMap=null;}
+    _tripLeafMap=L.map('tripMapDiv',{zoomControl:true}).setView([36.5,127.5],6);
+    // CARTO Voyager — 구글 지도와 유사한 깔끔한 스타일, 무료·API키 불필요
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{
+      attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/">CARTO</a>',
+      subdomains:'abcd',maxZoom:19
+    }).addTo(_tripLeafMap);
+    const bounds=[];
     items.forEach((item,i)=>{
       if(!item.lat||!item.lon)return;
-      const pos={lat:parseFloat(item.lat),lng:parseFloat(item.lon)};
       const num=i+1;
-      const marker=new google.maps.Marker({
-        position:pos,map:_tripGMap,
-        label:{text:String(num),color:'#fff',fontWeight:'700',fontSize:'11px'},
-        icon:{
-          path:google.maps.SymbolPath.CIRCLE,
-          scale:14,
-          fillColor:'#9FC93C',fillOpacity:1,
-          strokeColor:'#fff',strokeWeight:2.5,
-          labelOrigin:new google.maps.Point(0,0)
-        }
+      const icon=L.divIcon({
+        html:`<div class="trip-map-num-marker">${num}</div>`,
+        className:'',iconSize:[28,28],iconAnchor:[14,14],popupAnchor:[0,-18]
       });
       const gq=encodeURIComponent(item.위치||item.항목||'');
-      const content=`<div style="font-family:'Segoe UI',sans-serif;min-width:160px;max-width:220px;line-height:1.6;padding:4px 2px;">
+      const popup=`<div style="font-family:'Segoe UI',sans-serif;min-width:160px;max-width:220px;line-height:1.6;">
         <div style="font-weight:700;font-size:13px;margin-bottom:4px;">${num}. ${item.항목||''}</div>
         ${item.내용?`<div style="font-size:11px;color:#666;margin-bottom:6px;">${item.내용}</div>`:''}
         ${item.위치?`<a href="https://maps.google.com/maps?q=${gq}" target="_blank"
           style="font-size:12px;color:#4285f4;text-decoration:none;display:flex;align-items:center;gap:3px;">
           📍 ${item.위치}&nbsp;<span style="font-size:10px;">→ 구글맵 열기</span></a>`:''}
       </div>`;
-      marker.addListener('click',()=>{
-        _tripGMapInfoWin.setContent(content);
-        _tripGMapInfoWin.open(_tripGMap,marker);
-      });
-      _tripGMapMarkers.push(marker);
-      bounds.extend(pos);
-      hasMarkers=true;
+      L.marker([item.lat,item.lon],{icon}).bindPopup(popup).addTo(_tripLeafMap);
+      bounds.push([item.lat,item.lon]);
     });
-    if(hasMarkers){
-      if(_tripGMapMarkers.length===1){_tripGMap.setCenter(bounds.getCenter());_tripGMap.setZoom(13);}
-      else{_tripGMap.fitBounds(bounds,{top:40,right:40,bottom:40,left:40});}
-    }
+    if(bounds.length===1)_tripLeafMap.setView(bounds[0],13);
+    else if(bounds.length>1)_tripLeafMap.fitBounds(bounds,{padding:[40,40]});
   });
 }
 async function tripGeocode(address){
