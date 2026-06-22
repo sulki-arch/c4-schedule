@@ -2485,7 +2485,7 @@ function renderProjectOverview(){
     <div id="${sliderID}" style="position:relative;width:100%;border-radius:8px;overflow:hidden;background:#111;user-select:none;">
       <div class="persp-track" style="display:flex;transition:transform 0.35s ease;will-change:transform;">
         ${imgs.map((im,idx)=>`<div style="min-width:100%;position:relative;">
-          <img src="${(im.base64&&im.base64.length>10)?im.base64:im.url}" style="width:100%;height:220px;object-fit:cover;display:block;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" loading="lazy">
+          <img src="${(im.base64&&im.base64.length>10)?im.base64:im.url}" style="width:100%;height:auto;display:block;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" loading="lazy">
           <div style="display:none;width:100%;height:220px;background:#ddd;align-items:center;justify-content:center;color:#aaa;font-size:12px;">이미지를 불러올 수 없습니다</div>
           ${im.desc?`<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.55));color:#fff;font-size:11px;padding:8px 12px;">${im.desc}</div>`:''}
         </div>`).join('')}
