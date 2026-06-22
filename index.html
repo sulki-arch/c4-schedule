@@ -2482,7 +2482,7 @@ function renderProjectOverview(){
   if(!imgs.length&&ov.perspectiveUrl)imgs.push({url:ov.perspectiveUrl,desc:''});
   const sliderID='perspSlider_'+Date.now();
   const imgHtml=imgs.length?`
-    <div id="${sliderID}" style="position:relative;width:100%;border-radius:8px;overflow:hidden;background:#111;user-select:none;">
+    <div id="${sliderID}" style="position:relative;width:100%;border-radius:8px;overflow:hidden;background:#fff;user-select:none;">
       <div class="persp-track" style="display:flex;transition:transform 0.35s ease;will-change:transform;">
         ${imgs.map((im,idx)=>`<div style="min-width:100%;position:relative;">
           <img src="${(im.base64&&im.base64.length>10)?im.base64:im.url}" style="width:100%;height:auto;display:block;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" loading="lazy">
