@@ -459,8 +459,8 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .triplist-item-cell{display:flex;flex-direction:column;gap:2px;}
 .triplist-item-label{font-size:9px;color:var(--text4);letter-spacing:.4px;text-transform:uppercase;}
 .triplist-item-tag{font-size:11px;font-weight:700;color:var(--text);}
-.triplist-item-desc{font-size:11px;color:var(--text3);line-height:1.5;}
-.triplist-item-att{font-size:11px;color:var(--text3);}
+.triplist-item-desc{font-size:11px;color:var(--text);line-height:1.5;}
+.triplist-item-att{font-size:11px;color:var(--text);}
 .triplist-item-loc{font-size:11px;color:#4285f4;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;}
 .triplist-item-loc:hover{color:#1a73e8;}
 .triplist-del{background:none;border:none;cursor:pointer;color:var(--text4);font-size:12px;padding:2px 4px;border-radius:4px;flex-shrink:0;}
@@ -3234,7 +3234,7 @@ function renderTripList(){
       etcHtml+=`<div class="triplist-etc-item">
         <div class="triplist-etc-num" style="${noCoords?'background:#f59e0b;':''}">${noCoords?'⚠':letter}</div>
         <div class="triplist-etc-row">
-          <div class="triplist-item-cell"><span class="triplist-item-label">항목</span><span class="triplist-item-tag" style="color:#6b7280;">${item.항목||'—'}</span></div>
+          <div class="triplist-item-cell"><span class="triplist-item-label">항목</span><span class="triplist-item-tag">${item.항목||'—'}</span></div>
           <div class="triplist-item-cell"><span class="triplist-item-label">내용</span><span class="triplist-item-desc">${item.내용||'—'}</span></div>
           <div class="triplist-item-cell"><span class="triplist-item-label">위치</span>
             ${item.위치
