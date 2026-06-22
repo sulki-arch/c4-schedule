@@ -1267,8 +1267,9 @@ function performLogin(acc,animate){
   }
   // 계정·카테고리 관리는 관리자만
   if(acc.role==='admin'){document.querySelectorAll('.admin-only-strict').forEach(el=>el.style.display='block');}
-  // 출장 비용 탭: 관리자 또는 크래프톤 계정만 표시
-  document.querySelectorAll('.trip-tab-pill').forEach(el=>el.style.display=canSeeTrip()?'':'none');
+  // 출장 리스트 탭: 전체 공개 / 출장 비용 탭: 관리자·크래프톤만
+  document.querySelectorAll('[data-tab="triplist"]').forEach(el=>el.style.display=canSeeTripList()?'':'none');
+  document.querySelectorAll('[data-tab="trip"]').forEach(el=>el.style.display=canSeeTrip()?'':'none');
   document.getElementById('userText').textContent=acc.name||acc.id;
   const d=TODAY;const days=['SUN','MON','TUE','WED','THU','FRI','SAT'];
   document.getElementById('todayBadge').textContent=`Today '${String(d.getFullYear()).slice(2)}.${p2(d.getMonth()+1)}.${p2(d.getDate())} ${days[d.getDay()]}`;
@@ -2930,6 +2931,9 @@ function canSeeTrip(){
   if(S.user.cat==='크래프톤')return true;
   return false;
 }
+function canSeeTripList(){
+  return !!S.user; // 로그인한 모든 사용자
+}
 // 톤온톤 팔레트: #9FC93C(진) ~ #E4F7BA(연), 7단계 균등 분배
 const TRIP_PALETTE=['#9FC93C','#ABD151','#B6D966','#C2E17B','#CDE890','#D9F0A5','#E4F7BA'];
 const TRIP_BUDGET=[
@@ -3082,7 +3086,7 @@ function tripDateFmt(d){
 
 function renderTripList(){
   const el=document.getElementById('triplistContent');
-  if(!el||!canSeeTrip())return;
+  if(!el||!canSeeTripList())return;
   const items=tripListItems();
   const formIdx=_tripListForm;
   let listItemsHtml='';
@@ -3120,10 +3124,10 @@ function renderTripList(){
               : '<span style="font-size:11px;color:var(--text4);">—</span>'}
           </div>
         </div>
-        <div class="triplist-item-btns">
+        ${canSeeTrip()?`<div class="triplist-item-btns">
           <button class="triplist-edit" onclick="tripListShowForm(${i})">✏</button>
           <button class="triplist-del" onclick="tripListDel(${i})">✕</button>
-        </div>
+        </div>`:''}
       </div>`;
     }
   });
