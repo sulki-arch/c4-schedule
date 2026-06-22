@@ -3275,13 +3275,16 @@ function renderTripList(){
     etcHtml+=`<button class="triplist-add-btn" style="background:#9ca3af;margin-top:4px;" onclick="tripEtcShowForm()">+ 기타 추가</button>`;
   }
 
+  const _editBtnStyle=editModeActive
+    ? 'font-size:11px;padding:4px 12px;border-radius:8px;border:1px solid var(--accent);background:var(--accent-dim);color:var(--accent);cursor:pointer;font-weight:700;font-family:inherit;'
+    : 'font-size:11px;padding:4px 12px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;font-weight:700;font-family:inherit;';
+  const _editBtnLabel=editModeActive?'✓ 편집 완료':'✏ 편집';
+  const _editBtnHtml=canSeeTrip()?`<button onclick="toggleTripListEditMode()" style="${_editBtnStyle}">${_editBtnLabel}</button>`:'';
+  const _addBtnHtml=editModeActive?`<button class="triplist-add-btn" onclick="tripListShowForm()">+ 추가</button>`:'';
   el.innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
       <div style="font-size:13px;font-weight:700;color:var(--text2);">출장 리스트</div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        ${editModeActive?`<button class="triplist-add-btn" onclick="tripListShowForm()">+ 추가</button>`:''}
-        ${canSeeTrip()?`<button onclick="toggleTripListEditMode()" style="font-size:11px;padding:4px 12px;border-radius:8px;border:1px solid ${editModeActive?'var(--accent)':'var(--border2)'};background:${editModeActive?'var(--accent-dim)':'transparent'};color:${editModeActive?'var(--accent)':'var(--text3)'};cursor:pointer;font-weight:700;font-family:inherit;">${editModeActive?'✓ 편집 완료':'✏ 편집'}</button>`:''}
-      </div>
+      <div style="display:flex;gap:8px;align-items:center;">${_addBtnHtml}${_editBtnHtml}</div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
       <div>${listItemsHtml}${fixedHtml}${etcHtml}</div>
