@@ -3269,7 +3269,7 @@ function renderTripList(){
 
   const _hdrBtns=(em
     ?'<button class="triplist-add-btn" onclick="tripListShowForm()">+ 추가</button>'
-    +'<button onclick="toggleTripListEditMode()" style="font-size:11px;padding:4px 12px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;font-weight:700;font-family:inherit;">✏ 편집</button>'
+    +'<button onclick="toggleTripListEditMode()" style="font-size:11px;padding:4px 12px;border-radius:8px;border:1px solid var(--accent);background:var(--accent-dim);color:var(--accent);cursor:pointer;font-weight:700;font-family:inherit;">✓ 편집 완료</button>'
     :'<button onclick="toggleTripListEditMode()" style="font-size:11px;padding:4px 12px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;font-weight:700;font-family:inherit;">✏ 편집</button>');
   el.innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
