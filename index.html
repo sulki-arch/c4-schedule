@@ -452,36 +452,38 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .triplist-title{font-size:12px;font-weight:700;color:var(--text2);letter-spacing:.5px;}
 .triplist-add-btn{font-size:11px;padding:4px 11px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-weight:700;font-family:inherit;}
 .triplist-add-btn:hover{background:var(--accent2);}
-.triplist-item{border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-bottom:8px;position:relative;background:var(--bg3);}
+.triplist-item{border:1px solid var(--border);border-radius:9px;padding:10px 12px 10px 10px;margin-bottom:8px;position:relative;background:var(--bg3);display:flex;gap:10px;align-items:flex-start;}
 .triplist-item:last-child{margin-bottom:0;}
-.triplist-item-row{display:grid;grid-template-columns:1fr 2fr 1fr;gap:12px;align-items:start;}
+.triplist-num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;min-width:26px;background:var(--accent);color:#fff;border-radius:50%;font-size:11px;font-weight:700;margin-top:1px;flex-shrink:0;}
+.triplist-item-row{display:grid;grid-template-columns:1fr 2fr 1fr 1.5fr;gap:12px;align-items:start;flex:1;}
 .triplist-item-cell{display:flex;flex-direction:column;gap:2px;}
 .triplist-item-label{font-size:9px;color:var(--text4);letter-spacing:.4px;text-transform:uppercase;}
 .triplist-item-tag{font-size:11px;font-weight:700;color:var(--text);}
 .triplist-item-desc{font-size:11px;color:var(--text3);line-height:1.5;}
 .triplist-item-att{font-size:11px;color:var(--text3);}
-.triplist-del{position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;color:var(--text4);font-size:12px;padding:2px 5px;border-radius:4px;}
+.triplist-item-loc{font-size:11px;color:#4285f4;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;}
+.triplist-item-loc:hover{color:#1a73e8;}
+.triplist-del{background:none;border:none;cursor:pointer;color:var(--text4);font-size:12px;padding:2px 4px;border-radius:4px;flex-shrink:0;}
 .triplist-del:hover{color:#DC2626;background:rgba(220,38,38,.07);}
-.triplist-edit{position:absolute;top:8px;right:30px;background:none;border:none;cursor:pointer;color:var(--text4);font-size:12px;padding:2px 5px;border-radius:4px;}
+.triplist-edit{background:none;border:none;cursor:pointer;color:var(--text4);font-size:12px;padding:2px 4px;border-radius:4px;flex-shrink:0;}
 .triplist-edit:hover{color:var(--accent);background:var(--accent-dim);}
-.triplist-form{border:1.5px dashed var(--accent);border-radius:9px;padding:10px 12px;margin-bottom:8px;background:var(--accent-dim);}
+.triplist-item-btns{display:flex;gap:2px;margin-left:auto;}
+.triplist-form{border:1.5px dashed var(--accent);border-radius:9px;padding:12px;margin-bottom:8px;background:var(--accent-dim);}
 .triplist-form-row{display:grid;grid-template-columns:1fr 2fr 1fr;gap:8px;margin-bottom:8px;align-items:start;}
-.triplist-form-row label{font-size:9px;color:var(--text4);letter-spacing:.4px;text-transform:uppercase;display:block;margin-bottom:3px;}
-.triplist-form input,.triplist-form textarea{font-size:11px;padding:5px 8px;border:1px solid var(--border2);border-radius:6px;background:#fff;color:var(--text);width:100%;outline:none;font-family:inherit;}
+.triplist-form-loc{margin-bottom:8px;}
+.triplist-form-row label,.triplist-form-loc label{font-size:9px;color:var(--text4);letter-spacing:.4px;text-transform:uppercase;display:block;margin-bottom:3px;}
+.triplist-form input,.triplist-form textarea{font-size:11px;padding:5px 8px;border:1px solid var(--border2);border-radius:6px;background:#fff;color:var(--text);width:100%;outline:none;font-family:inherit;box-sizing:border-box;}
 .triplist-form input:focus,.triplist-form textarea:focus{border-color:var(--accent);}
 .triplist-form textarea{resize:none;height:54px;}
-.triplist-form textarea{resize:vertical;min-height:52px;}
 .triplist-form-btns{display:flex;gap:6px;}
 .triplist-save{font-size:11px;padding:4px 12px;border-radius:6px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-weight:700;font-family:inherit;}
 .triplist-cancel{font-size:11px;padding:4px 12px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;font-family:inherit;}
-/* ── MAP ── */
+/* ── MAP (Leaflet) ── */
 .tripmap-card{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;}
-.tripmap-head{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--border);}
+.tripmap-head{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);}
 .tripmap-title{font-size:12px;font-weight:700;color:var(--text2);}
-.tripmap-input{font-size:11px;padding:4px 8px;border:1px solid var(--border2);border-radius:7px;background:var(--bg3);color:var(--text);flex:1;outline:none;font-family:inherit;}
-.tripmap-input:focus{border-color:var(--accent);background:#fff;}
-.tripmap-btn{font-size:11px;padding:4px 10px;border-radius:7px;border:none;background:var(--accent);color:#fff;cursor:pointer;white-space:nowrap;font-family:inherit;font-weight:600;}
-.tripmap-frame{width:100%;height:220px;border:none;display:block;}
+#tripMapDiv{width:100%;height:400px;}
+.trip-map-num-marker{width:28px;height:28px;background:#9FC93C;border:2.5px solid #fff;border-radius:50%;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.35);cursor:pointer;}
 /* ── TRIP EXPENSES ── */
 .trip-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:20px;}
 .trip-kpi{background:var(--bg3);border-radius:10px;padding:13px 15px;}
@@ -2920,24 +2922,58 @@ function tripRows(id){return Array.isArray(S.tripData[id])?S.tripData[id].filter
 // ── 출장 리스트 ──
 function tripListItems(){return Array.isArray(S.tripData.tripList)?S.tripData.tripList.filter(x=>x!=null):[];}
 let _tripListForm=null;
-// ── 지도 ──
-function tripMapSearch(){
-  const q=(document.getElementById('tripMapQ')?.value||'').trim();
-  if(!q)return;
-  const f=document.getElementById('tripMapFrame');
-  if(!f)return;
-  // Nominatim으로 좌표 검색 후 OpenStreetMap 임베드
-  fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&accept-language=ko`)
-    .then(r=>r.json())
-    .then(data=>{
-      if(data&&data[0]){
-        const lat=parseFloat(data[0].lat),lon=parseFloat(data[0].lon),d=0.04;
-        f.src=`https://www.openstreetmap.org/export/embed.html?bbox=${lon-d},${lat-d},${lon+d},${lat+d}&layer=mapnik&marker=${lat},${lon}`;
-      }
-    })
-    .catch(()=>{});
+
+// ── Leaflet 지도 ──
+let _tripLeafMap=null;
+function ensureLeaflet(cb){
+  if(window.L){cb();return;}
+  const lnk=document.createElement('link');lnk.rel='stylesheet';
+  lnk.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
+  document.head.appendChild(lnk);
+  const s=document.createElement('script');
+  s.src='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+  s.onload=cb;document.head.appendChild(s);
 }
-function tripMapInputKey(e){if(e.key==='Enter')tripMapSearch();}
+function initLeafletMap(items){
+  ensureLeaflet(()=>{
+    const el=document.getElementById('tripMapDiv');if(!el)return;
+    if(_tripLeafMap){_tripLeafMap.remove();_tripLeafMap=null;}
+    _tripLeafMap=L.map('tripMapDiv').setView([36.5,127.5],6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+      attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>',maxZoom:18
+    }).addTo(_tripLeafMap);
+    const bounds=[];
+    items.forEach((item,i)=>{
+      if(!item.lat||!item.lon)return;
+      const num=i+1;
+      const icon=L.divIcon({
+        html:`<div class="trip-map-num-marker">${num}</div>`,
+        className:'',iconSize:[28,28],iconAnchor:[14,14],popupAnchor:[0,-16]
+      });
+      const gq=encodeURIComponent(item.위치||item.항목||'');
+      const popup=`<div style="font-family:'Segoe UI',sans-serif;min-width:160px;line-height:1.5;">
+        <div style="font-weight:700;font-size:13px;margin-bottom:4px;">${num}. ${item.항목||''}</div>
+        ${item.내용?`<div style="font-size:11px;color:#666;margin-bottom:6px;">${item.내용}</div>`:''}
+        ${item.위치?`<a href="https://maps.google.com/maps?q=${gq}" target="_blank"
+          style="font-size:12px;color:#4285f4;text-decoration:none;display:flex;align-items:center;gap:3px;">
+          📍 ${item.위치}&nbsp;<span style="font-size:10px;">→ 구글맵</span></a>`:''}
+      </div>`;
+      L.marker([item.lat,item.lon],{icon}).bindPopup(popup).addTo(_tripLeafMap);
+      bounds.push([item.lat,item.lon]);
+    });
+    if(bounds.length===1)_tripLeafMap.setView(bounds[0],13);
+    else if(bounds.length>1)_tripLeafMap.fitBounds(bounds,{padding:[40,40]});
+  });
+}
+async function tripGeocode(address){
+  if(!address)return null;
+  try{
+    const r=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1&accept-language=ko`);
+    const d=await r.json();
+    if(d&&d[0])return{lat:parseFloat(d[0].lat),lon:parseFloat(d[0].lon)};
+  }catch(e){}
+  return null;
+}
 function tripSpent(id){return tripRows(id).reduce((s,r)=>s+(r.amt||0),0);}
 function tripTotalSpent(){return TRIP_BUDGET.reduce((s,c)=>s+tripSpent(c.id),0);}
 function tripFmt(v){return Math.round(v).toLocaleString('ko-KR');}
@@ -2956,19 +2992,25 @@ function renderTripList(){
           <div><label>내용</label><textarea id="tl-내용" placeholder="일정, 목적 등">${item.내용||''}</textarea></div>
           <div><label>참석자</label><input id="tl-참석자" placeholder="예: 박슬기, 홍길동" value="${(item.참석자||'').replace(/"/g,'&quot;')}"></div>
         </div>
+        <div class="triplist-form-loc"><label>📍 위치 (주소 · 지명)</label><input id="tl-위치" placeholder="예: London, UK 또는 성수동 2가, 서울" value="${(item.위치||'').replace(/"/g,'&quot;')}"></div>
         <div class="triplist-form-btns">
           <button class="triplist-save" onclick="tripListSave(${i})">저장</button>
           <button class="triplist-cancel" onclick="tripListHideForm()">취소</button>
         </div>
       </div>`;
     } else {
+      const gq=encodeURIComponent(item.위치||'');
       listItemsHtml+=`<div class="triplist-item">
-        <button class="triplist-edit" onclick="tripListShowForm(${i})">✏</button>
-        <button class="triplist-del" onclick="tripListDel(${i})">✕</button>
+        <div class="triplist-num">${i+1}</div>
         <div class="triplist-item-row">
           <div class="triplist-item-cell"><span class="triplist-item-label">항목</span><span class="triplist-item-tag">${item.항목||'—'}</span></div>
           <div class="triplist-item-cell"><span class="triplist-item-label">내용</span><span class="triplist-item-desc">${item.내용||'—'}</span></div>
           <div class="triplist-item-cell"><span class="triplist-item-label">참석자</span><span class="triplist-item-att">${item.참석자||'—'}</span></div>
+          <div class="triplist-item-cell"><span class="triplist-item-label">위치</span>${item.위치?`<a class="triplist-item-loc" href="https://maps.google.com/maps?q=${gq}" target="_blank">📍 ${item.위치}</a>`:'<span style="font-size:11px;color:var(--text4);">—</span>'}</div>
+        </div>
+        <div class="triplist-item-btns">
+          <button class="triplist-edit" onclick="tripListShowForm(${i})">✏</button>
+          <button class="triplist-del" onclick="tripListDel(${i})">✕</button>
         </div>
       </div>`;
     }
@@ -2980,6 +3022,7 @@ function renderTripList(){
         <div><label>내용</label><textarea id="tl-내용" placeholder="일정, 목적 등"></textarea></div>
         <div><label>참석자</label><input id="tl-참석자" placeholder="예: 박슬기, 홍길동"></div>
       </div>
+      <div class="triplist-form-loc"><label>📍 위치 (주소 · 지명)</label><input id="tl-위치" placeholder="예: London, UK 또는 성수동 2가, 서울"></div>
       <div class="triplist-form-btns">
         <button class="triplist-save" onclick="tripListSave('new')">저장</button>
         <button class="triplist-cancel" onclick="tripListHideForm()">취소</button>
@@ -2998,27 +3041,32 @@ function renderTripList(){
       <div>${listItemsHtml}</div>
       <div class="tripmap-card">
         <div class="tripmap-head">
-          <span class="tripmap-title">지도</span>
-          <input class="tripmap-input" id="tripMapQ" placeholder="장소 검색..." onkeydown="tripMapInputKey(event)">
-          <button class="tripmap-btn" onclick="tripMapSearch()">검색</button>
+          <span class="tripmap-title">📍 지도</span>
         </div>
-        <iframe id="tripMapFrame" class="tripmap-frame" style="height:340px;"
-          src="https://www.openstreetmap.org/export/embed.html?bbox=126.85,37.52,127.05,37.62&layer=mapnik"
-          allowfullscreen loading="lazy"></iframe>
+        <div id="tripMapDiv"></div>
       </div>
     </div>`;
+  initLeafletMap(items);
 }
 
 // renderTripList에서 save 후 재렌더링
-function tripListSave(idx){
+async function tripListSave(idx){
   const 항목=(document.getElementById('tl-항목')?.value||'').trim();
   const 내용=(document.getElementById('tl-내용')?.value||'').trim();
   const 참석자=(document.getElementById('tl-참석자')?.value||'').trim();
+  const 위치=(document.getElementById('tl-위치')?.value||'').trim();
   if(!항목)return;
   const list=tripListItems();
-  const item={항목,내용,참석자,id:Date.now()};
+  const existing=(idx!=='new'&&idx!==null)?{...list[idx]}:{};
+  const item={...existing,항목,내용,참석자,위치};
+  // 주소 바뀌었으면 지오코딩
+  if(위치&&위치!==(existing.위치||'')){
+    const coords=await tripGeocode(위치);
+    if(coords){item.lat=coords.lat;item.lon=coords.lon;}
+    else{delete item.lat;delete item.lon;}
+  } else if(!위치){delete item.lat;delete item.lon;}
   if(idx==='new'||idx===null){list.push(item);}
-  else{list[idx]={...list[idx],...item};}
+  else{list[idx]=item;}
   S.tripData.tripList=list;
   _tripListForm=null;
   save().then(()=>renderTripList());
