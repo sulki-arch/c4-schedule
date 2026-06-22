@@ -479,12 +479,13 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .triplist-save{font-size:11px;padding:4px 12px;border-radius:6px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-weight:700;font-family:inherit;}
 .triplist-cancel{font-size:11px;padding:4px 12px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;font-family:inherit;}
 /* ── MAP (Leaflet) ── */
-.tripmap-card{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.tripmap-card{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;position:sticky;top:80px;}
 .tripmap-head{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);}
 .tripmap-title{font-size:12px;font-weight:700;color:var(--text2);}
-#tripMapDiv{width:100%;height:400px;}
+#tripMapDiv{width:100%;height:calc(100vh - 140px);min-height:300px;}
 .trip-map-num-marker{width:28px;height:28px;background:#9FC93C;border:2.5px solid #fff;border-radius:50%;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.35);cursor:pointer;}
 .trip-map-fix-marker{width:32px;height:32px;border:2.5px solid #fff;border-radius:50%;font-size:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.35);cursor:pointer;}
+.trip-map-etc-marker{width:24px;height:24px;background:#9ca3af;border:2px solid #fff;border-radius:50%;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.25);cursor:pointer;}
 /* ── FIXED LOCATIONS (숙소·오피스) ── */
 .triplist-fixed-sep{display:flex;align-items:center;gap:8px;margin:12px 0 8px;font-size:9px;color:var(--text4);letter-spacing:.5px;text-transform:uppercase;}
 .triplist-fixed-sep::before,.triplist-fixed-sep::after{content:'';flex:1;height:1px;background:var(--border);}
@@ -500,6 +501,12 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .triplist-fixed-form label{font-size:9px;color:var(--text4);letter-spacing:.4px;text-transform:uppercase;display:block;margin-bottom:3px;}
 .triplist-fixed-form input{font-size:11px;padding:5px 8px;border:1px solid var(--border2);border-radius:6px;background:#fff;color:var(--text);width:100%;outline:none;font-family:inherit;box-sizing:border-box;margin-bottom:8px;}
 .triplist-fixed-form input:focus{border-color:var(--accent);}
+/* ── ETC LIST (기타 일정) ── */
+.triplist-etc-item{display:flex;gap:10px;align-items:flex-start;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;}
+.triplist-etc-num{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;min-width:24px;background:#9ca3af;color:#fff;border-radius:50%;font-size:10px;font-weight:700;margin-top:1px;flex-shrink:0;}
+.triplist-etc-row{display:grid;grid-template-columns:1fr 2fr 1.5fr;gap:12px;align-items:start;flex:1;}
+.triplist-etc-loc{font-size:11px;color:#4285f4;text-decoration:underline;text-decoration-style:dotted;cursor:pointer;}
+.triplist-etc-loc:hover{color:#1a73e8;}
 /* ── TRIP EXPENSES ── */
 .trip-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:20px;}
 .trip-kpi{background:var(--bg3);border-radius:10px;padding:13px 15px;}
@@ -2939,6 +2946,9 @@ function tripRows(id){return Array.isArray(S.tripData[id])?S.tripData[id].filter
 function tripListItems(){return Array.isArray(S.tripData.tripList)?S.tripData.tripList.filter(x=>x!=null):[];}
 let _tripListForm=null;
 let _tripListFixedForm=null;
+let _tripListEtcForm=null;
+function toAlpha(i){if(i<26)return String.fromCharCode(97+i);return toAlpha(Math.floor(i/26)-1)+String.fromCharCode(97+i%26);}
+function tripEtcItems(){return Array.isArray(S.tripData.etcList)?S.tripData.etcList.filter(x=>x!=null):[];}
 
 // ── Leaflet 지도 (CARTO Voyager 타일) ──
 let _tripLeafMap=null;
@@ -2951,7 +2961,7 @@ function ensureLeaflet(cb){
   s.src='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
   s.onload=cb;document.head.appendChild(s);
 }
-function initLeafletMap(items, fixedLocs={}, fixedDefs=[]){
+function initLeafletMap(items, fixedLocs={}, fixedDefs=[], etcItems=[]){
   ensureLeaflet(()=>{
     const el=document.getElementById('tripMapDiv');if(!el)return;
     if(_tripLeafMap){_tripLeafMap.remove();_tripLeafMap=null;}
@@ -2999,6 +3009,25 @@ function initLeafletMap(items, fixedLocs={}, fixedDefs=[]){
       L.marker([loc.lat,loc.lon],{icon}).bindPopup(popup).addTo(_tripLeafMap);
       bounds.push([loc.lat,loc.lon]);
     }
+    // 알파벳 마커 (기타 일정)
+    etcItems.forEach((item,i)=>{
+      if(!item.lat||!item.lon)return;
+      const letter=toAlpha(i);
+      const icon=L.divIcon({
+        html:`<div class="trip-map-etc-marker">${letter}</div>`,
+        className:'',iconSize:[24,24],iconAnchor:[12,12],popupAnchor:[0,-16]
+      });
+      const gq=encodeURIComponent(item.위치||item.항목||'');
+      const popup=`<div style="font-family:'Segoe UI',sans-serif;min-width:140px;max-width:200px;line-height:1.6;">
+        <div style="font-weight:700;font-size:13px;margin-bottom:4px;color:#6b7280;">${letter}. ${item.항목||''}</div>
+        ${item.내용?`<div style="font-size:11px;color:#666;margin-bottom:6px;">${item.내용}</div>`:''}
+        ${item.위치?`<a href="https://maps.google.com/maps?q=${gq}" target="_blank"
+          style="font-size:12px;color:#4285f4;text-decoration:none;">
+          📍 ${item.위치}&nbsp;<span style="font-size:10px;">→ 구글맵 열기</span></a>`:''}
+      </div>`;
+      L.marker([item.lat,item.lon],{icon}).bindPopup(popup).addTo(_tripLeafMap);
+      bounds.push([item.lat,item.lon]);
+    });
     if(bounds.length===1)_tripLeafMap.setView(bounds[0],13);
     else if(bounds.length>1)_tripLeafMap.fitBounds(bounds,{padding:[40,40]});
   });
@@ -3151,13 +3180,74 @@ function renderTripList(){
     }
   }
 
+  // ── 기타 일정 ──
+  const etcItems=tripEtcItems();
+  const etcFormIdx=_tripListEtcForm;
+  let etcHtml=`<div class="triplist-fixed-sep">기타 일정</div>`;
+  etcItems.forEach((item,i)=>{
+    const letter=toAlpha(i);
+    const gq=encodeURIComponent(item.위치||'');
+    const noCoords=item.위치&&(!item.lat||!item.lon);
+    if(etcFormIdx===i){
+      etcHtml+=`<div class="triplist-form" style="border-color:#9ca3af;background:#f9fafb;">
+        <div class="triplist-form-row">
+          <div><label>항목</label><input id="te-항목" value="${(item.항목||'').replace(/"/g,'&quot;')}"></div>
+          <div><label>내용</label><textarea id="te-내용">${item.내용||''}</textarea></div>
+          <div><label>참석자</label><input id="te-참석자" value="${(item.참석자||'').replace(/"/g,'&quot;')}"></div>
+        </div>
+        <div class="triplist-form-loc"><label>📍 위치</label><input id="te-위치" placeholder="예: London, UK" value="${(item.위치||'').replace(/"/g,'&quot;')}"></div>
+        <div class="triplist-form-btns">
+          <button class="triplist-save" style="background:#9ca3af;" onclick="tripEtcSave(${i})">저장</button>
+          <button class="triplist-cancel" onclick="tripEtcHideForm()">취소</button>
+        </div>
+      </div>`;
+    } else {
+      etcHtml+=`<div class="triplist-etc-item">
+        <div class="triplist-etc-num" style="${noCoords?'background:#f59e0b;':''}">${noCoords?'⚠':letter}</div>
+        <div class="triplist-etc-row">
+          <div class="triplist-item-cell"><span class="triplist-item-label">항목</span><span class="triplist-item-tag" style="color:#6b7280;">${item.항목||'—'}</span></div>
+          <div class="triplist-item-cell"><span class="triplist-item-label">내용</span><span class="triplist-item-desc">${item.내용||'—'}</span></div>
+          <div class="triplist-item-cell"><span class="triplist-item-label">위치</span>
+            ${item.위치
+              ?`<div style="display:flex;align-items:center;gap:4px;">
+                  <a class="triplist-etc-loc" href="https://maps.google.com/maps?q=${gq}" target="_blank">📍 ${item.위치}</a>
+                  ${noCoords?`<button onclick="tripEtcReGeocode(${i})" style="background:#f59e0b;color:#fff;border:none;border-radius:4px;font-size:9px;padding:1px 5px;cursor:pointer;">재검색</button>`:''}
+                </div>`
+              :'<span style="font-size:11px;color:var(--text4);">—</span>'}
+          </div>
+        </div>
+        <div class="triplist-item-btns">
+          <button class="triplist-edit" onclick="tripEtcShowForm(${i})">✏</button>
+          <button class="triplist-del" onclick="tripEtcDel(${i})">✕</button>
+        </div>
+      </div>`;
+    }
+  });
+  if(etcFormIdx==='new'){
+    etcHtml+=`<div class="triplist-form" style="border-color:#9ca3af;background:#f9fafb;">
+      <div class="triplist-form-row">
+        <div><label>항목</label><input id="te-항목" placeholder="예: 공항 라운지"></div>
+        <div><label>내용</label><textarea id="te-내용" placeholder="메모"></textarea></div>
+        <div><label>참석자</label><input id="te-참석자" placeholder="예: 박슬기"></div>
+      </div>
+      <div class="triplist-form-loc"><label>📍 위치</label><input id="te-위치" placeholder="예: Heathrow Airport, London"></div>
+      <div class="triplist-form-btns">
+        <button class="triplist-save" style="background:#9ca3af;" onclick="tripEtcSave('new')">저장</button>
+        <button class="triplist-cancel" onclick="tripEtcHideForm()">취소</button>
+      </div>
+    </div>`;
+  }
+  if(canEdit()){
+    etcHtml+=`<button class="triplist-add-btn" style="background:#9ca3af;margin-top:4px;" onclick="tripEtcShowForm()">+ 기타 추가</button>`;
+  }
+
   el.innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
       <div style="font-size:13px;font-weight:700;color:var(--text2);">출장 리스트</div>
       ${canEdit()?`<button class="triplist-add-btn" onclick="tripListShowForm()">+ 추가</button>`:''}
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
-      <div>${listItemsHtml}${fixedHtml}</div>
+      <div>${listItemsHtml}${fixedHtml}${etcHtml}</div>
       <div class="tripmap-card">
         <div class="tripmap-head">
           <span class="tripmap-title">📍 지도</span>
@@ -3165,7 +3255,7 @@ function renderTripList(){
         <div id="tripMapDiv"></div>
       </div>
     </div>`;
-  initLeafletMap(items, fixedLocs, FIXED_DEFS);
+  initLeafletMap(items, fixedLocs, FIXED_DEFS, etcItems);
 }
 
 // renderTripList에서 save 후 재렌더링
@@ -3204,6 +3294,42 @@ function tripListDel(idx){
 }
 function tripListShowForm(idx=null){_tripListForm=(idx===null?'new':idx);_tripListFixedForm=null;renderTripList();}
 function tripListHideForm(){_tripListForm=null;renderTripList();}
+// ── 기타 일정 함수 ──
+function tripEtcShowForm(idx=null){_tripListEtcForm=(idx===null?'new':idx);_tripListForm=null;_tripListFixedForm=null;renderTripList();}
+function tripEtcHideForm(){_tripListEtcForm=null;renderTripList();}
+async function tripEtcSave(idx){
+  const 항목=(document.getElementById('te-항목')?.value||'').trim();
+  const 내용=(document.getElementById('te-내용')?.value||'').trim();
+  const 참석자=(document.getElementById('te-참석자')?.value||'').trim();
+  const 위치=(document.getElementById('te-위치')?.value||'').trim();
+  if(!항목)return;
+  if(!S.tripData.etcList)S.tripData.etcList=[];
+  const list=tripEtcItems();
+  const existing=(idx!=='new'&&idx!==null)?{...list[idx]}:{};
+  const item={...existing,항목,내용,참석자,위치};
+  if(위치&&위치!==(existing.위치||'')){
+    const btn=document.querySelector('.triplist-save');
+    if(btn){btn.textContent='📍 검색 중...';btn.disabled=true;}
+    const coords=await tripGeocode(위치);
+    if(coords){item.lat=coords.lat;item.lon=coords.lon;showToast('✅ 지도에 표시됩니다!');}
+    else{delete item.lat;delete item.lon;showToast('⚠️ 주소를 찾지 못했어요.');}
+  } else if(!위치){delete item.lat;delete item.lon;}
+  if(idx==='new'||idx===null){list.push(item);}else{list[idx]=item;}
+  S.tripData.etcList=list;_tripListEtcForm=null;
+  save().then(()=>renderTripList());
+}
+function tripEtcDel(idx){
+  const list=tripEtcItems();list.splice(idx,1);
+  S.tripData.etcList=list;save().then(()=>renderTripList());
+}
+async function tripEtcReGeocode(idx){
+  const list=tripEtcItems();const item=list[idx];
+  if(!item||!item.위치)return;
+  showToast('📍 좌표 검색 중...',1500);
+  const coords=await tripGeocode(item.위치);
+  if(coords){list[idx]={...item,lat:coords.lat,lon:coords.lon};S.tripData.etcList=list;save().then(()=>{showToast('✅ 지도에 표시됐어요!');renderTripList();});}
+  else{showToast('❌ 주소를 찾을 수 없어요.');}
+}
 // ── 고정 위치 (숙소·오피스) 함수 ──
 function tripFixedShowForm(key){_tripListFixedForm=key;_tripListForm=null;renderTripList();}
 function tripFixedHideForm(){_tripListFixedForm=null;renderTripList();}
