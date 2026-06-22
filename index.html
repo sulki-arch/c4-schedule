@@ -446,6 +446,10 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .trip-layout{display:grid;grid-template-columns:320px 1fr;gap:16px;align-items:start;}
 @media(max-width:860px){.trip-layout{grid-template-columns:1fr;}}
 .trip-left-panel{display:flex;flex-direction:column;gap:14px;position:sticky;top:16px;}
+/* ── TRIPLIST 분할 레이아웃 ── */
+#triplistTab.active{height:calc(100vh - 68px);overflow:hidden;display:flex;flex-direction:column;}
+#triplistTab .cw{flex:1;overflow:hidden;display:flex;flex-direction:column;padding:0;}
+#triplistContent{flex:1;overflow:hidden;display:flex;flex-direction:column;}
 /* ── TRIP LIST ── */
 .triplist-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;}
 .triplist-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
@@ -479,10 +483,10 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .triplist-save{font-size:11px;padding:4px 12px;border-radius:6px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-weight:700;font-family:inherit;}
 .triplist-cancel{font-size:11px;padding:4px 12px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;font-family:inherit;}
 /* ── MAP (Leaflet) ── */
-.tripmap-card{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;position:sticky;top:68px;height:calc(100vh - 68px);}
-.tripmap-head{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);}
+.tripmap-card{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;height:100%;}
+.tripmap-head{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0;}
 .tripmap-title{font-size:12px;font-weight:700;color:var(--text2);}
-#tripMapDiv{width:100%;height:calc(100vh - 114px);min-height:300px;}
+#tripMapDiv{width:100%;flex:1;min-height:300px;}
 .trip-map-num-marker{width:28px;height:28px;background:#E8401C;border:2.5px solid #fff;border-radius:50%;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.35);cursor:pointer;}
 .trip-map-fix-marker{width:32px;height:32px;border:2.5px solid #fff;border-radius:50%;font-size:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.35);cursor:pointer;}
 .trip-map-etc-marker{width:24px;height:24px;background:#9ca3af;border:2px solid #fff;border-radius:50%;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.25);cursor:pointer;}
@@ -3279,17 +3283,21 @@ function renderTripList(){
     +'<button onclick="toggleTripListEditMode()" style="font-size:11px;padding:4px 12px;border-radius:8px;border:1px solid var(--accent);background:var(--accent-dim);color:var(--accent);cursor:pointer;font-weight:700;font-family:inherit;">✓ 편집 완료</button>'
     :'<button onclick="toggleTripListEditMode()" style="font-size:11px;padding:4px 12px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;font-weight:700;font-family:inherit;">✏ 편집</button>');
   el.innerHTML=`
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px 10px;flex-shrink:0;">
       <div style="font-size:13px;font-weight:700;color:var(--text2);">출장 리스트</div>
       <div style="display:flex;gap:8px;">${_hdrBtns}</div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
-      <div>${listItemsHtml}${fixedHtml}${etcHtml}</div>
-      <div class="tripmap-card">
-        <div class="tripmap-head">
-          <span class="tripmap-title">📍 지도</span>
+    <div style="display:flex;flex:1;overflow:hidden;gap:0;border-top:1px solid var(--border);">
+      <div style="width:420px;min-width:320px;overflow-y:auto;padding:16px 16px 24px;">
+        ${listItemsHtml}${fixedHtml}${etcHtml}
+      </div>
+      <div style="flex:1;overflow:hidden;border-left:1px solid var(--border);">
+        <div class="tripmap-card" style="border:none;border-radius:0;">
+          <div class="tripmap-head">
+            <span class="tripmap-title">📍 지도</span>
+          </div>
+          <div id="tripMapDiv"></div>
         </div>
-        <div id="tripMapDiv"></div>
       </div>
     </div>`;
   initLeafletMap(items, fixedLocs, FIXED_DEFS, etcItems);
