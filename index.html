@@ -2952,6 +2952,25 @@ function tripListItems(){return Array.isArray(S.tripData.tripList)?S.tripData.tr
 let _tripListForm=null;
 let _tripListFixedForm=null;
 let _tripListEtcForm=null;
+let _tripListEditMode=false;
+let _tripDragIdx=null;
+function toggleTripListEditMode(){
+  _tripListEditMode=!_tripListEditMode;
+  _tripListForm=null;_tripListEtcForm=null;
+  renderTripList();
+}
+function tripListDragStart(e,idx){_tripDragIdx=idx;e.dataTransfer.effectAllowed='move';}
+function tripListDragOver(e){e.preventDefault();e.dataTransfer.dropEffect='move';}
+function tripListDrop(e,toIdx){
+  e.preventDefault();
+  if(_tripDragIdx===null||_tripDragIdx===toIdx){_tripDragIdx=null;return;}
+  const list=[...tripListItems()];
+  const [moved]=list.splice(_tripDragIdx,1);
+  list.splice(toIdx,0,moved);
+  S.tripData.tripList=list;
+  _tripDragIdx=null;
+  save().then(()=>{showToast('순서가 저장됐어요');renderTripList();});
+}
 function toAlpha(i){if(i<26)return String.fromCharCode(97+i);return toAlpha(Math.floor(i/26)-1)+String.fromCharCode(97+i%26);}
 function tripEtcItems(){return Array.isArray(S.tripData.etcList)?S.tripData.etcList.filter(x=>x!=null):[];}
 
@@ -3107,7 +3126,9 @@ function renderTripList(){
     } else {
       const gq=encodeURIComponent(item.위치||'');
       const noCoords=item.위치&&(!item.lat||!item.lon);
-      listItemsHtml+=`<div class="triplist-item">
+      const editMode=_tripListEditMode&&canSeeTrip();
+      listItemsHtml+=`<div class="triplist-item" ${editMode?`draggable="true" ondragstart="tripListDragStart(event,${i})" ondragover="tripListDragOver(event)" ondrop="tripListDrop(event,${i})" style="cursor:grab;"`:''}>
+        ${editMode?`<div style="color:#ccc;font-size:16px;padding:0 4px;cursor:grab;user-select:none;align-self:center;">⠿</div>`:''}
         <div class="triplist-num" style="${noCoords?'background:#f59e0b;':''}" title="${noCoords?'지도 좌표 없음':''}">
           ${noCoords?'⚠':i+1}
         </div>
@@ -3124,7 +3145,7 @@ function renderTripList(){
               : '<span style="font-size:11px;color:var(--text4);">—</span>'}
           </div>
         </div>
-        ${canSeeTrip()?`<div class="triplist-item-btns">
+        ${editMode?`<div class="triplist-item-btns">
           <button class="triplist-edit" onclick="tripListShowForm(${i})">✏</button>
           <button class="triplist-del" onclick="tripListDel(${i})">✕</button>
         </div>`:''}
@@ -3188,7 +3209,7 @@ function renderTripList(){
               </div>`
             : `<span class="triplist-fixed-empty">주소 미설정 — 편집 버튼으로 입력하세요</span>`}
         </div>
-        ${canEdit()?`<button class="triplist-fix-edit" onclick="tripFixedShowForm('${def.key}')">✏</button>`:''}
+        ${editModeActive?`<button class="triplist-fix-edit" onclick="tripFixedShowForm('${def.key}')">✏</button>`:''}
       </div>`;
     }
   }
@@ -3229,10 +3250,10 @@ function renderTripList(){
               :'<span style="font-size:11px;color:var(--text4);">—</span>'}
           </div>
         </div>
-        <div class="triplist-item-btns">
+        ${editModeActive?`<div class="triplist-item-btns">
           <button class="triplist-edit" onclick="tripEtcShowForm(${i})">✏</button>
           <button class="triplist-del" onclick="tripEtcDel(${i})">✕</button>
-        </div>
+        </div>`:''}
       </div>`;
     }
   });
@@ -3250,14 +3271,18 @@ function renderTripList(){
       </div>
     </div>`;
   }
-  if(canEdit()){
+  if(editModeActive){
     etcHtml+=`<button class="triplist-add-btn" style="background:#9ca3af;margin-top:4px;" onclick="tripEtcShowForm()">+ 기타 추가</button>`;
   }
 
+  const editModeActive=_tripListEditMode&&canSeeTrip();
   el.innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
       <div style="font-size:13px;font-weight:700;color:var(--text2);">출장 리스트</div>
-      ${canEdit()?`<button class="triplist-add-btn" onclick="tripListShowForm()">+ 추가</button>`:''}
+      <div style="display:flex;gap:8px;align-items:center;">
+        ${editModeActive?`<button class="triplist-add-btn" onclick="tripListShowForm()">+ 추가</button>`:''}
+        ${canSeeTrip()?`<button onclick="toggleTripListEditMode()" style="font-size:11px;padding:4px 12px;border-radius:8px;border:1px solid ${editModeActive?'var(--accent)':'var(--border2)'};background:${editModeActive?'var(--accent-dim)':'transparent'};color:${editModeActive?'var(--accent)':'var(--text3)'};cursor:pointer;font-weight:700;font-family:inherit;">${editModeActive?'✓ 편집 완료':'✏ 편집'}</button>`:''}
+      </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
       <div>${listItemsHtml}${fixedHtml}${etcHtml}</div>
