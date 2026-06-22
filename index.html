@@ -3106,6 +3106,7 @@ function tripDateFmt(d){
 function renderTripList(){
   const el=document.getElementById('triplistContent');
   if(!el||!canSeeTripList())return;
+  const editModeActive=_tripListEditMode&&canSeeTrip();
   const items=tripListItems();
   const formIdx=_tripListForm;
   let listItemsHtml='';
@@ -3126,9 +3127,8 @@ function renderTripList(){
     } else {
       const gq=encodeURIComponent(item.위치||'');
       const noCoords=item.위치&&(!item.lat||!item.lon);
-      const editMode=_tripListEditMode&&canSeeTrip();
-      listItemsHtml+=`<div class="triplist-item" ${editMode?`draggable="true" ondragstart="tripListDragStart(event,${i})" ondragover="tripListDragOver(event)" ondrop="tripListDrop(event,${i})" style="cursor:grab;"`:''}>
-        ${editMode?`<div style="color:#ccc;font-size:16px;padding:0 4px;cursor:grab;user-select:none;align-self:center;">⠿</div>`:''}
+      listItemsHtml+=`<div class="triplist-item" ${editModeActive?`draggable="true" ondragstart="tripListDragStart(event,${i})" ondragover="tripListDragOver(event)" ondrop="tripListDrop(event,${i})" style="cursor:grab;"`:''}>
+        ${editModeActive?`<div style="color:#ccc;font-size:16px;padding:0 4px;cursor:grab;user-select:none;align-self:center;">⠿</div>`:''}
         <div class="triplist-num" style="${noCoords?'background:#f59e0b;':''}" title="${noCoords?'지도 좌표 없음':''}">
           ${noCoords?'⚠':i+1}
         </div>
@@ -3275,7 +3275,6 @@ function renderTripList(){
     etcHtml+=`<button class="triplist-add-btn" style="background:#9ca3af;margin-top:4px;" onclick="tripEtcShowForm()">+ 기타 추가</button>`;
   }
 
-  const editModeActive=_tripListEditMode&&canSeeTrip();
   el.innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
       <div style="font-size:13px;font-weight:700;color:var(--text2);">출장 리스트</div>
