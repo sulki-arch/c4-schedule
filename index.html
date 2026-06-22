@@ -3053,6 +3053,12 @@ function initLeafletMap(items, fixedLocs={}, fixedDefs=[], etcItems=[]){
     else if(bounds.length>1)_tripLeafMap.fitBounds(bounds,{padding:[40,40]});
   });
 }
+function linkify(text){
+  if(!text)return'—';
+  const escaped=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const linked=escaped.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener" style="color:#4285f4;word-break:break-all;">$1</a>');
+  return linked.replace(/\n/g,'<br>');
+}
 function showToast(msg,duration=3000){
   let t=document.getElementById('_toast');
   if(!t){t=document.createElement('div');t.id='_toast';
@@ -3132,8 +3138,8 @@ function renderTripList(){
         </div>
         <div class="triplist-item-row">
           <div class="triplist-item-cell"><span class="triplist-item-label">항목</span><span class="triplist-item-tag">${item.항목||'—'}</span></div>
-          <div class="triplist-item-cell"><span class="triplist-item-label">내용</span><span class="triplist-item-desc" style="white-space:pre-line;">${item.내용||'—'}</span></div>
-          <div class="triplist-item-cell"><span class="triplist-item-label">참석자</span><span class="triplist-item-att" style="white-space:pre-line;">${item.참석자||'—'}</span></div>
+          <div class="triplist-item-cell"><span class="triplist-item-label">내용</span><span class="triplist-item-desc">${linkify(item.내용)}</span></div>
+          <div class="triplist-item-cell"><span class="triplist-item-label">참석자</span><span class="triplist-item-att">${linkify(item.참석자)}</span></div>
           <div class="triplist-item-cell"><span class="triplist-item-label">위치</span>
             ${item.위치
               ? `<div style="display:flex;align-items:center;gap:4px;">
@@ -3235,8 +3241,8 @@ function renderTripList(){
         <div class="triplist-etc-num" style="${noCoords?'background:#f59e0b;':''}">${noCoords?'⚠':letter}</div>
         <div class="triplist-etc-row">
           <div class="triplist-item-cell"><span class="triplist-item-label">항목</span><span class="triplist-item-tag">${item.항목||'—'}</span></div>
-          <div class="triplist-item-cell"><span class="triplist-item-label">내용</span><span class="triplist-item-desc" style="white-space:pre-line;">${item.내용||'—'}</span></div>
-          <div class="triplist-item-cell"><span class="triplist-item-label">참석자</span><span class="triplist-item-att" style="white-space:pre-line;">${item.참석자||'—'}</span></div>
+          <div class="triplist-item-cell"><span class="triplist-item-label">내용</span><span class="triplist-item-desc">${linkify(item.내용)}</span></div>
+          <div class="triplist-item-cell"><span class="triplist-item-label">참석자</span><span class="triplist-item-att">${linkify(item.참석자)}</span></div>
           <div class="triplist-item-cell"><span class="triplist-item-label">위치</span>
             ${item.위치
               ?`<div style="display:flex;align-items:center;gap:4px;">
