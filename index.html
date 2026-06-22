@@ -483,7 +483,7 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .tripmap-head{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);}
 .tripmap-title{font-size:12px;font-weight:700;color:var(--text2);}
 #tripMapDiv{width:100%;height:calc(100vh - 140px);min-height:300px;}
-.trip-map-num-marker{width:28px;height:28px;background:#9FC93C;border:2.5px solid #fff;border-radius:50%;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.35);cursor:pointer;}
+.trip-map-num-marker{width:28px;height:28px;background:#E8401C;border:2.5px solid #fff;border-radius:50%;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.35);cursor:pointer;}
 .trip-map-fix-marker{width:32px;height:32px;border:2.5px solid #fff;border-radius:50%;font-size:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.35);cursor:pointer;}
 .trip-map-etc-marker{width:24px;height:24px;background:#9ca3af;border:2px solid #fff;border-radius:50%;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.25);cursor:pointer;}
 /* ── FIXED LOCATIONS (숙소·오피스) ── */
@@ -504,7 +504,7 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 /* ── ETC LIST (기타 일정) ── */
 .triplist-etc-item{display:flex;gap:10px;align-items:flex-start;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;}
 .triplist-etc-num{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;min-width:24px;background:#9ca3af;color:#fff;border-radius:50%;font-size:10px;font-weight:700;margin-top:1px;flex-shrink:0;}
-.triplist-etc-row{display:grid;grid-template-columns:1fr 2fr 1.5fr;gap:12px;align-items:start;flex:1;}
+.triplist-etc-row{display:grid;grid-template-columns:1fr 2fr 1fr 1.5fr;gap:12px;align-items:start;flex:1;}
 .triplist-etc-loc{font-size:11px;color:#4285f4;text-decoration:underline;text-decoration-style:dotted;cursor:pointer;}
 .triplist-etc-loc:hover{color:#1a73e8;}
 /* ── TRIP EXPENSES ── */
@@ -3132,8 +3132,8 @@ function renderTripList(){
         </div>
         <div class="triplist-item-row">
           <div class="triplist-item-cell"><span class="triplist-item-label">항목</span><span class="triplist-item-tag">${item.항목||'—'}</span></div>
-          <div class="triplist-item-cell"><span class="triplist-item-label">내용</span><span class="triplist-item-desc">${item.내용||'—'}</span></div>
-          <div class="triplist-item-cell"><span class="triplist-item-label">참석자</span><span class="triplist-item-att">${item.참석자||'—'}</span></div>
+          <div class="triplist-item-cell"><span class="triplist-item-label">내용</span><span class="triplist-item-desc" style="white-space:pre-line;">${item.내용||'—'}</span></div>
+          <div class="triplist-item-cell"><span class="triplist-item-label">참석자</span><span class="triplist-item-att" style="white-space:pre-line;">${item.참석자||'—'}</span></div>
           <div class="triplist-item-cell"><span class="triplist-item-label">위치</span>
             ${item.위치
               ? `<div style="display:flex;align-items:center;gap:4px;">
@@ -3235,7 +3235,8 @@ function renderTripList(){
         <div class="triplist-etc-num" style="${noCoords?'background:#f59e0b;':''}">${noCoords?'⚠':letter}</div>
         <div class="triplist-etc-row">
           <div class="triplist-item-cell"><span class="triplist-item-label">항목</span><span class="triplist-item-tag">${item.항목||'—'}</span></div>
-          <div class="triplist-item-cell"><span class="triplist-item-label">내용</span><span class="triplist-item-desc">${item.내용||'—'}</span></div>
+          <div class="triplist-item-cell"><span class="triplist-item-label">내용</span><span class="triplist-item-desc" style="white-space:pre-line;">${item.내용||'—'}</span></div>
+          <div class="triplist-item-cell"><span class="triplist-item-label">참석자</span><span class="triplist-item-att" style="white-space:pre-line;">${item.참석자||'—'}</span></div>
           <div class="triplist-item-cell"><span class="triplist-item-label">위치</span>
             ${item.위치
               ?`<div style="display:flex;align-items:center;gap:4px;">
