@@ -484,6 +484,22 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
 .tripmap-title{font-size:12px;font-weight:700;color:var(--text2);}
 #tripMapDiv{width:100%;height:400px;}
 .trip-map-num-marker{width:28px;height:28px;background:#9FC93C;border:2.5px solid #fff;border-radius:50%;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.35);cursor:pointer;}
+.trip-map-fix-marker{width:32px;height:32px;border:2.5px solid #fff;border-radius:50%;font-size:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.35);cursor:pointer;}
+/* ── FIXED LOCATIONS (숙소·오피스) ── */
+.triplist-fixed-sep{display:flex;align-items:center;gap:8px;margin:12px 0 8px;font-size:9px;color:var(--text4);letter-spacing:.5px;text-transform:uppercase;}
+.triplist-fixed-sep::before,.triplist-fixed-sep::after{content:'';flex:1;height:1px;background:var(--border);}
+.triplist-fixed-item{display:flex;gap:10px;align-items:flex-start;background:#f9f9f8;border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;border-left:3px solid;}
+.triplist-fix-icon{width:28px;height:28px;min-width:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;margin-top:1px;}
+.triplist-fixed-body{flex:1;min-width:0;}
+.triplist-fixed-name{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:3px;}
+.triplist-fixed-loc{font-size:11px;color:#4285f4;text-decoration:underline;text-decoration-style:dotted;cursor:pointer;}
+.triplist-fixed-empty{font-size:11px;color:var(--text4);}
+.triplist-fix-edit{background:none;border:none;cursor:pointer;color:var(--text4);font-size:12px;padding:2px 4px;border-radius:4px;margin-left:auto;flex-shrink:0;}
+.triplist-fix-edit:hover{color:var(--accent);background:var(--accent-dim);}
+.triplist-fixed-form{border:1.5px dashed #888;border-radius:9px;padding:12px;margin-bottom:8px;background:#f5f5f3;}
+.triplist-fixed-form label{font-size:9px;color:var(--text4);letter-spacing:.4px;text-transform:uppercase;display:block;margin-bottom:3px;}
+.triplist-fixed-form input{font-size:11px;padding:5px 8px;border:1px solid var(--border2);border-radius:6px;background:#fff;color:var(--text);width:100%;outline:none;font-family:inherit;box-sizing:border-box;margin-bottom:8px;}
+.triplist-fixed-form input:focus{border-color:var(--accent);}
 /* ── TRIP EXPENSES ── */
 .trip-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:20px;}
 .trip-kpi{background:var(--bg3);border-radius:10px;padding:13px 15px;}
@@ -2922,6 +2938,7 @@ function tripRows(id){return Array.isArray(S.tripData[id])?S.tripData[id].filter
 // ── 출장 리스트 ──
 function tripListItems(){return Array.isArray(S.tripData.tripList)?S.tripData.tripList.filter(x=>x!=null):[];}
 let _tripListForm=null;
+let _tripListFixedForm=null;
 
 // ── Leaflet 지도 (CARTO Voyager 타일) ──
 let _tripLeafMap=null;
@@ -2934,7 +2951,7 @@ function ensureLeaflet(cb){
   s.src='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
   s.onload=cb;document.head.appendChild(s);
 }
-function initLeafletMap(items){
+function initLeafletMap(items, fixedLocs={}, fixedDefs=[]){
   ensureLeaflet(()=>{
     const el=document.getElementById('tripMapDiv');if(!el)return;
     if(_tripLeafMap){_tripLeafMap.remove();_tripLeafMap=null;}
@@ -2945,6 +2962,7 @@ function initLeafletMap(items){
       subdomains:'abcd',maxZoom:19
     }).addTo(_tripLeafMap);
     const bounds=[];
+    // 번호 마커 (출장 항목)
     items.forEach((item,i)=>{
       if(!item.lat||!item.lon)return;
       const num=i+1;
@@ -2963,6 +2981,24 @@ function initLeafletMap(items){
       L.marker([item.lat,item.lon],{icon}).bindPopup(popup).addTo(_tripLeafMap);
       bounds.push([item.lat,item.lon]);
     });
+    // 아이콘 마커 (고정 위치: 숙소·오피스)
+    for(const def of fixedDefs){
+      const loc=fixedLocs[def.key]||{};
+      if(!loc.lat||!loc.lon)continue;
+      const icon=L.divIcon({
+        html:`<div class="trip-map-fix-marker" style="background:${def.color};">${def.icon}</div>`,
+        className:'',iconSize:[32,32],iconAnchor:[16,16],popupAnchor:[0,-20]
+      });
+      const gq=encodeURIComponent(loc.위치||'');
+      const popup=`<div style="font-family:'Segoe UI',sans-serif;min-width:140px;max-width:200px;line-height:1.6;">
+        <div style="font-weight:700;font-size:13px;margin-bottom:4px;">${def.icon} ${def.label}${loc.이름?` — ${loc.이름}`:''}</div>
+        ${loc.위치?`<a href="https://maps.google.com/maps?q=${gq}" target="_blank"
+          style="font-size:12px;color:#4285f4;text-decoration:none;">
+          📍 ${loc.위치}&nbsp;<span style="font-size:10px;">→ 구글맵 열기</span></a>`:''}
+      </div>`;
+      L.marker([loc.lat,loc.lon],{icon}).bindPopup(popup).addTo(_tripLeafMap);
+      bounds.push([loc.lat,loc.lon]);
+    }
     if(bounds.length===1)_tripLeafMap.setView(bounds[0],13);
     else if(bounds.length>1)_tripLeafMap.fitBounds(bounds,{padding:[40,40]});
   });
@@ -3070,13 +3106,58 @@ function renderTripList(){
   if(!items.length&&formIdx===null){
     listItemsHtml=`<div style="color:var(--text4);font-size:12px;text-align:center;padding:32px 0;">+ 추가 버튼으로 출장을 기록하세요</div>`;
   }
+
+  // ── 고정 위치 (숙소·오피스) ──
+  const FIXED_DEFS=[
+    {key:'숙소', icon:'🏨', color:'#6366f1', bg:'rgba(99,102,241,.1)', label:'숙소'},
+    {key:'오피스', icon:'🏢', color:'#f97316', bg:'rgba(249,115,22,.1)', label:'오피스'}
+  ];
+  const fixedLocs=S.tripData.fixedLocs||{};
+  const fixedFormKey=_tripListFixedForm;
+  let fixedHtml=`<div class="triplist-fixed-sep">고정 위치</div>`;
+  for(const def of FIXED_DEFS){
+    const loc=fixedLocs[def.key]||{};
+    const gq=encodeURIComponent(loc.위치||'');
+    const noCoords=loc.위치&&(!loc.lat||!loc.lon);
+    if(fixedFormKey===def.key){
+      fixedHtml+=`<div class="triplist-fixed-form">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+          <span style="font-size:18px;">${def.icon}</span>
+          <span style="font-size:12px;font-weight:700;color:${def.color};">${def.label} 설정</span>
+        </div>
+        <label>이름 (선택)</label>
+        <input id="tf-이름-${def.key}" placeholder="예: 더 샤드 오피스" value="${(loc.이름||'').replace(/"/g,'&quot;')}">
+        <label>📍 주소 · 지명</label>
+        <input id="tf-위치-${def.key}" placeholder="예: The Shard, London" value="${(loc.위치||'').replace(/"/g,'&quot;')}">
+        <div class="triplist-form-btns">
+          <button class="triplist-save" onclick="tripFixedSave('${def.key}')">저장</button>
+          <button class="triplist-cancel" onclick="tripFixedHideForm()">취소</button>
+        </div>
+      </div>`;
+    } else {
+      fixedHtml+=`<div class="triplist-fixed-item" style="border-left-color:${def.color};">
+        <div class="triplist-fix-icon" style="background:${def.bg};">${def.icon}</div>
+        <div class="triplist-fixed-body">
+          <div class="triplist-fixed-name" style="color:${def.color};">${def.label}${loc.이름?` — ${loc.이름}`:''}</div>
+          ${loc.위치
+            ? `<div style="display:flex;align-items:center;gap:4px;">
+                <a class="triplist-fixed-loc" href="https://maps.google.com/maps?q=${gq}" target="_blank">📍 ${loc.위치}</a>
+                ${noCoords?`<button onclick="tripFixedReGeocode('${def.key}')" style="background:#f59e0b;color:#fff;border:none;border-radius:4px;font-size:9px;padding:1px 5px;cursor:pointer;">재검색</button>`:''}
+              </div>`
+            : `<span class="triplist-fixed-empty">주소 미설정 — 편집 버튼으로 입력하세요</span>`}
+        </div>
+        ${canEdit()?`<button class="triplist-fix-edit" onclick="tripFixedShowForm('${def.key}')">✏</button>`:''}
+      </div>`;
+    }
+  }
+
   el.innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
       <div style="font-size:13px;font-weight:700;color:var(--text2);">출장 리스트</div>
       ${canEdit()?`<button class="triplist-add-btn" onclick="tripListShowForm()">+ 추가</button>`:''}
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
-      <div>${listItemsHtml}</div>
+      <div>${listItemsHtml}${fixedHtml}</div>
       <div class="tripmap-card">
         <div class="tripmap-head">
           <span class="tripmap-title">📍 지도</span>
@@ -3084,7 +3165,7 @@ function renderTripList(){
         <div id="tripMapDiv"></div>
       </div>
     </div>`;
-  initLeafletMap(items);
+  initLeafletMap(items, fixedLocs, FIXED_DEFS);
 }
 
 // renderTripList에서 save 후 재렌더링
@@ -3121,8 +3202,39 @@ function tripListDel(idx){
   S.tripData.tripList=list;
   save().then(()=>renderTripList());
 }
-function tripListShowForm(idx=null){_tripListForm=(idx===null?'new':idx);renderTripList();}
+function tripListShowForm(idx=null){_tripListForm=(idx===null?'new':idx);_tripListFixedForm=null;renderTripList();}
 function tripListHideForm(){_tripListForm=null;renderTripList();}
+// ── 고정 위치 (숙소·오피스) 함수 ──
+function tripFixedShowForm(key){_tripListFixedForm=key;_tripListForm=null;renderTripList();}
+function tripFixedHideForm(){_tripListFixedForm=null;renderTripList();}
+async function tripFixedSave(key){
+  const 이름=(document.getElementById(`tf-이름-${key}`)?.value||'').trim();
+  const 위치=(document.getElementById(`tf-위치-${key}`)?.value||'').trim();
+  if(!S.tripData.fixedLocs)S.tripData.fixedLocs={};
+  const existing=S.tripData.fixedLocs[key]||{};
+  const loc={...existing,이름,위치};
+  if(위치&&위치!==(existing.위치||'')){
+    const btn=document.querySelector('.triplist-save');
+    if(btn){btn.textContent='📍 좌표 검색 중...';btn.disabled=true;}
+    const coords=await tripGeocode(위치);
+    if(coords){loc.lat=coords.lat;loc.lon=coords.lon;showToast('✅ 지도에 표시됩니다!');}
+    else{delete loc.lat;delete loc.lon;showToast('⚠️ 주소를 찾지 못했어요. 영문 주소로 입력해보세요.');}
+  } else if(!위치){delete loc.lat;delete loc.lon;}
+  S.tripData.fixedLocs[key]=loc;
+  _tripListFixedForm=null;
+  save().then(()=>renderTripList());
+}
+async function tripFixedReGeocode(key){
+  if(!S.tripData.fixedLocs||!S.tripData.fixedLocs[key])return;
+  const loc=S.tripData.fixedLocs[key];
+  if(!loc.위치)return;
+  showToast('📍 좌표 검색 중...',1500);
+  const coords=await tripGeocode(loc.위치);
+  if(coords){
+    S.tripData.fixedLocs[key]={...loc,lat:coords.lat,lon:coords.lon};
+    save().then(()=>{showToast('✅ 지도에 표시됐어요!');renderTripList();});
+  } else {showToast('❌ 주소를 찾을 수 없어요.');}
+}
 
 function renderTrip(){
   const el=document.getElementById('tripContent');
