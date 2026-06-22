@@ -2967,14 +2967,40 @@ function initLeafletMap(items){
     else if(bounds.length>1)_tripLeafMap.fitBounds(bounds,{padding:[40,40]});
   });
 }
+function showToast(msg,duration=3000){
+  let t=document.getElementById('_toast');
+  if(!t){t=document.createElement('div');t.id='_toast';
+    t.style.cssText='position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#222;color:#fff;font-size:12px;padding:9px 18px;border-radius:20px;z-index:9999;pointer-events:none;transition:opacity .3s;max-width:340px;text-align:center;';
+    document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';
+  clearTimeout(t._tid);t._tid=setTimeout(()=>t.style.opacity='0',duration);
+}
 async function tripGeocode(address){
   if(!address)return null;
+  // 한국어·영어 두 번 시도
+  const queries=[address];
   try{
-    const r=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1&accept-language=ko`);
-    const d=await r.json();
-    if(d&&d[0])return{lat:parseFloat(d[0].lat),lon:parseFloat(d[0].lon)};
+    for(const q of queries){
+      const r=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&accept-language=ko,en`);
+      const d=await r.json();
+      if(d&&d[0])return{lat:parseFloat(d[0].lat),lon:parseFloat(d[0].lon)};
+    }
   }catch(e){}
   return null;
+}
+async function tripReGeocode(idx){
+  const list=tripListItems();
+  const item=list[idx];
+  if(!item||!item.위치)return;
+  showToast('📍 좌표 검색 중...',1500);
+  const coords=await tripGeocode(item.위치);
+  if(coords){
+    list[idx]={...item,lat:coords.lat,lon:coords.lon};
+    S.tripData.tripList=list;
+    save().then(()=>{showToast('✅ 지도에 표시됐어요!');renderTripList();});
+  } else {
+    showToast('❌ 주소를 찾을 수 없어요. 영문 주소나 영문 도시명으로 입력해보세요.');
+  }
 }
 function tripSpent(id){return tripRows(id).reduce((s,r)=>s+(r.amt||0),0);}
 function tripTotalSpent(){return TRIP_BUDGET.reduce((s,c)=>s+tripSpent(c.id),0);}
@@ -3002,13 +3028,23 @@ function renderTripList(){
       </div>`;
     } else {
       const gq=encodeURIComponent(item.위치||'');
+      const noCoords=item.위치&&(!item.lat||!item.lon);
       listItemsHtml+=`<div class="triplist-item">
-        <div class="triplist-num">${i+1}</div>
+        <div class="triplist-num" style="${noCoords?'background:#f59e0b;':''}" title="${noCoords?'지도 좌표 없음':''}">
+          ${noCoords?'⚠':i+1}
+        </div>
         <div class="triplist-item-row">
           <div class="triplist-item-cell"><span class="triplist-item-label">항목</span><span class="triplist-item-tag">${item.항목||'—'}</span></div>
           <div class="triplist-item-cell"><span class="triplist-item-label">내용</span><span class="triplist-item-desc">${item.내용||'—'}</span></div>
           <div class="triplist-item-cell"><span class="triplist-item-label">참석자</span><span class="triplist-item-att">${item.참석자||'—'}</span></div>
-          <div class="triplist-item-cell"><span class="triplist-item-label">위치</span>${item.위치?`<a class="triplist-item-loc" href="https://maps.google.com/maps?q=${gq}" target="_blank">📍 ${item.위치}</a>`:'<span style="font-size:11px;color:var(--text4);">—</span>'}</div>
+          <div class="triplist-item-cell"><span class="triplist-item-label">위치</span>
+            ${item.위치
+              ? `<div style="display:flex;align-items:center;gap:4px;">
+                   <a class="triplist-item-loc" href="https://maps.google.com/maps?q=${gq}" target="_blank">📍 ${item.위치}</a>
+                   ${noCoords?`<button onclick="tripReGeocode(${i})" title="좌표 재검색" style="background:#f59e0b;color:#fff;border:none;border-radius:4px;font-size:9px;padding:1px 5px;cursor:pointer;">재검색</button>`:''}
+                 </div>`
+              : '<span style="font-size:11px;color:var(--text4);">—</span>'}
+          </div>
         </div>
         <div class="triplist-item-btns">
           <button class="triplist-edit" onclick="tripListShowForm(${i})">✏</button>
@@ -3063,9 +3099,16 @@ async function tripListSave(idx){
   const item={...existing,항목,내용,참석자,위치};
   // 주소 바뀌었으면 지오코딩
   if(위치&&위치!==(existing.위치||'')){
+    const btn=document.querySelector('.triplist-save');
+    if(btn){btn.textContent='📍 좌표 검색 중...';btn.disabled=true;}
     const coords=await tripGeocode(위치);
-    if(coords){item.lat=coords.lat;item.lon=coords.lon;}
-    else{delete item.lat;delete item.lon;}
+    if(coords){
+      item.lat=coords.lat;item.lon=coords.lon;
+      showToast('✅ 지도에 표시됩니다!');
+    } else {
+      delete item.lat;delete item.lon;
+      showToast('⚠️ 주소 좌표를 찾지 못했어요. 항목의 ⚠️ 버튼으로 재시도하거나 영문 주소로 바꿔보세요.');
+    }
   } else if(!위치){delete item.lat;delete item.lon;}
   if(idx==='new'||idx===null){list.push(item);}
   else{list[idx]=item;}
