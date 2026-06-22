@@ -3398,12 +3398,17 @@ function renderTrip(){
   <div class="trip-cat-grid">`;
   TRIP_BUDGET.forEach(c=>{
     const rows=tripRows(c.id);
+    // 날짜 오름차순 정렬 (원본 인덱스 보존)
+    const sortedRows=rows
+      .map((r,i)=>({...r,_origIdx:i}))
+      .sort((a,b)=>{const da=a.date||'';const db=b.date||'';return da<db?-1:da>db?1:0;});
     const s=tripSpent(c.id);
     const rem2=c.budget-s;
     const p=c.budget>0?Math.min(100,s/c.budget*100):0;
     const bc=p>=100?'trip-over':p>=85?'trip-warn':'trip-ok';
-    const rowsHtml=rows.length
-      ? rows.map((r,i)=>{
+    const rowsHtml=sortedRows.length
+      ? sortedRows.map((r)=>{
+          const i=r._origIdx;
           const ekey=`${c.id}-${i}`;
           if(_tripEditKey===ekey){
             const safeDate=(r.date||'').replace(/"/g,'&quot;');
