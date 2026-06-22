@@ -1267,9 +1267,8 @@ function performLogin(acc,animate){
   }
   // 계정·카테고리 관리는 관리자만
   if(acc.role==='admin'){document.querySelectorAll('.admin-only-strict').forEach(el=>el.style.display='block');}
-  // 출장 리스트 탭: 전체 공개 / 출장 비용 탭: 관리자·크래프톤만
-  document.querySelectorAll('[data-tab="triplist"]').forEach(el=>el.style.display=canSeeTripList()?'':'none');
-  document.querySelectorAll('[data-tab="trip"]').forEach(el=>el.style.display=canSeeTrip()?'':'none');
+  // 출장 비용 탭: 관리자 또는 크래프톤 계정만 표시
+  document.querySelectorAll('.trip-tab-pill').forEach(el=>el.style.display=canSeeTrip()?'':'none');
   document.getElementById('userText').textContent=acc.name||acc.id;
   const d=TODAY;const days=['SUN','MON','TUE','WED','THU','FRI','SAT'];
   document.getElementById('todayBadge').textContent=`Today '${String(d.getFullYear()).slice(2)}.${p2(d.getMonth()+1)}.${p2(d.getDate())} ${days[d.getDay()]}`;
@@ -2931,9 +2930,6 @@ function canSeeTrip(){
   if(S.user.cat==='크래프톤')return true;
   return false;
 }
-function canSeeTripList(){
-  return !!S.user; // 로그인한 모든 사용자
-}
 // 톤온톤 팔레트: #9FC93C(진) ~ #E4F7BA(연), 7단계 균등 분배
 const TRIP_PALETTE=['#9FC93C','#ABD151','#B6D966','#C2E17B','#CDE890','#D9F0A5','#E4F7BA'];
 const TRIP_BUDGET=[
@@ -2952,25 +2948,6 @@ function tripListItems(){return Array.isArray(S.tripData.tripList)?S.tripData.tr
 let _tripListForm=null;
 let _tripListFixedForm=null;
 let _tripListEtcForm=null;
-let _tripListEditMode=false;
-let _tripDragIdx=null;
-function toggleTripListEditMode(){
-  _tripListEditMode=!_tripListEditMode;
-  _tripListForm=null;_tripListEtcForm=null;
-  renderTripList();
-}
-function tripListDragStart(e,idx){_tripDragIdx=idx;e.dataTransfer.effectAllowed='move';}
-function tripListDragOver(e){e.preventDefault();e.dataTransfer.dropEffect='move';}
-function tripListDrop(e,toIdx){
-  e.preventDefault();
-  if(_tripDragIdx===null||_tripDragIdx===toIdx){_tripDragIdx=null;return;}
-  const list=[...tripListItems()];
-  const [moved]=list.splice(_tripDragIdx,1);
-  list.splice(toIdx,0,moved);
-  S.tripData.tripList=list;
-  _tripDragIdx=null;
-  save().then(()=>{showToast('순서가 저장됐어요');renderTripList();});
-}
 function toAlpha(i){if(i<26)return String.fromCharCode(97+i);return toAlpha(Math.floor(i/26)-1)+String.fromCharCode(97+i%26);}
 function tripEtcItems(){return Array.isArray(S.tripData.etcList)?S.tripData.etcList.filter(x=>x!=null):[];}
 
@@ -3105,8 +3082,7 @@ function tripDateFmt(d){
 
 function renderTripList(){
   const el=document.getElementById('triplistContent');
-  if(!el||!canSeeTripList())return;
-  const editModeActive=_tripListEditMode&&canSeeTrip();
+  if(!el||!canSeeTrip())return;
   const items=tripListItems();
   const formIdx=_tripListForm;
   let listItemsHtml='';
@@ -3127,8 +3103,7 @@ function renderTripList(){
     } else {
       const gq=encodeURIComponent(item.위치||'');
       const noCoords=item.위치&&(!item.lat||!item.lon);
-      listItemsHtml+=`<div class="triplist-item" ${editModeActive?`draggable="true" ondragstart="tripListDragStart(event,${i})" ondragover="tripListDragOver(event)" ondrop="tripListDrop(event,${i})" style="cursor:grab;"`:''}>
-        ${editModeActive?`<div style="color:#ccc;font-size:16px;padding:0 4px;cursor:grab;user-select:none;align-self:center;">⠿</div>`:''}
+      listItemsHtml+=`<div class="triplist-item">
         <div class="triplist-num" style="${noCoords?'background:#f59e0b;':''}" title="${noCoords?'지도 좌표 없음':''}">
           ${noCoords?'⚠':i+1}
         </div>
@@ -3145,10 +3120,10 @@ function renderTripList(){
               : '<span style="font-size:11px;color:var(--text4);">—</span>'}
           </div>
         </div>
-        ${editMode?`<div class="triplist-item-btns">
+        <div class="triplist-item-btns">
           <button class="triplist-edit" onclick="tripListShowForm(${i})">✏</button>
           <button class="triplist-del" onclick="tripListDel(${i})">✕</button>
-        </div>`:''}
+        </div>
       </div>`;
     }
   });
@@ -3209,7 +3184,7 @@ function renderTripList(){
               </div>`
             : `<span class="triplist-fixed-empty">주소 미설정 — 편집 버튼으로 입력하세요</span>`}
         </div>
-        ${editModeActive?`<button class="triplist-fix-edit" onclick="tripFixedShowForm('${def.key}')">✏</button>`:''}
+        ${canEdit()?`<button class="triplist-fix-edit" onclick="tripFixedShowForm('${def.key}')">✏</button>`:''}
       </div>`;
     }
   }
@@ -3250,10 +3225,10 @@ function renderTripList(){
               :'<span style="font-size:11px;color:var(--text4);">—</span>'}
           </div>
         </div>
-        ${editModeActive?`<div class="triplist-item-btns">
+        <div class="triplist-item-btns">
           <button class="triplist-edit" onclick="tripEtcShowForm(${i})">✏</button>
           <button class="triplist-del" onclick="tripEtcDel(${i})">✕</button>
-        </div>`:''}
+        </div>
       </div>`;
     }
   });
@@ -3271,20 +3246,14 @@ function renderTripList(){
       </div>
     </div>`;
   }
-  if(editModeActive){
+  if(canEdit()){
     etcHtml+=`<button class="triplist-add-btn" style="background:#9ca3af;margin-top:4px;" onclick="tripEtcShowForm()">+ 기타 추가</button>`;
   }
 
-  const _editBtnStyle=editModeActive
-    ? 'font-size:11px;padding:4px 12px;border-radius:8px;border:1px solid var(--accent);background:var(--accent-dim);color:var(--accent);cursor:pointer;font-weight:700;font-family:inherit;'
-    : 'font-size:11px;padding:4px 12px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;font-weight:700;font-family:inherit;';
-  const _editBtnLabel=editModeActive?'✓ 편집 완료':'✏ 편집';
-  const _editBtnHtml=canSeeTrip()?`<button onclick="toggleTripListEditMode()" style="${_editBtnStyle}">${_editBtnLabel}</button>`:'';
-  const _addBtnHtml=editModeActive?`<button class="triplist-add-btn" onclick="tripListShowForm()">+ 추가</button>`:'';
   el.innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
       <div style="font-size:13px;font-weight:700;color:var(--text2);">출장 리스트</div>
-      <div style="display:flex;gap:8px;align-items:center;">${_addBtnHtml}${_editBtnHtml}</div>
+      ${canEdit()?`<button class="triplist-add-btn" onclick="tripListShowForm()">+ 추가</button>`:''}
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
       <div>${listItemsHtml}${fixedHtml}${etcHtml}</div>
