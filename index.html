@@ -3070,6 +3070,14 @@ async function tripReGeocode(idx){
 function tripSpent(id){return tripRows(id).reduce((s,r)=>s+(r.amt||0),0);}
 function tripTotalSpent(){return TRIP_BUDGET.reduce((s,c)=>s+tripSpent(c.id),0);}
 function tripFmt(v){return Math.round(v).toLocaleString('ko-KR');}
+function tripDateFmt(d){
+  // 260622 → 26.06.22 / 20260622 → 26.06.22 / 그 외는 그대로
+  if(!d||d==='—')return d||'—';
+  const s=String(d).replace(/\D/g,'');
+  if(s.length===6)return`${s.slice(0,2)}.${s.slice(2,4)}.${s.slice(4,6)}`;
+  if(s.length===8)return`${s.slice(2,4)}.${s.slice(4,6)}.${s.slice(6,8)}`;
+  return d;
+}
 
 function renderTripList(){
   const el=document.getElementById('triplistContent');
@@ -3415,7 +3423,7 @@ function renderTrip(){
             const safeDesc=(r.desc||'').replace(/"/g,'&quot;');
             const safePayer=(r.payer||'').replace(/"/g,'&quot;');
             return`<tr class="editing">
-              <td><input type="text" id="te-d-${ekey}" value="${safeDate}" placeholder="날짜"></td>
+              <td><input type="text" id="te-d-${ekey}" value="${safeDate}" placeholder="예: 260622"></td>
               <td><input type="text" id="te-t-${ekey}" value="${safeDesc}" placeholder="내용"></td>
               <td><input type="text" id="te-p-${ekey}" value="${safePayer}" placeholder="결제자"></td>
               <td><input type="number" id="te-a-${ekey}" value="${r.amt||0}" step="1000"></td>
@@ -3423,7 +3431,7 @@ function renderTrip(){
             </tr>`;
           }
           return`<tr>
-            <td style="color:var(--text3);white-space:nowrap;">${r.date||'—'}</td>
+            <td style="color:var(--text3);white-space:nowrap;">${tripDateFmt(r.date)}</td>
             <td>${r.desc||''}</td>
             <td style="color:var(--text3);">${r.payer||''}</td>
             <td class="trip-td-num">${tripFmt(r.amt||0)}원</td>
@@ -3456,7 +3464,7 @@ function renderTrip(){
         <tbody>${rowsHtml}</tbody>
       </table>
       <div class="trip-add-wrap">
-        <input type="text" id="td-${c.id}" placeholder="날짜">
+        <input type="text" id="td-${c.id}" placeholder="예: 260622">
         <input type="text" id="tt-${c.id}" placeholder="내용">
         <input type="text" id="tp-${c.id}" placeholder="결제자" style="flex:0.7;">
         <input type="number" id="ta-${c.id}" placeholder="금액" step="1000">
