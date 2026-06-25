@@ -704,7 +704,8 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
         <button class="tab-pill" onclick="switchTab('calendar',this)" data-tab="calendar">월간 일정</button>
         <button class="tab-pill" onclick="switchTab('weekly',this)" data-tab="weekly">주간 일정</button>
         <button class="tab-pill trip-tab-pill" onclick="switchTab('triplist',this)" data-tab="triplist" style="display:none;">출장 리스트</button>
-        <button class="tab-pill trip-tab-pill" onclick="switchTab('trip',this)" data-tab="trip" style="display:none;">출장 비용</button>
+        <button class="tab-pill trip-tab-pill" onclick="switchTab('trip',this)" data-tab="trip" style="display:none;">런던 출장 비용</button>
+        <button class="tab-pill trip-tab-pill" onclick="switchTab('venice',this)" data-tab="venice" style="display:none;">베니스 출장 비용</button>
       </div>
       <div class="tabs-right">
         <span class="perm-hint admin-only" id="permHint">관리자 · 한미글로벌 계정에서 직접 편집할 수 있습니다</span>
@@ -786,6 +787,13 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif;backgroun
     <div id="tripTab" class="tab-content">
       <div class="cw">
         <div id="tripContent"></div>
+      </div>
+    </div>
+
+    <!-- VENICE EXPENSES -->
+    <div id="veniceTab" class="tab-content">
+      <div class="cw">
+        <div id="veniceContent"></div>
       </div>
     </div>
 
@@ -1076,6 +1084,7 @@ function save(){
     weeklyEvents: S.weeklyEvents||[],
     wevPalette: S.wevPalette||[],
     tripData: S.tripData||{},
+    veniceData: S.veniceData||{},
     overview: S.overview||{}
   };
   return db.ref(DB_REF).set(data)
@@ -1111,6 +1120,7 @@ function applyFirebaseData(data){
     S.wevPalette = (fbPalette && fbPalette.length) ? fbPalette : [];
     // tripData: Firebase 우선, 없으면 빈 객체
     S.tripData = (data.tripData && typeof data.tripData==='object') ? data.tripData : {};
+    S.veniceData = (data.veniceData && typeof data.veniceData==='object') ? data.veniceData : {};
     // overview: Power Automate가 OneDrive→Firebase로 자동 업데이트
     S.overview = (data.overview && typeof data.overview==='object') ? data.overview : {};
 
@@ -1141,7 +1151,7 @@ function arr(v){
   return Object.values(v).filter(x=>x!=null);
 }
 // 전체 초기화 (최초 앱 시작 또는 Firebase 데이터 없을 때만 사용)
-function reset(){S.cats=jc(DC);S.accounts=jc(DA);S.phases=jc(DP);S.milestones=jc(DM);S.events=jc(DEV);S.lastImport=null;S.clusterCells={};S.weeklyEvents=[];S.wevPalette=[];S.tripData={};}
+function reset(){S.cats=jc(DC);S.accounts=jc(DA);S.phases=jc(DP);S.milestones=jc(DM);S.events=jc(DEV);S.lastImport=null;S.clusterCells={};S.weeklyEvents=[];S.wevPalette=[];S.tripData={};S.veniceData={};}
 
 // 일정 스케줄만 초기화 — 사용자 직접 입력 데이터(events, clusterCells)는 보존
 function resetScheduleOnly(){
@@ -1274,6 +1284,7 @@ function performLogin(acc,animate){
   // 출장 리스트: 전체 공개 / 출장 비용: 관리자·크래프톤만
   document.querySelector('.tab-pill[data-tab="triplist"]').style.display='';
   document.querySelector('.tab-pill[data-tab="trip"]').style.display=canSeeTrip()?'':'none';
+  document.querySelector('.tab-pill[data-tab="venice"]').style.display=canSeeTrip()?'':'none';
   document.getElementById('userText').textContent=acc.name||acc.id;
   const d=TODAY;const days=['SUN','MON','TUE','WED','THU','FRI','SAT'];
   document.getElementById('todayBadge').textContent=`Today '${String(d.getFullYear()).slice(2)}.${p2(d.getMonth()+1)}.${p2(d.getDate())} ${days[d.getDay()]}`;
@@ -2435,6 +2446,7 @@ function switchTab(id,el){
   if(id==='calendar')renderCalendar();
   if(id==='weekly')renderWeekly();
   if(id==='trip')renderTrip();
+  if(id==='venice')renderVeniceTrip();
   if(id==='triplist')renderTripList();
   if(id==='settings')renderSettings();
 }
@@ -2947,6 +2959,20 @@ const TRIP_BUDGET=[
   {id:'misc', name:'예비비',    budget:6816730 },
 ].map((c,i)=>({...c, color:TRIP_PALETTE[i]}));
 const TRIP_TOTAL=72727990;
+// ═══ VENICE EXPENSES ═══
+const VENICE_BUDGET=[
+  {id:'air',  name:'항공 운임', budget:9482700},
+  {id:'stay', name:'숙박비',    budget:4992000},
+  {id:'move', name:'교통비',    budget:1170000},
+  {id:'food', name:'식비',      budget:1440000},
+  {id:'roam', name:'로밍비',    budget:360000 },
+  {id:'wash', name:'세탁비',    budget:180000 },
+  {id:'misc', name:'예비비',    budget:301680 },
+].map((c,i)=>({...c, color:TRIP_PALETTE[i]}));
+const VENICE_TOTAL=17926380;
+function veniceRows(id){return Array.isArray(S.veniceData[id])?S.veniceData[id].filter(x=>x!=null):[];}
+function veniceSpent(id){return veniceRows(id).reduce((s,r)=>s+(r.amt||0),0);}
+function veniceTotalSpent(){return VENICE_BUDGET.reduce((s,c)=>s+veniceSpent(c.id),0);}
 function tripRows(id){return Array.isArray(S.tripData[id])?S.tripData[id].filter(x=>x!=null):[];}
 // ── 출장 리스트 ──
 function tripListItems(){return Array.isArray(S.tripData.tripList)?S.tripData.tripList.filter(x=>x!=null):[];}
@@ -3517,6 +3543,111 @@ function renderTrip(){
   html+=`</div></div>`; // trip-cat-grid 닫기 + 외부 div 닫기
   el.innerHTML=html;
 }
+function renderVeniceTrip(){
+  const el=document.getElementById('veniceContent');
+  if(!el||!canSeeTrip())return;
+  const sp=veniceTotalSpent();
+  const rem=VENICE_TOTAL-sp;
+  const pct=sp/VENICE_TOTAL*100;
+  const remPctTotal=Math.max(0,100-pct);
+
+  // ── 1. KPI 카드 4개
+  let html=`<div><div class="trip-summary">
+    <div class="trip-kpi"><div class="trip-kpi-lbl">총 예산</div><div class="trip-kpi-val">${tripFmt(VENICE_TOTAL)}</div><div class="trip-kpi-sub">원</div></div>
+    <div class="trip-kpi"><div class="trip-kpi-lbl">집행 금액</div><div class="trip-kpi-val" style="color:var(--text3);">${tripFmt(sp)}</div><div class="trip-kpi-sub">원</div></div>
+    <div class="trip-kpi" style="border:1px solid #C2E17B;"><div class="trip-kpi-lbl">잔여 예산</div><div class="trip-kpi-val" style="color:${rem<0?'var(--accent)':'#5a7a00'};">${tripFmt(rem)}</div><div class="trip-kpi-sub">원</div></div>
+    <div class="trip-kpi"><div class="trip-kpi-lbl">소진율</div><div class="trip-kpi-val">${pct.toFixed(1)}%</div><div class="trip-kpi-sub" style="margin-top:4px;"><div style="height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;"><div style="width:${remPctTotal}%;height:100%;background:#9FC93C;border-radius:2px;"></div></div></div></div>
+  </div>`;
+
+  // ── 2. 항목별 소진 현황
+  html+=`<div class="trip-cat-card" style="margin-bottom:16px;">
+    <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;">항목별 소진 현황</div>`;
+  VENICE_BUDGET.forEach(c=>{
+    const s=veniceSpent(c.id);
+    const p=c.budget>0?Math.min(100,s/c.budget*100):0;
+    const bc=p>=100?'trip-over':p>=85?'trip-warn':'trip-ok';
+    html+=`<div class="trip-brow">
+      <span class="trip-brow-lbl">${c.name}</span>
+      <div style="height:5px;background:var(--bg3);border-radius:4px;overflow:hidden;"><div style="width:${p}%;height:100%;background:${c.color};border-radius:4px;"></div></div>
+      <div class="trip-brow-num">${tripFmt(s)}원<span class="trip-badge ${bc}">${Math.round(p)}%</span></div>
+    </div>`;
+  });
+  html+=`</div>`;
+
+  // ── 3. 항목별 지출 내역
+  html+=`<div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">항목별 지출 내역</div>
+  <div class="trip-cat-grid">`;
+  VENICE_BUDGET.forEach(c=>{
+    const rows=veniceRows(c.id);
+    // 날짜 오름차순 정렬 (원본 인덱스 보존)
+    const sortedRows=rows
+      .map((r,i)=>({...r,_origIdx:i}))
+      .sort((a,b)=>{const da=a.date||'';const db=b.date||'';return da<db?-1:da>db?1:0;});
+    const s=veniceSpent(c.id);
+    const rem2=c.budget-s;
+    const p=c.budget>0?Math.min(100,s/c.budget*100):0;
+    const bc=p>=100?'trip-over':p>=85?'trip-warn':'trip-ok';
+    const rowsHtml=sortedRows.length
+      ? sortedRows.map((r)=>{
+          const i=r._origIdx;
+          const ekey=`${c.id}-${i}`;
+          if(_veniceEditKey===ekey){
+            const safeDate=(r.date||'').replace(/"/g,'&quot;');
+            const safeDesc=(r.desc||'').replace(/"/g,'&quot;');
+            const safePayer=(r.payer||'').replace(/"/g,'&quot;');
+            return`<tr class="editing">
+              <td><input type="text" id="ve-d-${ekey}" value="${safeDate}" placeholder="예: 260622"></td>
+              <td><input type="text" id="ve-t-${ekey}" value="${safeDesc}" placeholder="내용"></td>
+              <td><input type="text" id="ve-p-${ekey}" value="${safePayer}" placeholder="결제자"></td>
+              <td><input type="number" id="ve-a-${ekey}" value="${r.amt||0}" step="1000"></td>
+              <td style="white-space:nowrap;"><button class="trip-save" onclick="veniceSaveEdit('${c.id}',${i})">저장</button><button class="trip-cancel" onclick="veniceCancelEdit()">취소</button></td>
+            </tr>`;
+          }
+          return`<tr>
+            <td style="color:var(--text3);white-space:nowrap;">${tripDateFmt(r.date)}</td>
+            <td>${r.desc||''}</td>
+            <td style="color:var(--text3);">${r.payer||''}</td>
+            <td class="trip-td-num">${tripFmt(r.amt||0)}원</td>
+            <td><div class="trip-row-btns">
+              <button class="trip-edit" onclick="veniceEditRow('${c.id}',${i})">수정</button>
+              <button class="trip-del" onclick="veniceDelRow('${c.id}',${i})">삭제</button>
+            </div></td>
+          </tr>`;
+        }).join('')
+      : `<tr><td colspan="5" style="color:var(--text4);padding:8px 4px;font-size:11px;">내역 없음</td></tr>`;
+    const remPct=c.budget>0?Math.max(0,(rem2/c.budget)*100):0;
+    const remColor=rem2<=0?'var(--accent)':rem2/c.budget<0.15?'#D97706':'var(--text)';
+    html+=`<div class="trip-cat-card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
+        <span class="trip-cat-name" style="color:var(--text2);">${c.name}</span>
+        <div style="text-align:right;">
+          <div style="font-size:9px;color:var(--text4);margin-bottom:1px;">잔여 예산</div>
+          <div style="font-size:17px;font-weight:800;line-height:1;color:${remColor};">${tripFmt(rem2)}<span style="font-size:10px;font-weight:400;margin-left:2px;">원</span></div>
+        </div>
+      </div>
+      <div style="height:6px;background:#E0E0DC;border-radius:3px;margin-bottom:8px;overflow:hidden;">
+        <div style="width:${p}%;height:100%;background:${c.color};border-radius:3px;transition:width 0.4s;"></div>
+      </div>
+      <div style="display:flex;gap:12px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border);">
+        <div><span style="font-size:9px;color:var(--text4);display:block;">예산</span><span style="font-size:11px;color:var(--text3);">${tripFmt(c.budget)}원</span></div>
+        <div><span style="font-size:9px;color:var(--text4);display:block;">집행</span><span style="font-size:11px;color:var(--text3);">${tripFmt(s)}원 <span class="trip-badge ${bc}">${Math.round(p)}%</span></span></div>
+      </div>
+      <table class="trip-tbl">
+        <thead><tr><th>날짜</th><th>내용</th><th>결제자</th><th style="text-align:right">금액</th><th></th></tr></thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+      <div class="trip-add-wrap">
+        <input type="text" id="vd-${c.id}" placeholder="예: 260622">
+        <input type="text" id="vt-${c.id}" placeholder="내용">
+        <input type="text" id="vp-${c.id}" placeholder="결제자" style="flex:0.7;">
+        <input type="number" id="va-${c.id}" placeholder="금액" step="1000">
+        <button class="trip-add-btn" onclick="veniceAddRow('${c.id}')">+ 추가</button>
+      </div>
+    </div>`;
+  });
+  html+=`</div></div>`; // trip-cat-grid 닫기 + 외부 div 닫기
+  el.innerHTML=html;
+}
 function tripAddRow(id){
   const date=(document.getElementById('td-'+id)||{}).value||'';
   const desc=(document.getElementById('tt-'+id)||{}).value||'';
@@ -3557,6 +3688,49 @@ function tripSaveEdit(id,i){
   _tripEditKey=null;
   save().then(()=>showWeeklySaveToast('수정됨 ✓')).catch(()=>showWeeklySaveToast('저장 실패 ✗',true));
   renderTrip();
+}
+
+// ═══ VENICE CRUD ═══
+let _veniceEditKey=null;
+function veniceAddRow(id){
+  const date=(document.getElementById('vd-'+id)||{}).value||'';
+  const desc=(document.getElementById('vt-'+id)||{}).value||'';
+  const payer=(document.getElementById('vp-'+id)||{}).value||'';
+  const amt=parseInt((document.getElementById('va-'+id)||{}).value||0)||0;
+  if(!desc||amt<=0){alert('내용과 금액을 입력하세요.');return;}
+  if(!S.veniceData[id])S.veniceData[id]=[];
+  S.veniceData[id].push({date:date.trim()||'—',desc:desc.trim(),payer:payer.trim(),amt});
+  save().then(()=>showWeeklySaveToast('저장됨 ✓')).catch(()=>showWeeklySaveToast('저장 실패 ✗',true));
+  renderVeniceTrip();
+}
+function veniceDelRow(id,i){
+  if(!confirm('이 항목을 삭제할까요?'))return;
+  if(!S.veniceData[id])return;
+  S.veniceData[id].splice(i,1);
+  if(_veniceEditKey===`${id}-${i}`)_veniceEditKey=null;
+  save().then(()=>showWeeklySaveToast('저장됨 ✓')).catch(()=>showWeeklySaveToast('저장 실패 ✗',true));
+  renderVeniceTrip();
+}
+function veniceEditRow(id,i){
+  _veniceEditKey=`${id}-${i}`;
+  renderVeniceTrip();
+  setTimeout(()=>{const el=document.getElementById(`ve-t-${id}-${i}`);if(el)el.focus();},50);
+}
+function veniceCancelEdit(){
+  _veniceEditKey=null;
+  renderVeniceTrip();
+}
+function veniceSaveEdit(id,i){
+  const ekey=`${id}-${i}`;
+  const date=(document.getElementById('ve-d-'+ekey)||{}).value||'';
+  const desc=(document.getElementById('ve-t-'+ekey)||{}).value||'';
+  const payer=(document.getElementById('ve-p-'+ekey)||{}).value||'';
+  const amt=parseInt((document.getElementById('ve-a-'+ekey)||{}).value||0)||0;
+  if(!desc||amt<=0){alert('내용과 금액을 입력하세요.');return;}
+  S.veniceData[id][i]={date:date.trim()||'—',desc:desc.trim(),payer:payer.trim(),amt};
+  _veniceEditKey=null;
+  save().then(()=>showWeeklySaveToast('수정됨 ✓')).catch(()=>showWeeklySaveToast('저장 실패 ✗',true));
+  renderVeniceTrip();
 }
 
 // 파스텔 배경용: 밝은 색에는 어두운 텍스트 반환
